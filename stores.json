@@ -1,0 +1,10 @@
+{
+  "stores": [
+    "Boscombe",
+    "Bournemouth", 
+    "Bournemouth+-+Castlepoint",
+    "Poole"
+  ],
+  "categoryIds": ["1037", "1055", "1052"],
+  "searchUrl": "https://uk.webuy.com/search"
+}

@@ -1,0 +1,31 @@
+/*!*****************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[13].oneOf[12].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[13].oneOf[12].use[3]!./src/app/globals.css ***!
+  \*****************************************************************************************************************************************************************************************************************************************************************/
+:root {
+  --bg: #0b0d10;
+  --fg: #e6edf3;
+  --muted: #9aa4af;
+  --accent: #3b82f6;
+  --ok: #22c55e;
+  --bad: #ef4444;
+}
+
+html, body {
+  padding: 0;
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Ubuntu, Cantarell, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+a { color: var(--accent); text-decoration: none; }
+
+.container { max-width: 960px; margin: 0 auto; padding: 24px; }
+.card { background: #0f1318; border: 1px solid #1f2937; border-radius: 12px; padding: 16px; }
+.muted { color: var(--muted); }
+.ok { color: var(--ok); }
+.bad { color: var(--bad); }
+.table { width: 100%; border-collapse: collapse; }
+.table th, .table td { padding: 10px 12px; border-bottom: 1px solid #1f2937; text-align: left; }
+
+

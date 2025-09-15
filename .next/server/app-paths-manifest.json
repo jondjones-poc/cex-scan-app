@@ -1,0 +1,5 @@
+{
+  "/whats-in-stock/page": "app/whats-in-stock/page.js",
+  "/page": "app/page.js",
+  "/api/settings/route": "app/api/settings/route.js"
+}
