@@ -1,0 +1,59 @@
+{
+  "stores": [
+    {
+      "name": "Home",
+      "values": [
+        "Boscombe",
+        "Bournemouth", 
+        "Bournemouth+-+Castlepoint",
+        "Poole"
+      ]
+    },
+    {
+      "name": "London",
+      "values": [
+        "Islington",
+        "London+W1+Rathbone+Place",
+        "London+W1+Tottenham+Crt+Rd",
+        "Elephant+and+Castle",
+        "Clapham+Junction",
+        "Tooting",
+        "Camden",
+        "Holloway",
+        "Shepherds+Bush",
+        "Hammersmith"
+      ]
+    },
+    {
+      "name": "Near home",
+      "values": [
+        "Eastleigh",
+        "Gosport",
+        "Havant",
+        "Portsmouth",
+        "Portsmouth+North+End",
+        "Salisbury",
+        "Southampton",
+        "Southampton++Shirley",
+        "Fareham",
+        "Weymouth",
+        "Winchester"
+      ]
+    },
+    {
+      "name": "Midlands",
+      "values": [
+        "Nottingham",
+        "Nottingham+Victoria",
+        "Derby",
+        "Burton+On+Trent",
+        "Newbury",
+        "Leicester+Gallowtree+Gate",
+        "Sutton+In+Ashfield"
+      ]
+    }
+  ],
+  "retroCategoryIds": ["1037", "1055", "1052", "1030"],
+  "discBasedGameCategoryIds": ["1178", "403", "1192", "782", "808", "1064", "795"],
+  "searchUrl": "https://uk.webuy.com/search"
+}
