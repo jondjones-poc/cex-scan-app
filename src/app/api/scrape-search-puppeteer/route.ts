@@ -141,7 +141,7 @@ export async function POST(request: NextRequest) {
     
     // Allow images to load for URL extraction, but block CSS and fonts for faster loading
     await page.setRequestInterception(true);
-    page.on('request', (req) => {
+    page.on('request', (req: any) => {
       const resourceType = req.resourceType();
       if (resourceType === 'stylesheet' || resourceType === 'font') {
         req.abort();

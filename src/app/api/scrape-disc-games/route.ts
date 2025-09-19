@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
     
     // Block images, stylesheets, and fonts for faster loading
     await page.setRequestInterception(true);
-    page.on('request', (req) => {
+    page.on('request', (req: any) => {
       if (req.resourceType() === 'image' || req.resourceType() === 'stylesheet' || req.resourceType() === 'font') {
         req.abort();
       } else {
