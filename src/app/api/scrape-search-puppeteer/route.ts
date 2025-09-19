@@ -1,25 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import chromium from "@sparticuz/chromium";
-
-// Use puppeteer-core with chromium package for Netlify, regular puppeteer for local
-let puppeteer: any;
-
-
-const isNetlify = process.env.NETLIFY === 'true' || process.env.VERCEL || process.env.NETLIFY_URL || process.env.NODE_ENV === 'production';
-
-if (isNetlify) {
-  puppeteer = require('puppeteer-core');
-} else {
-  puppeteer = require('puppeteer');
-}
+import puppeteer from "puppeteer-core";
 
 console.log('Environment check:', { 
   NETLIFY: process.env.NETLIFY, 
   VERCEL: process.env.VERCEL, 
   NETLIFY_URL: process.env.NETLIFY_URL, 
-  NODE_ENV: process.env.NODE_ENV,
-  isNetlify,
-  puppeteerType: isNetlify ? 'puppeteer-core' : 'puppeteer'
+  NODE_ENV: process.env.NODE_ENV
 });
 
 export const dynamic = "force-dynamic";
@@ -111,27 +98,20 @@ export async function POST(request: NextRequest) {
     }
 
     console.log(`Puppeteer scraping URL: ${url}`);
-    console.log(`Using ${isNetlify ? 'puppeteer-core with @sparticuz/chromium' : 'regular puppeteer'} for ${isNetlify ? 'production' : 'development'}`);
-
     // Launch Puppeteer browser with optimized settings
     const launchArgs = [
       '--no-sandbox'
     ];
-
-    console.log('process.env.CHROME_PATH:', process.env.CHROME_PATH);
-    console.log(' chromium.path:', process.env.CHROME_PATH);
-        
    
       try {
-        console.log('Using puppeteer-core with chromium package for Netlify deployment');
         console.log('Environment check:', {
           NODE_ENV: process.env.NODE_ENV,
           NETLIFY: process.env.NETLIFY,
           CHROME_PATH: process.env.CHROME_PATH
         });
         
-        // Try multiple approaches to get the executable path
-        const executablePath = await chromium.executablePath();
+        const executablePath =
+          process.env.CHROME_PATH || (await chromium.executablePath());
 
         console.log('chromium.path:', process.env.CHROME_PATH);
         console.log('executablePath', executablePath);     
@@ -140,8 +120,7 @@ export async function POST(request: NextRequest) {
         browser = await puppeteer.launch({
           args: chromium.args,
           executablePath: executablePath,
-          headless: true,
-          ignoreHTTPSErrors: true,
+          headless: true
         });
         
         console.log('Browser launched successfully with chromium package');
@@ -197,7 +176,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Reduced wait time for page rendering
-    await page.waitForTimeout(2000);
+   // await page.waitForTimeout(2000);
     
     // Try to wait for any loading indicators to disappear with reduced timeout
     try {
@@ -210,7 +189,7 @@ export async function POST(request: NextRequest) {
     }
     
     // Wait a bit more for images to load
-    await page.waitForTimeout(2000);
+    //await page.waitForTimeout(2000);
 
     // Extract products using JavaScript evaluation
     const products = await page.evaluate((showAllProducts: boolean) => {

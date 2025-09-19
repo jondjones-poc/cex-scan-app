@@ -10,7 +10,7 @@
     "check": "node scripts/run-check.js"
   },
   "dependencies": {
-    "@sparticuz/chromium": "^138.0.2",
+    "@sparticuz/chromium": "^119.0.2",
     "@types/node": "20.12.12",
     "@types/puppeteer": "^7.0.4",
     "@types/react": "18.3.3",
