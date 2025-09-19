@@ -91,16 +91,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "URL is required" }, { status: 400 });
     }
 
+    const executablePath = await chromium.executablePath();
+    console.log("Using Chromium path:", executablePath);
     console.log(`Puppeteer scraping URL: ${url}`);
     // Launch Puppeteer browser with optimized settings
     const launchArgs = [
-      '--no-sandbox'
+      '--no-sandbox',
+      '--shamefully-hoist'
     ];
    
     try {
-      const executablePath = await chromium.executablePath();
-      console.log("Using Chromium path:", executablePath);
-  
+
       const headless: boolean | "shell" = chromium.headless === true ? true : "shell";
 
       browser = await puppeteer.launch({
@@ -118,7 +119,7 @@ export async function POST(request: NextRequest) {
         stack: (error as Error).stack,
         name: (error as Error).name
       });
-      throw new Error(`Chrome launch failed: ${(error as Error).message}`);
+      throw new Error(`Chrome launch failed: ${(error as Error).message}error`);
     }
    
 
