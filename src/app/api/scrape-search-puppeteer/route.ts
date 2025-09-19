@@ -194,7 +194,7 @@ export async function POST(request: NextRequest) {
     await page.waitForTimeout(2000);
 
     // Extract products using JavaScript evaluation
-    const products = await page.evaluate((showAllProducts) => {
+    const products = await page.evaluate((showAllProducts: boolean) => {
       const productElements: Array<{
         name: string;
         url: string;
