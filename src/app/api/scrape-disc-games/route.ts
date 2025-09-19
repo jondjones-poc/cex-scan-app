@@ -2,7 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import chromium from "@sparticuz/chromium";
 
 // Use puppeteer-core for Netlify, regular puppeteer for local development
-const isNetlify = process.env.NETLIFY === 'true';
+const isNetlify = process.env.NETLIFY === 'true' || process.env.VERCEL || process.env.NETLIFY_URL;
+console.log('Environment check:', { 
+  NETLIFY: process.env.NETLIFY, 
+  VERCEL: process.env.VERCEL, 
+  NETLIFY_URL: process.env.NETLIFY_URL, 
+  isNetlify 
+});
+
 const puppeteer = isNetlify 
   ? require('puppeteer-core') 
   : require('puppeteer');
@@ -16,11 +23,23 @@ export async function POST(request: NextRequest) {
     }
 
     console.log(`Starting disc-based games scrape for: ${url}`);
+    console.log(`Using ${isNetlify ? 'puppeteer-core with chromium' : 'puppeteer'}`);
 
     // Launch Puppeteer browser with optimized settings
+    let executablePath;
+    if (isNetlify) {
+      try {
+        executablePath = await chromium.executablePath();
+        console.log(`Chromium executable path: ${executablePath}`);
+      } catch (error) {
+        console.error('Failed to get chromium executable path:', error);
+        throw new Error(`Failed to get chromium executable path: ${error}`);
+      }
+    }
+
     const browser = await puppeteer.launch({
       headless: true,
-      executablePath: isNetlify ? await chromium.executablePath() : undefined,
+      executablePath: executablePath,
       args: isNetlify ? [
         ...chromium.args,
         '--no-sandbox',
