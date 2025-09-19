@@ -9,7 +9,6 @@
   included_files = ["node_modules/@sparticuz/chromium/bin/**"]
   node_bundler = "esbuild"
 
-# Environment variables for Netlify
 [build.environment]
   NODE_VERSION = "20"
   NETLIFY = "true"

@@ -103,36 +103,32 @@ export async function POST(request: NextRequest) {
       '--no-sandbox'
     ];
    
-      try {
-        
-        console.log('Environment check:', {
-          NODE_ENV: process.env.NODE_ENV,
-          NETLIFY: process.env.NETLIFY,
-          CHROME_PATH: process.env.CHROME_PATH
-        });
-        
-        const executablePath = await chromium.executablePath();
+    try {
+      const executablePath = await chromium.executablePath();
 
-        console.log('chromium.path:', process.env.CHROME_PATH);
-        console.log('executablePath', executablePath);     
-        console.log('Final executable path:', executablePath);
-        
-        browser = await puppeteer.launch({
-          args: chromium.args,
-          executablePath: executablePath,
-          headless: true
-        });
-        
-        console.log('Browser launched successfully with chromium package');
-      } catch (error) {
-        console.error('Chrome launch failed:', error);
-        console.error('Full error details:', {
-          message: (error as Error).message,
-          stack: (error as Error).stack,
-          name: (error as Error).name
-        });
-        throw new Error(`Chrome launch failed: ${(error as Error).message}`);
-      }
+      console.log('Environment check:', {
+        NODE_ENV: process.env.NODE_ENV,
+        NETLIFY: process.env.NETLIFY,
+        executablePath: executablePath
+      });
+  
+      browser = await puppeteer.launch({
+        args: chromium.args,
+        defaultViewport: chromium.defaultViewport,
+        executablePath: await chromium.executablePath(),
+        headless: chromium.headless as boolean | "shell",
+      });
+      
+      console.log('Browser launched successfully with chromium package');
+    } catch (error) {
+      console.error('Chrome launch failed:', error);
+      console.error('Full error details:', {
+        message: (error as Error).message,
+        stack: (error as Error).stack,
+        name: (error as Error).name
+      });
+      throw new Error(`Chrome launch failed: ${(error as Error).message}`);
+    }
    
 
     const page = await browser.newPage();
