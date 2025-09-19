@@ -11,24 +11,19 @@ console.log('Environment check:', {
   isNetlify 
 });
 
-// Always use puppeteer-core for production environments (Netlify/Vercel)
-// and regular puppeteer for local development
+// Use puppeteer-core with chromium for production, regular puppeteer for development
 let puppeteer: any;
-let useChromium = false;
 
 if (isNetlify) {
   try {
     puppeteer = require('puppeteer-core');
-    useChromium = true;
-    console.log('Using puppeteer-core with chromium for production environment');
+    console.log('Using puppeteer-core for production environment');
   } catch (error) {
     console.log('puppeteer-core not available, falling back to puppeteer:', error);
     puppeteer = require('puppeteer');
-    useChromium = false;
   }
 } else {
   puppeteer = require('puppeteer');
-  useChromium = false;
   console.log('Using regular puppeteer for development');
 }
 
@@ -121,13 +116,14 @@ export async function POST(request: NextRequest) {
     }
 
     console.log(`Puppeteer scraping URL: ${url}`);
-    console.log(`Using ${useChromium ? 'puppeteer-core with chromium' : 'puppeteer'}`);
+    console.log(`Using ${isNetlify ? 'puppeteer-core with chromium' : 'puppeteer'}`);
 
     // Launch Puppeteer browser with optimized settings
     let executablePath;
     let launchArgs;
 
-    if (useChromium) {
+    if (isNetlify) {
+      // For Netlify, try to use chromium executable path
       try {
         executablePath = await chromium.executablePath();
         launchArgs = [
@@ -150,7 +146,7 @@ export async function POST(request: NextRequest) {
         ];
         console.log(`Using chromium executable path: ${executablePath}`);
       } catch (error) {
-        console.log('Chromium not available, falling back to default puppeteer:', error);
+        console.log('Chromium not available, using default puppeteer executable:', error);
         executablePath = undefined;
         launchArgs = [
           '--no-sandbox',
@@ -171,6 +167,7 @@ export async function POST(request: NextRequest) {
         ];
       }
     } else {
+      // For local development, use default puppeteer
       executablePath = undefined;
       launchArgs = [
         '--no-sandbox',
