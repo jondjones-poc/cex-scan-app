@@ -1,13 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import chromium from "@sparticuz/chromium";
-import puppeteer from "puppeteer-core";
-
-console.log('Environment check:', { 
-  NETLIFY: process.env.NETLIFY, 
-  VERCEL: process.env.VERCEL, 
-  NETLIFY_URL: process.env.NETLIFY_URL, 
-  NODE_ENV: process.env.NODE_ENV
-});
+// at top of your API file
+const chromium = require("@sparticuz/chromium");
+const puppeteer = require("puppeteer-core");
 
 export const dynamic = "force-dynamic";
 
@@ -105,12 +99,7 @@ export async function POST(request: NextRequest) {
    
     try {
       const executablePath = await chromium.executablePath();
-
-      console.log('Environment check:', {
-        NODE_ENV: process.env.NODE_ENV,
-        NETLIFY: process.env.NETLIFY,
-        executablePath
-      });
+      console.log("Using Chromium path:", executablePath);
   
       const headless: boolean | "shell" = chromium.headless === true ? true : "shell";
 
