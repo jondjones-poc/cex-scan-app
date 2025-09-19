@@ -109,14 +109,16 @@ export async function POST(request: NextRequest) {
       console.log('Environment check:', {
         NODE_ENV: process.env.NODE_ENV,
         NETLIFY: process.env.NETLIFY,
-        executablePath: executablePath
+        executablePath
       });
   
+      const headless: boolean | "shell" = chromium.headless === true ? true : "shell";
+
       browser = await puppeteer.launch({
         args: chromium.args,
         defaultViewport: chromium.defaultViewport,
         executablePath,
-        headless: chromium.headless === true ? true : "shell"
+        headless
       });
       
       console.log('Browser launched successfully with chromium package');
