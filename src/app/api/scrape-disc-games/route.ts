@@ -12,7 +12,7 @@ console.log('Environment check:', {
 });
 
 // Try to use puppeteer-core with chromium if available, fallback to regular puppeteer
-let puppeteer;
+let puppeteer: any;
 try {
   if (isNetlify) {
     puppeteer = require('puppeteer-core');
