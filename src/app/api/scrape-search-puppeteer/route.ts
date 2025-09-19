@@ -1,31 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import chromium from "@sparticuz/chromium";
 
-// Use puppeteer-core for Netlify, regular puppeteer for local development
+// Use regular puppeteer everywhere - let it handle Chrome installation
+const puppeteer = require('puppeteer');
 const isNetlify = process.env.NETLIFY === 'true' || process.env.VERCEL || process.env.NETLIFY_URL || process.env.NODE_ENV === 'production';
+
 console.log('Environment check:', { 
   NETLIFY: process.env.NETLIFY, 
   VERCEL: process.env.VERCEL, 
   NETLIFY_URL: process.env.NETLIFY_URL, 
   NODE_ENV: process.env.NODE_ENV,
-  isNetlify 
+  isNetlify,
+  PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: process.env.PUPPETEER_SKIP_CHROMIUM_DOWNLOAD,
+  PUPPETEER_EXECUTABLE_PATH: process.env.PUPPETEER_EXECUTABLE_PATH
 });
-
-// Use puppeteer-core with chromium for production, regular puppeteer for development
-let puppeteer: any;
-
-if (isNetlify) {
-  try {
-    puppeteer = require('puppeteer-core');
-    console.log('Using puppeteer-core for production environment');
-  } catch (error) {
-    console.log('puppeteer-core not available, falling back to puppeteer:', error);
-    puppeteer = require('puppeteer');
-  }
-} else {
-  puppeteer = require('puppeteer');
-  console.log('Using regular puppeteer for development');
-}
 
 export const dynamic = "force-dynamic";
 
@@ -116,76 +103,33 @@ export async function POST(request: NextRequest) {
     }
 
     console.log(`Puppeteer scraping URL: ${url}`);
-    console.log(`Using ${isNetlify ? 'puppeteer-core with chromium' : 'puppeteer'}`);
+    console.log(`Using regular puppeteer for ${isNetlify ? 'production' : 'development'}`);
 
     // Launch Puppeteer browser with optimized settings
-    let executablePath;
-    let launchArgs;
+    const launchArgs = [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-accelerated-2d-canvas',
+      '--no-first-run',
+      '--no-zygote',
+      '--disable-gpu',
+      '--disable-web-security',
+      '--disable-features=VizDisplayCompositor',
+      '--disable-extensions',
+      '--disable-plugins',
+      '--disable-javascript-harmony-shipping',
+      '--disable-background-timer-throttling',
+      '--disable-backgrounding-occluded-windows',
+      '--disable-renderer-backgrounding'
+    ];
 
-    if (isNetlify) {
-      // For Netlify, try to use chromium executable path
-      try {
-        executablePath = await chromium.executablePath();
-        launchArgs = [
-          ...chromium.args,
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-accelerated-2d-canvas',
-          '--no-first-run',
-          '--no-zygote',
-          '--disable-gpu',
-          '--disable-web-security',
-          '--disable-features=VizDisplayCompositor',
-          '--disable-extensions',
-          '--disable-plugins',
-          '--disable-javascript-harmony-shipping',
-          '--disable-background-timer-throttling',
-          '--disable-backgrounding-occluded-windows',
-          '--disable-renderer-backgrounding'
-        ];
-        console.log(`Using chromium executable path: ${executablePath}`);
-      } catch (error) {
-        console.log('Chromium not available, using default puppeteer executable:', error);
-        executablePath = undefined;
-        launchArgs = [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-accelerated-2d-canvas',
-          '--no-first-run',
-          '--no-zygote',
-          '--disable-gpu',
-          '--disable-web-security',
-          '--disable-features=VizDisplayCompositor',
-          '--disable-extensions',
-          '--disable-plugins',
-          '--disable-javascript-harmony-shipping',
-          '--disable-background-timer-throttling',
-          '--disable-backgrounding-occluded-windows',
-          '--disable-renderer-backgrounding'
-        ];
-      }
+    // Use environment variable for executable path if available (for Netlify)
+    const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || undefined;
+    
+    if (executablePath) {
+      console.log(`Using custom executable path: ${executablePath}`);
     } else {
-      // For local development, use default puppeteer
-      executablePath = undefined;
-      launchArgs = [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--no-first-run',
-        '--no-zygote',
-        '--disable-gpu',
-        '--disable-web-security',
-        '--disable-features=VizDisplayCompositor',
-        '--disable-extensions',
-        '--disable-plugins',
-        '--disable-javascript-harmony-shipping',
-        '--disable-background-timer-throttling',
-        '--disable-backgrounding-occluded-windows',
-        '--disable-renderer-backgrounding'
-      ];
       console.log('Using default puppeteer executable');
     }
 

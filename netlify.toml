@@ -10,5 +10,7 @@
   NODE_VERSION = "20"
   NETLIFY = "true"
   NODE_ENV = "production"
+  PUPPETEER_SKIP_CHROMIUM_DOWNLOAD = "false"
+  PUPPETEER_EXECUTABLE_PATH = "/opt/render/project/.cache/puppeteer/chrome/linux-*/chrome-linux64/chrome"
 
 
