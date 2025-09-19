@@ -84,7 +84,6 @@ function isValidProductName(text: string, showAllProducts: boolean = false): boo
 export async function POST(request: NextRequest) {
   let browser;
   
-  try {
     const { url, showAllProducts = false } = await request.json();
     
     if (!url) {
@@ -99,8 +98,6 @@ export async function POST(request: NextRequest) {
       '--no-sandbox',
       '--shamefully-hoist'
     ];
-   
-    try {
 
       const headless: boolean | "shell" = chromium.headless === true ? true : "shell";
 
@@ -112,17 +109,8 @@ export async function POST(request: NextRequest) {
       });
       
       console.log('Browser launched successfully with chromium package');
-    } catch (error) {
-      console.error('Chrome launch failed:', error);
-      console.error('Full error details:', {
-        message: (error as Error).message,
-        stack: (error as Error).stack,
-        name: (error as Error).name
-      });
-      throw new Error(`Chrome launch failed: ${(error as Error).message}error`);
-    }
-   
 
+   
     const page = await browser.newPage();
     
     // Allow images to load for URL extraction, but block CSS and fonts for faster loading
@@ -474,16 +462,4 @@ export async function POST(request: NextRequest) {
         showAllProducts: showAllProducts
       }
     });
-
-  } catch (error) {
-    console.error("Puppeteer scraping error:", error);
-    return NextResponse.json({ 
-      error: `Puppeteer error: ${(error as Error).message}`,
-      success: false
-    }, { status: 500 });
-  } finally {
-    if (browser) {
-      await browser.close();
-    }
-  }
 }
