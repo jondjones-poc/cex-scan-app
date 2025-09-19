@@ -89,8 +89,10 @@ export async function POST(request: NextRequest) {
     if (!url) {
       return NextResponse.json({ error: "URL is required" }, { status: 400 });
     }
-
+    
     const executablePath = await chromium.executablePath();
+
+
     console.log("Using Chromium path:", executablePath);
     console.log(`Puppeteer scraping URL: ${url}`);
     // Launch Puppeteer browser with optimized settings
