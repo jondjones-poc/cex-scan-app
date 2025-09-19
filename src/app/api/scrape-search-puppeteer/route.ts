@@ -2,17 +2,29 @@ import { NextRequest, NextResponse } from "next/server";
 import chromium from "@sparticuz/chromium";
 
 // Use puppeteer-core for Netlify, regular puppeteer for local development
-const isNetlify = process.env.NETLIFY === 'true' || process.env.VERCEL || process.env.NETLIFY_URL;
+const isNetlify = process.env.NETLIFY === 'true' || process.env.VERCEL || process.env.NETLIFY_URL || process.env.NODE_ENV === 'production';
 console.log('Environment check:', { 
   NETLIFY: process.env.NETLIFY, 
   VERCEL: process.env.VERCEL, 
   NETLIFY_URL: process.env.NETLIFY_URL, 
+  NODE_ENV: process.env.NODE_ENV,
   isNetlify 
 });
 
-const puppeteer = isNetlify 
-  ? require('puppeteer-core') 
-  : require('puppeteer');
+// Try to use puppeteer-core with chromium if available, fallback to regular puppeteer
+let puppeteer;
+try {
+  if (isNetlify) {
+    puppeteer = require('puppeteer-core');
+    console.log('Using puppeteer-core for production environment');
+  } else {
+    puppeteer = require('puppeteer');
+    console.log('Using regular puppeteer for development');
+  }
+} catch (error) {
+  console.log('Fallback to regular puppeteer:', error);
+  puppeteer = require('puppeteer');
+}
 
 export const dynamic = "force-dynamic";
 
@@ -107,53 +119,55 @@ export async function POST(request: NextRequest) {
 
     // Launch Puppeteer browser with optimized settings
     let executablePath;
-    if (isNetlify) {
-      try {
-        executablePath = await chromium.executablePath();
-        console.log(`Chromium executable path: ${executablePath}`);
-      } catch (error) {
-        console.error('Failed to get chromium executable path:', error);
-        throw new Error(`Failed to get chromium executable path: ${error}`);
-      }
+    try {
+      // Always try to use chromium if available (for production environments)
+      executablePath = await chromium.executablePath();
+      console.log(`Using chromium executable path: ${executablePath}`);
+    } catch (error) {
+      console.log('Chromium not available, using default puppeteer executable');
+      executablePath = undefined;
     }
+
+    // Use chromium args if chromium is available, otherwise use standard args
+    const launchArgs = executablePath ? [
+      ...chromium.args,
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-accelerated-2d-canvas',
+      '--no-first-run',
+      '--no-zygote',
+      '--disable-gpu',
+      '--disable-web-security',
+      '--disable-features=VizDisplayCompositor',
+      '--disable-extensions',
+      '--disable-plugins',
+      '--disable-javascript-harmony-shipping',
+      '--disable-background-timer-throttling',
+      '--disable-backgrounding-occluded-windows',
+      '--disable-renderer-backgrounding'
+    ] : [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-accelerated-2d-canvas',
+      '--no-first-run',
+      '--no-zygote',
+      '--disable-gpu',
+      '--disable-web-security',
+      '--disable-features=VizDisplayCompositor',
+      '--disable-extensions',
+      '--disable-plugins',
+      '--disable-javascript-harmony-shipping',
+      '--disable-background-timer-throttling',
+      '--disable-backgrounding-occluded-windows',
+      '--disable-renderer-backgrounding'
+    ];
 
     browser = await puppeteer.launch({
       headless: true,
       executablePath: executablePath,
-      args: isNetlify ? [
-        ...chromium.args,
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--no-first-run',
-        '--no-zygote',
-        '--disable-gpu',
-        '--disable-web-security',
-        '--disable-features=VizDisplayCompositor',
-        '--disable-extensions',
-        '--disable-plugins',
-        '--disable-javascript-harmony-shipping',
-        '--disable-background-timer-throttling',
-        '--disable-backgrounding-occluded-windows',
-        '--disable-renderer-backgrounding'
-      ] : [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--no-first-run',
-        '--no-zygote',
-        '--disable-gpu',
-        '--disable-web-security',
-        '--disable-features=VizDisplayCompositor',
-        '--disable-extensions',
-        '--disable-plugins',
-        '--disable-javascript-harmony-shipping',
-        '--disable-background-timer-throttling',
-        '--disable-backgrounding-occluded-windows',
-        '--disable-renderer-backgrounding'
-      ]
+      args: launchArgs
     });
 
     const page = await browser.newPage();
