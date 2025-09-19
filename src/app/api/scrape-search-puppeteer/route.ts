@@ -115,8 +115,8 @@ export async function POST(request: NextRequest) {
       browser = await puppeteer.launch({
         args: chromium.args,
         defaultViewport: chromium.defaultViewport,
-        executablePath: await chromium.executablePath(),
-        headless: chromium.headless as boolean | "shell",
+        executablePath,
+        headless: chromium.headless === true ? true : "shell"
       });
       
       console.log('Browser launched successfully with chromium package');
