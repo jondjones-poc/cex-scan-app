@@ -11,19 +11,25 @@ console.log('Environment check:', {
   isNetlify 
 });
 
-// Try to use puppeteer-core with chromium if available, fallback to regular puppeteer
+// Always use puppeteer-core for production environments (Netlify/Vercel)
+// and regular puppeteer for local development
 let puppeteer: any;
-try {
-  if (isNetlify) {
+let useChromium = false;
+
+if (isNetlify) {
+  try {
     puppeteer = require('puppeteer-core');
-    console.log('Using puppeteer-core for production environment');
-  } else {
+    useChromium = true;
+    console.log('Using puppeteer-core with chromium for production environment');
+  } catch (error) {
+    console.log('puppeteer-core not available, falling back to puppeteer:', error);
     puppeteer = require('puppeteer');
-    console.log('Using regular puppeteer for development');
+    useChromium = false;
   }
-} catch (error) {
-  console.log('Fallback to regular puppeteer:', error);
+} else {
   puppeteer = require('puppeteer');
+  useChromium = false;
+  console.log('Using regular puppeteer for development');
 }
 
 export async function POST(request: NextRequest) {
@@ -35,56 +41,79 @@ export async function POST(request: NextRequest) {
     }
 
     console.log(`Starting disc-based games scrape for: ${url}`);
-    console.log(`Using ${isNetlify ? 'puppeteer-core with chromium' : 'puppeteer'}`);
+    console.log(`Using ${useChromium ? 'puppeteer-core with chromium' : 'puppeteer'}`);
 
     // Launch Puppeteer browser with optimized settings
     let executablePath;
-    try {
-      // Always try to use chromium if available (for production environments)
-      executablePath = await chromium.executablePath();
-      console.log(`Using chromium executable path: ${executablePath}`);
-    } catch (error) {
-      console.log('Chromium not available, using default puppeteer executable');
-      executablePath = undefined;
-    }
+    let launchArgs;
 
-    // Use chromium args if chromium is available, otherwise use standard args
-    const launchArgs = executablePath ? [
-      ...chromium.args,
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-accelerated-2d-canvas',
-      '--no-first-run',
-      '--no-zygote',
-      '--disable-gpu',
-      '--disable-web-security',
-      '--disable-features=VizDisplayCompositor',
-      '--disable-extensions',
-      '--disable-plugins',
-      '--disable-images',
-      '--disable-javascript-harmony-shipping',
-      '--disable-background-timer-throttling',
-      '--disable-backgrounding-occluded-windows',
-      '--disable-renderer-backgrounding'
-    ] : [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-accelerated-2d-canvas',
-      '--no-first-run',
-      '--no-zygote',
-      '--disable-gpu',
-      '--disable-web-security',
-      '--disable-features=VizDisplayCompositor',
-      '--disable-extensions',
-      '--disable-plugins',
-      '--disable-images',
-      '--disable-javascript-harmony-shipping',
-      '--disable-background-timer-throttling',
-      '--disable-backgrounding-occluded-windows',
-      '--disable-renderer-backgrounding'
-    ];
+    if (useChromium) {
+      try {
+        executablePath = await chromium.executablePath();
+        launchArgs = [
+          ...chromium.args,
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-accelerated-2d-canvas',
+          '--no-first-run',
+          '--no-zygote',
+          '--disable-gpu',
+          '--disable-web-security',
+          '--disable-features=VizDisplayCompositor',
+          '--disable-extensions',
+          '--disable-plugins',
+          '--disable-images',
+          '--disable-javascript-harmony-shipping',
+          '--disable-background-timer-throttling',
+          '--disable-backgrounding-occluded-windows',
+          '--disable-renderer-backgrounding'
+        ];
+        console.log(`Using chromium executable path: ${executablePath}`);
+      } catch (error) {
+        console.log('Chromium not available, falling back to default puppeteer:', error);
+        executablePath = undefined;
+        launchArgs = [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-accelerated-2d-canvas',
+          '--no-first-run',
+          '--no-zygote',
+          '--disable-gpu',
+          '--disable-web-security',
+          '--disable-features=VizDisplayCompositor',
+          '--disable-extensions',
+          '--disable-plugins',
+          '--disable-images',
+          '--disable-javascript-harmony-shipping',
+          '--disable-background-timer-throttling',
+          '--disable-backgrounding-occluded-windows',
+          '--disable-renderer-backgrounding'
+        ];
+      }
+    } else {
+      executablePath = undefined;
+      launchArgs = [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--no-first-run',
+        '--no-zygote',
+        '--disable-gpu',
+        '--disable-web-security',
+        '--disable-features=VizDisplayCompositor',
+        '--disable-extensions',
+        '--disable-plugins',
+        '--disable-images',
+        '--disable-javascript-harmony-shipping',
+        '--disable-background-timer-throttling',
+        '--disable-backgrounding-occluded-windows',
+        '--disable-renderer-backgrounding'
+      ];
+      console.log('Using default puppeteer executable');
+    }
 
     const browser = await puppeteer.launch({
       headless: true,
