@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
+import chromium from "@sparticuz/chromium";
 
 // Use puppeteer-core with chromium package for Netlify, regular puppeteer for local
 let puppeteer: any;
-let chromium: any;
+
 
 const isNetlify = process.env.NETLIFY === 'true' || process.env.VERCEL || process.env.NETLIFY_URL || process.env.NODE_ENV === 'production';
 
 if (isNetlify) {
   puppeteer = require('puppeteer-core');
-  chromium = require('chromium');
 } else {
   puppeteer = require('puppeteer');
 }
@@ -131,44 +131,15 @@ export async function POST(request: NextRequest) {
         });
         
         // Try multiple approaches to get the executable path
-        let executablePath = process.env.CHROME_PATH;
-        console.log('chromium.path:', executablePath);
-        console.log('process.env.CHROME_PATH:', process.env.CHROME_PATH);
-        // If chromium.path is undefined, try to construct the path manually
-        if (!executablePath) {
-          console.log('chromium.path is undefined, trying manual path construction...');
-          // Try the path that netlify-plugin-chromium sets
-          const possiblePaths = [
-            '/opt/build/repo/node_modules/chromium/lib/chromium/chrome-linux/chrome',
-            '/var/task/node_modules/chromium/lib/chromium/chrome-linux/chrome',
-            '/tmp/chromium/chrome-linux/chrome'
-          ];
-          
-          for (const path of possiblePaths) {
-            console.log(`Trying path: ${path}`);
-            try {
-              const fs = require('fs');
-              if (fs.existsSync(path)) {
-                executablePath = path;
-                console.log(`Found executable at: ${path}`);
-                break;
-              }
-            } catch (e) {
-              console.log(`Path ${path} not accessible:`, (e as Error).message);
-            }
-          }
-        }
-        
-        // Final validation
-        if (!executablePath) {
-          throw new Error('Could not find chromium executable path. chromium.path returned undefined and manual path search failed.');
-        }
-        
+        const executablePath = await chromium.executablePath();
+
+        console.log('chromium.path:', process.env.CHROME_PATH);
+        console.log('executablePath', executablePath);     
         console.log('Final executable path:', executablePath);
         
         browser = await puppeteer.launch({
-          args: launchArgs,
-          executablePath: process.env.CHROME_PATH,
+          args: chromium.args,
+          executablePath: executablePath,
           headless: true,
           ignoreHTTPSErrors: true,
         });
