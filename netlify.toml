@@ -8,8 +8,6 @@
 [functions]
   included_files = ["node_modules/@sparticuz/chromium/bin/**"]
   node_bundler = "esbuild"
-  [functions.environment]
-    CHROME_PATH = "/opt/build/repo/node_modules/chromium/lib/chromium/chrome-linux/chrome"
 
 # Environment variables for Netlify
 [build.environment]
