@@ -3,8 +3,6 @@ import { NextRequest, NextResponse } from "next/server";
 const chromium = require("@sparticuz/chromium");
 const puppeteer = require("puppeteer-core");
 
-export const dynamic = "force-dynamic";
-
 // Helper function to validate if a string looks like a product name
 function isValidProductName(text: string, showAllProducts: boolean = false): boolean {
   // If showAllProducts is true, be more lenient
