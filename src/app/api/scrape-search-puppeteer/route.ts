@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 const chromium = require("@sparticuz/chromium");
 const puppeteer = require("puppeteer-core");
 
+export const dynamic = "force-dynamic";
+
 // Helper function to validate if a string looks like a product name
 function isValidProductName(text: string, showAllProducts: boolean = false): boolean {
   // If showAllProducts is true, be more lenient
@@ -90,8 +92,6 @@ export async function POST(request: NextRequest) {
     
     const executablePath = await chromium.executablePath();
 
-    return NextResponse.json({ error: executablePath }, { status: 400 });
-    
     console.log("Using Chromium path:", executablePath);
     console.log(`Puppeteer scraping URL: ${url}`);
     // Launch Puppeteer browser with optimized settings
@@ -393,16 +393,16 @@ export async function POST(request: NextRequest) {
       }
       
       // If no price found in HTML, try text patterns
-      // if (!price) {
-      //   for (const pattern of pricePatterns) {
-      //     const match = allText.match(pattern);
-      //     if (match) {
-      //       price = `£${match[1]}`;
-      //       console.log(`Debug - Found price: ${price} using pattern: ${pattern}`);
-      //       break;
-      //     }
-      //   }
-      // }
+      if (!price) {
+        for (const pattern of pricePatterns) {
+          const match = allText.match(pattern);
+          if (match) {
+            price = `£${match[1]}`;
+            console.log(`Debug - Found price: ${price} using pattern: ${pattern}`);
+            break;
+          }
+        }
+      }
       
       if (!price) {
         console.log(`Debug - No price found for "${cleanName}"`);
