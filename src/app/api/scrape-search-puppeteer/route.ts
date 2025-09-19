@@ -395,16 +395,16 @@ export async function POST(request: NextRequest) {
       }
       
       // If no price found in HTML, try text patterns
-      if (!price) {
-        for (const pattern of pricePatterns) {
-          const match = allText.match(pattern);
-          if (match) {
-            price = `£${match[1]}`;
-            console.log(`Debug - Found price: ${price} using pattern: ${pattern}`);
-            break;
-          }
-        }
-      }
+      // if (!price) {
+      //   for (const pattern of pricePatterns) {
+      //     const match = allText.match(pattern);
+      //     if (match) {
+      //       price = `£${match[1]}`;
+      //       console.log(`Debug - Found price: ${price} using pattern: ${pattern}`);
+      //       break;
+      //     }
+      //   }
+      // }
       
       if (!price) {
         console.log(`Debug - No price found for "${cleanName}"`);
