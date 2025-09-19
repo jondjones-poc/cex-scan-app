@@ -1,17 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// Use puppeteer-core with chromium package for Netlify, regular puppeteer for local
-let puppeteer: any;
-let chromium: any;
+import chromium from "@sparticuz/chromium";
+import puppeteer from "puppeteer-core";
 
 const isNetlify = process.env.NETLIFY === 'true' || process.env.VERCEL || process.env.NETLIFY_URL || process.env.NODE_ENV === 'production';
 
-if (isNetlify) {
-  puppeteer = require('puppeteer-core');
-  chromium = require('chromium');
-} else {
-  puppeteer = require('puppeteer');
-}
 
 console.log('Environment check:', { 
   NETLIFY: process.env.NETLIFY, 
@@ -35,22 +28,7 @@ export async function POST(request: NextRequest) {
 
     // Launch Puppeteer browser with optimized settings
     const launchArgs = [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-accelerated-2d-canvas',
-      '--no-first-run',
-      '--no-zygote',
-      '--disable-gpu',
-      '--disable-web-security',
-      '--disable-features=VizDisplayCompositor',
-      '--disable-extensions',
-      '--disable-plugins',
-      '--disable-images',
-      '--disable-javascript-harmony-shipping',
-      '--disable-background-timer-throttling',
-      '--disable-backgrounding-occluded-windows',
-      '--disable-renderer-backgrounding'
+      '--no-sandbox'
     ];
 
     let browser;
@@ -64,35 +42,9 @@ export async function POST(request: NextRequest) {
         });
         
         // Try multiple approaches to get the executable path
-        let executablePath = chromium.path;
+        const executablePath = await chromium.executablePath();
         console.log('chromium.path:', executablePath);
-        
-        // If chromium.path is undefined, try to construct the path manually
-        if (!executablePath) {
-          console.log('chromium.path is undefined, trying manual path construction...');
-        
-          const possiblePaths = [
-            '/opt/build/repo/node_modules/chromium/lib/chromium/chrome-linux/chrome',
-            '/var/task/node_modules/chromium/lib/chromium/chrome-linux/chrome',
-            '/tmp/chromium/chrome-linux/chrome'
-          ];
-          
-          for (const path of possiblePaths) {
-            console.log(`Trying path: ${path}`);
-            try {
-              const fs = require('fs');
-              if (fs.existsSync(path)) {
-                executablePath = path;
-                console.log(`Found executable at: ${path}`);
-                break;
-              }
-            } catch (e) {
-              console.log(`Path ${path} not accessible:`, (e as Error).message);
-            }
-          }
-        }
-        
-        // Final validation
+              
         if (!executablePath) {
           throw new Error('Could not find chromium executable path. chromium.path returned undefined and manual path search failed.');
         }
@@ -102,8 +54,7 @@ export async function POST(request: NextRequest) {
         browser = await puppeteer.launch({
           args: launchArgs,
           executablePath: executablePath,
-          headless: true,
-          ignoreHTTPSErrors: true,
+          headless: true
         });
         
         console.log('Browser launched successfully with chromium package');
@@ -161,7 +112,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Wait for loading indicators to disappear
-    await page.waitForTimeout(2000);
+    //await page.waitForTimeout(2000);
     
     try {
       await page.waitForFunction(
