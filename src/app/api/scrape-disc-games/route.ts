@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
         // If chromium.path is undefined, try to construct the path manually
         if (!executablePath) {
           console.log('chromium.path is undefined, trying manual path construction...');
-          // Try the path that netlify-plugin-chromium sets
+        
           const possiblePaths = [
             '/opt/build/repo/node_modules/chromium/lib/chromium/chrome-linux/chrome',
             '/var/task/node_modules/chromium/lib/chromium/chrome-linux/chrome',

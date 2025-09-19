@@ -104,14 +104,14 @@ export async function POST(request: NextRequest) {
     ];
    
       try {
+        
         console.log('Environment check:', {
           NODE_ENV: process.env.NODE_ENV,
           NETLIFY: process.env.NETLIFY,
           CHROME_PATH: process.env.CHROME_PATH
         });
         
-        const executablePath =
-          process.env.CHROME_PATH || (await chromium.executablePath());
+        const executablePath = await chromium.executablePath();
 
         console.log('chromium.path:', process.env.CHROME_PATH);
         console.log('executablePath', executablePath);     
