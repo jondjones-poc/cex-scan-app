@@ -5,12 +5,19 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
+[[plugins]]
+  package = "netlify-plugin-chromium"
+
+[functions]
+  node_bundler = "esbuild"
+  [functions.environment]
+    CHROME_PATH = "/opt/build/repo/node_modules/chromium/lib/chromium/chrome-linux/chrome"
+
+
 # Environment variables for Netlify
 [build.environment]
   NODE_VERSION = "20"
   NETLIFY = "true"
   NODE_ENV = "production"
-  PUPPETEER_SKIP_CHROMIUM_DOWNLOAD = "false"
-  PUPPETEER_EXECUTABLE_PATH = "/opt/render/project/.cache/puppeteer/chrome/linux-*/chrome-linux64/chrome"
 
 
