@@ -309,7 +309,7 @@ export async function POST(request: NextRequest) {
           if (!imageUrl) {
             const linkRect = link.getBoundingClientRect();
             const allImages = document.querySelectorAll('img');
-            let closestImage = null;
+            let closestImage: HTMLImageElement | null = null;
             let minDistance = Infinity;
             
             allImages.forEach(img => {
@@ -327,7 +327,7 @@ export async function POST(request: NextRequest) {
             });
             
             if (closestImage) {
-              imageUrl = closestImage.src;
+              imageUrl = (closestImage as HTMLImageElement).src;
             }
           }
           
