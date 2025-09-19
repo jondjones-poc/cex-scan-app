@@ -10,5 +10,6 @@
   NODE_VERSION = "20"
   NETLIFY = "true"
   NODE_ENV = "production"
+  # Force redeploy with Puppeteer fixes
 
 
