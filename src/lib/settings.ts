@@ -7,7 +7,9 @@ export type StoreGroup = {
 };
 
 export type AppSettings = {
-  productIds: string[];
+  productIds?: string[]; // Legacy support
+  essentialProducts?: string[];
+  oneDayProducts?: string[];
   baseUrl?: string;
   userAgent?: string;
   webhookUrlEnv?: string;
@@ -17,7 +19,7 @@ export type AppSettings = {
   searchUrl?: string;
 };
 
-const DEFAULTS: Required<Omit<AppSettings, "productIds">> = {
+const DEFAULTS: Required<Omit<AppSettings, "productIds" | "essentialProducts" | "oneDayProducts">> = {
   baseUrl: "https://uk.webuy.com",
   userAgent: "Mozilla/5.0 (compatible; CeX-Monitor/0.1; +https://example.local)",
   webhookUrlEnv: "NOTIFY_WEBHOOK_URL",
@@ -50,9 +52,20 @@ export async function readSettings(): Promise<AppSettings & typeof DEFAULTS> {
   }
 
   const merged = { ...DEFAULTS, ...data, ...storesData } as AppSettings & typeof DEFAULTS;
+  
+  // Handle legacy productIds for backward compatibility
   if (!Array.isArray(merged.productIds)) {
     merged.productIds = [];
   }
+  
+  // Handle new product structure
+  if (!Array.isArray(merged.essentialProducts)) {
+    merged.essentialProducts = [];
+  }
+  if (!Array.isArray(merged.oneDayProducts)) {
+    merged.oneDayProducts = [];
+  }
+  
   if (!Array.isArray(merged.stores)) {
     merged.stores = [];
   }

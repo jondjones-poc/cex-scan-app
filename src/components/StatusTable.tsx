@@ -5,12 +5,13 @@ import type { ProductCheckResult } from "@/lib/cex";
 interface StatusTableProps {
   results: ProductCheckResult[];
   loading: boolean;
-  onCheckProducts: () => void;
+  onCheckProducts: (type: 'essential' | 'oneDay') => void;
   canCheck: boolean;
   totalProducts?: number;
+  checkType?: 'essential' | 'oneDay' | null;
 }
 
-export default function StatusTable({ results, loading, onCheckProducts, canCheck, totalProducts }: StatusTableProps) {
+export default function StatusTable({ results, loading, onCheckProducts, canCheck, totalProducts, checkType }: StatusTableProps) {
 
   // Separate results into successful and unsuccessful
   // Successful: Has a real product name AND no errors AND successful API call
@@ -249,25 +250,48 @@ export default function StatusTable({ results, loading, onCheckProducts, canChec
       )}
       
       <div style={{ marginTop: "16px", textAlign: "left" }}>
-        <button 
-          onClick={onCheckProducts}
-          disabled={loading || !canCheck}
-          style={{
-            padding: "12px 24px",
-            fontSize: "16px",
-            backgroundColor: loading || !canCheck ? "#ccc" : "#007bff",
-            color: "white",
-            border: "none",
-            borderRadius: "4px",
-            cursor: loading || !canCheck ? "not-allowed" : "pointer",
-            minWidth: "120px"
-          }}
-        >
-          {loading ? "Checking..." : "Find Rare Games"}
-        </button>
+        <div style={{ display: "flex", gap: "12px", marginBottom: "8px" }}>
+          <button 
+            onClick={() => onCheckProducts('essential')}
+            disabled={loading || !canCheck}
+            style={{
+              padding: "12px 24px",
+              fontSize: "16px",
+              backgroundColor: loading || !canCheck ? "#ccc" : (checkType === 'essential' ? "#28a745" : "#007bff"),
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              cursor: loading || !canCheck ? "not-allowed" : "pointer",
+              minWidth: "140px"
+            }}
+          >
+            {loading && checkType === 'essential' ? "Checking..." : "Essentials"}
+          </button>
+          <button 
+            onClick={() => onCheckProducts('oneDay')}
+            disabled={loading || !canCheck}
+            style={{
+              padding: "12px 24px",
+              fontSize: "16px",
+              backgroundColor: loading || !canCheck ? "#ccc" : (checkType === 'oneDay' ? "#28a745" : "#6c757d"),
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              cursor: loading || !canCheck ? "not-allowed" : "pointer",
+              minWidth: "140px"
+            }}
+          >
+            {loading && checkType === 'oneDay' ? "Checking..." : "Nice to Have"}
+          </button>
+        </div>
         {!canCheck && (
           <p className="muted" style={{ marginTop: "8px", fontSize: "14px" }}>
             Loading settings...
+          </p>
+        )}
+        {checkType && (
+          <p className="muted" style={{ marginTop: "8px", fontSize: "14px" }}>
+            Checking {checkType === 'essential' ? 'Essential' : 'Nice to Have'} products
           </p>
         )}
       </div>

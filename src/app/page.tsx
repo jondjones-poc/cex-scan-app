@@ -8,6 +8,7 @@ export default function HomePage() {
   const [results, setResults] = useState<ProductCheckResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [settings, setSettings] = useState<any>(null);
+  const [checkType, setCheckType] = useState<'essential' | 'oneDay' | null>(null);
 
   useEffect(() => {
     // Load settings on component mount
@@ -27,15 +28,26 @@ export default function HomePage() {
     loadSettings();
   }, []);
 
-  const handleCheckProducts = async () => {
+  const handleCheckProducts = async (type: 'essential' | 'oneDay') => {
     if (!settings) return;
     
     setLoading(true);
     setResults([]);
+    setCheckType(type);
+    
+    // Get the appropriate product list based on type
+    const productIds = type === 'essential' 
+      ? (settings.essentialProducts || [])
+      : (settings.oneDayProducts || []);
+    
+    if (productIds.length === 0) {
+      setLoading(false);
+      return;
+    }
     
     try {
       const checkResults = await checkProducts(
-        settings.productIds, 
+        productIds, 
         settings,
         (progressResults) => {
           // Update results in real-time as each batch completes
@@ -60,7 +72,7 @@ export default function HomePage() {
       }
       
       // Set error results for all products
-      const errorResults = settings.productIds.map((productId: string) => ({
+      const errorResults = productIds.map((productId: string) => ({
         productId,
         url: `https://uk.webuy.com/product-detail?id=${productId}`,
         inStock: false,
@@ -79,7 +91,11 @@ export default function HomePage() {
         loading={loading}
         onCheckProducts={handleCheckProducts}
         canCheck={!!settings}
-        totalProducts={settings?.productIds?.length}
+        totalProducts={checkType === 'essential' 
+          ? (settings?.essentialProducts?.length || 0)
+          : (settings?.oneDayProducts?.length || 0)
+        }
+        checkType={checkType}
       />
     </main>
   );
