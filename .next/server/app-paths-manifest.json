@@ -1,4 +1,7 @@
 {
+  "/api/image-proxy/route": "app/api/image-proxy/route.js",
   "/page": "app/page.js",
-  "/whats-in-stock/page": "app/whats-in-stock/page.js"
+  "/whats-in-stock/page": "app/whats-in-stock/page.js",
+  "/api/scrape-search-puppeteer/route": "app/api/scrape-search-puppeteer/route.js",
+  "/api/settings/route": "app/api/settings/route.js"
 }
