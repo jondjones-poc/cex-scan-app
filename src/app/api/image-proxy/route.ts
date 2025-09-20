@@ -36,8 +36,9 @@ export async function GET(request: NextRequest) {
       status: 200,
       headers: {
         'Content-Type': contentType,
-        'Cache-Control': 'public, max-age=3600', // Cache for 1 hour
+        'Cache-Control': 'public, max-age=300', // Cache for 5 minutes to reduce inconsistency
         'Access-Control-Allow-Origin': '*',
+        'ETag': `"${Date.now()}"`, // Add ETag for better cache control
       },
     });
 

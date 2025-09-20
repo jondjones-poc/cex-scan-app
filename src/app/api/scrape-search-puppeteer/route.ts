@@ -433,6 +433,9 @@ export async function POST(request: NextRequest) {
                        cleanName.toLowerCase().includes('manual included');
       
       const hasBoxed = cleanName.toLowerCase().includes('boxed');
+      const isUnboxed = cleanName.toLowerCase().includes('unboxed');
+      const hasNoManual = cleanName.toLowerCase().includes('w/o manual') ||
+                         cleanName.toLowerCase().includes('without manual');
       
       // Determine if product is valid based on showAllProducts flag
       let isValidProduct;
@@ -441,11 +444,19 @@ export async function POST(request: NextRequest) {
         isValidProduct = cleanName.length > 3;
       } else {
         // For retro games, only include products that have manual AND are boxed
-        isValidProduct = hasManual && hasBoxed && 
-                        !cleanName.toLowerCase().includes('unboxed') &&
-                        !cleanName.toLowerCase().includes('w/o manual') &&
-                        !cleanName.toLowerCase().includes('without manual');
+        isValidProduct = hasManual && hasBoxed && !isUnboxed && !hasNoManual;
       }
+      
+      // Enhanced logging for debugging
+      console.log(`Product validation for "${cleanName}":`, {
+        hasManual,
+        hasBoxed,
+        isUnboxed,
+        hasNoManual,
+        isValidProduct,
+        showAllProducts,
+        originalName: productName
+      });
       
       if (isValidProduct && cleanName.length > 3) {
         console.log(`Found valid product: "${cleanName}" - Price: ${price} - Manual: ${hasManual} - Boxed: ${hasBoxed}`);
@@ -465,9 +476,9 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Remove duplicates based on name
+    // Remove duplicates based on name and URL to ensure consistency
     const uniqueProducts = processedProducts.filter((product, index, self) => 
-      index === self.findIndex(p => p.name === product.name)
+      index === self.findIndex(p => p.name === product.name && p.url === product.url)
     );
 
     console.log(`Processed ${uniqueProducts.length} unique products`);
