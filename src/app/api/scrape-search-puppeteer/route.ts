@@ -1,7 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-// at top of your API file
-const chromium = require("@sparticuz/chromium");
-const puppeteer = require("puppeteer-core");
+
+// Use different packages for local vs production
+const isNetlify = process.env.NETLIFY === 'true' || process.env.NODE_ENV === 'production';
+
+let chromium: any;
+let puppeteer: any;
+
+if (isNetlify) {
+  // Production: use puppeteer-core with @sparticuz/chromium
+  chromium = require("@sparticuz/chromium");
+  puppeteer = require("puppeteer-core");
+} else {
+  // Local development: use regular puppeteer
+  puppeteer = require("puppeteer");
+}
 
 export const dynamic = "force-dynamic";
 
@@ -90,15 +102,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "URL is required" }, { status: 400 });
     }
     
-    const executablePath = await chromium.executablePath();
-
-    console.log("Using Chromium path:", executablePath);
     console.log(`Puppeteer scraping URL: ${url}`);
-    // Launch Puppeteer browser with optimized settings
-    const launchArgs = [
-      '--no-sandbox',
-      '--shamefully-hoist'
-    ];
+    console.log(`Environment: ${isNetlify ? 'Netlify (production)' : 'Local development'}`);
+
+    if (isNetlify) {
+      // Production: use @sparticuz/chromium
+      const executablePath = await chromium.executablePath();
+      console.log("Using Chromium path:", executablePath);
 
       const headless: boolean | "shell" = chromium.headless === true ? true : "shell";
 
@@ -110,6 +120,15 @@ export async function POST(request: NextRequest) {
       });
       
       console.log('Browser launched successfully with chromium package');
+    } else {
+      // Local development: use regular puppeteer
+      browser = await puppeteer.launch({
+        headless: true,
+        args: ['--no-sandbox']
+      });
+      
+      console.log('Browser launched successfully with regular puppeteer');
+    }
 
    
     const page = await browser.newPage();
