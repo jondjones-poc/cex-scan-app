@@ -369,7 +369,11 @@ export async function POST(request: NextRequest) {
       price?: string;
       url?: string;
       imageUrl?: string;
+      productId: string;
       hasManual: boolean;
+      hasBoxed: boolean;
+      isUnboxed: boolean;
+      hasNoManual: boolean;
     }> = [];
 
     for (const product of products) {
@@ -427,58 +431,46 @@ export async function POST(request: NextRequest) {
         console.log(`Debug - No price found for "${cleanName}"`);
       }
       
-      // Check for manual and boxed indicators - must have BOTH
+      // Check for manual and boxed indicators for metadata
       const hasManual = cleanName.toLowerCase().includes('w/ manual') || 
                        cleanName.toLowerCase().includes('with manual') ||
-                       cleanName.toLowerCase().includes('manual included');
+                       cleanName.toLowerCase().includes('manual included') ||
+                       cleanName.toLowerCase().includes('+ manual');
       
       const hasBoxed = cleanName.toLowerCase().includes('boxed');
       const isUnboxed = cleanName.toLowerCase().includes('unboxed');
       const hasNoManual = cleanName.toLowerCase().includes('w/o manual') ||
-                         cleanName.toLowerCase().includes('without manual');
+                         cleanName.toLowerCase().includes('without manual') ||
+                         cleanName.toLowerCase().includes('no manual');
       
-      // Determine if product is valid based on showAllProducts flag
-      let isValidProduct;
-      if (showAllProducts) {
-        // For disc-based games, include all products regardless of manual/boxed status
-        isValidProduct = cleanName.length > 3;
-      } else {
-        // For retro games, only include products that have manual AND are boxed
-        isValidProduct = hasManual && hasBoxed && !isUnboxed && !hasNoManual;
-      }
+      // Extract product ID from URL for deduplication
+      const productId = productUrl 
+        ? productUrl.split('id=')[1]?.split('&')[0] || `product-${Date.now()}-${Math.random()}`
+        : `product-${Date.now()}-${Math.random()}`;
       
-      // Enhanced logging for debugging
-      console.log(`Product validation for "${cleanName}":`, {
-        hasManual,
-        hasBoxed,
-        isUnboxed,
-        hasNoManual,
-        isValidProduct,
-        showAllProducts,
-        originalName: productName
-      });
-      
-      if (isValidProduct && cleanName.length > 3) {
-        console.log(`Found valid product: "${cleanName}" - Price: ${price} - Manual: ${hasManual} - Boxed: ${hasBoxed}`);
-        console.log(`Container text: "${containerText.substring(0, 200)}"`);
-        console.log(`Price text: "${product.priceText || 'none'}"`);
-        console.log(`Image URL: "${product.imageUrl || 'none'}"`);
+      // Include all products - filtering will be done in the page component
+      if (cleanName.length > 3) {
+        console.log(`Found product: "${cleanName}" - Price: ${price} - Manual: ${hasManual} - Boxed: ${hasBoxed} - ProductID: ${productId}`);
         
         processedProducts.push({
           name: cleanName,
           price: price,
           url: productUrl,
           imageUrl: product.imageUrl || undefined,
-          hasManual: true
+          productId: productId,
+          hasManual: hasManual,
+          hasBoxed: hasBoxed,
+          isUnboxed: isUnboxed,
+          hasNoManual: hasNoManual
         });
       } else {
-        console.log(`Skipping product: "${cleanName}" - Manual: ${hasManual} - Boxed: ${hasBoxed} - Unboxed: ${cleanName.toLowerCase().includes('unboxed')}`);
+        console.log(`Skipping product: "${cleanName}" - Name too short`);
       }
     }
 
-    // Remove duplicates based on name and URL to ensure consistency
+    // Remove duplicates based on product ID to ensure consistency
     const uniqueProducts = processedProducts.filter((product, index, self) => 
-      index === self.findIndex(p => p.name === product.name && p.url === product.url)
+      index === self.findIndex(p => p.productId === product.productId)
     );
 
     console.log(`Processed ${uniqueProducts.length} unique products`);

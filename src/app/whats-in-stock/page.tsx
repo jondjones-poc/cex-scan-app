@@ -133,20 +133,20 @@ export default function WhatsInStockPage() {
         
         console.log("Processing extracted products...");
         
-        // Count products with manual indicators
-        const manualIncludedCount = extractedProducts.filter((p: any) => p.hasManual).length;
-        console.log(`Found ${manualIncludedCount} products with manual/boxed indicators`);
-        
-        // Process each extracted product
+        // Process each extracted product with filtering logic
         for (const extractedProduct of extractedProducts) {
-          // Only include products that have manual/boxed/complete indicators
-          if (extractedProduct.hasManual) {
-            const productId = extractedProduct.url 
-              ? extractedProduct.url.split('id=')[1]?.split('&')[0] || `manual-${Date.now()}-${Math.random()}`
-              : `manual-${Date.now()}-${Math.random()}`;
-            
+          // Apply "What's in Stock" filtering logic: must have manual AND be boxed AND not unboxed AND not "no manual"
+          const hasManual = extractedProduct.hasManual || false;
+          const hasBoxed = extractedProduct.hasBoxed || false;
+          const isUnboxed = extractedProduct.isUnboxed || false;
+          const hasNoManual = extractedProduct.hasNoManual || false;
+          
+          // What's in Stock filtering: require manual AND boxed, exclude unboxed and no manual
+          const isValidForWhatsInStock = hasManual && hasBoxed && !isUnboxed && !hasNoManual;
+          
+          if (isValidForWhatsInStock) {
             products.push({
-              productId: productId,
+              productId: extractedProduct.productId || `product-${Date.now()}-${Math.random()}`,
               name: extractedProduct.name,
               price: extractedProduct.price || "N/A",
               url: extractedProduct.url || "",
@@ -157,7 +157,7 @@ export default function WhatsInStockPage() {
           }
         }
         
-        console.log(`Found ${products.length} products with manual/boxed indicators`);
+        console.log(`Found ${products.length} products with manual/boxed indicators after filtering`);
         
         // For now, assume there might be more pages if we found products
         // This could be improved by checking the actual pagination in the response
@@ -226,6 +226,13 @@ export default function WhatsInStockPage() {
           const { products, hasNextPage: hasMore } = await scrapePage(urls, targetCategoryId);
           categoryProducts.push(...products);
           
+          // Deduplicate products based on productId
+          const uniqueCategoryProducts = categoryProducts.filter((product, index, self) => 
+            index === self.findIndex(p => p.productId === product.productId)
+          );
+          categoryProducts.length = 0; // Clear array
+          categoryProducts.push(...uniqueCategoryProducts); // Add back unique products
+          
           // Update products in real-time
           const updatedProducts = [...allProducts, ...categoryProducts];
           const sortedProducts = updatedProducts.sort((a: ProductWithManual, b: ProductWithManual) => {
@@ -263,8 +270,13 @@ export default function WhatsInStockPage() {
       allProducts.push(...categoryProducts);
       console.log(`${categoryName} completed: ${categoryProducts.length} products found`);
       
+      // Final deduplication across all products
+      const finalUniqueProducts = allProducts.filter((product, index, self) => 
+        index === self.findIndex(p => p.productId === product.productId)
+      );
+      
       // Final sort and update
-      const finalSortedProducts = allProducts.sort((a: ProductWithManual, b: ProductWithManual) => {
+      const finalSortedProducts = finalUniqueProducts.sort((a: ProductWithManual, b: ProductWithManual) => {
         const priceA = parseFloat(a.price.replace(/[£,]/g, '')) || 0;
         const priceB = parseFloat(b.price.replace(/[£,]/g, '')) || 0;
         return priceB - priceA;
