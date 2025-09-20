@@ -8,7 +8,17 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     const settings = await readSettings();
-    const results = await checkProducts(settings.productIds, settings);
+    
+    // Use essentialProducts if available, otherwise fall back to legacy productIds
+    const productIds = settings.essentialProducts && settings.essentialProducts.length > 0 
+      ? settings.essentialProducts 
+      : (settings.productIds || []);
+    
+    if (productIds.length === 0) {
+      return NextResponse.json({ ok: false, error: "No products configured for checking" }, { status: 400 });
+    }
+    
+    const results = await checkProducts(productIds, settings);
 
     const inStock = results.filter(r => r.inStock === true);
     if (inStock.length > 0) {
