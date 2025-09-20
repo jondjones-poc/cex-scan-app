@@ -1,5 +1,1 @@
-{
-  "/page": "app/page.js",
-  "/api/image-proxy/route": "app/api/image-proxy/route.js",
-  "/whats-in-stock/page": "app/whats-in-stock/page.js"
-}
+{}

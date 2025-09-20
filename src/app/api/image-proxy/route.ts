@@ -31,14 +31,15 @@ export async function GET(request: NextRequest) {
     const imageBuffer = await response.arrayBuffer();
     const contentType = response.headers.get('content-type') || 'image/jpeg';
 
-    // Return the image with proper headers
+    // Return the image with no caching
     return new NextResponse(imageBuffer, {
       status: 200,
       headers: {
         'Content-Type': contentType,
-        'Cache-Control': 'public, max-age=300', // Cache for 5 minutes to reduce inconsistency
+        'Cache-Control': 'no-cache, no-store, must-revalidate', // No caching
+        'Pragma': 'no-cache',
+        'Expires': '0',
         'Access-Control-Allow-Origin': '*',
-        'ETag': `"${Date.now()}"`, // Add ETag for better cache control
       },
     });
 

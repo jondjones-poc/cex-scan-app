@@ -430,7 +430,7 @@ export default function WhatsInStockPage() {
                     <td>
                       {product.imageUrl ? (
                         <img 
-                          src={`/api/image-proxy?url=${encodeURIComponent(product.imageUrl)}&t=${Date.now()}`}
+                          src={`/api/image-proxy?url=${encodeURIComponent(product.imageUrl)}`}
                           alt={product.name || 'Product'} 
                           style={{
                             width: '40px',
