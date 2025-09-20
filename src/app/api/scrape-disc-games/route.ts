@@ -1,19 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import chromium from "@sparticuz/chromium";
-import puppeteer from "puppeteer-core";
+// Use different packages for local vs production
+const isNetlify = process.env.NETLIFY === 'true' || process.env.NODE_ENV === 'production';
 
-const isNetlify = process.env.NETLIFY === 'true' || process.env.VERCEL || process.env.NETLIFY_URL || process.env.NODE_ENV === 'production';
+let chromium: any;
+let puppeteer: any;
 
-
-console.log('Environment check:', { 
-  NETLIFY: process.env.NETLIFY, 
-  VERCEL: process.env.VERCEL, 
-  NETLIFY_URL: process.env.NETLIFY_URL, 
-  NODE_ENV: process.env.NODE_ENV,
-  isNetlify,
-  puppeteerType: isNetlify ? 'puppeteer-core' : 'puppeteer'
-});
+if (isNetlify) {
+  // Production: use puppeteer-core with @sparticuz/chromium
+  chromium = require("@sparticuz/chromium");
+  puppeteer = require("puppeteer-core");
+} else {
+  // Local development: use regular puppeteer
+  puppeteer = require("puppeteer");
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,55 +24,32 @@ export async function POST(request: NextRequest) {
     }
 
     console.log(`Starting disc-based games scrape for: ${url}`);
-    console.log(`Using ${isNetlify ? 'puppeteer-core with @sparticuz/chromium' : 'regular puppeteer'} for ${isNetlify ? 'production' : 'development'}`);
-
-    // Launch Puppeteer browser with optimized settings
-    const launchArgs = [
-      '--no-sandbox'
-    ];
+    console.log(`Environment: ${isNetlify ? 'Netlify (production)' : 'Local development'}`);
 
     let browser;
     if (isNetlify) {
-      try {
-        console.log('Using puppeteer-core with chromium package for Netlify deployment');
-        console.log('Environment check:', {
-          NODE_ENV: process.env.NODE_ENV,
-          NETLIFY: process.env.NETLIFY,
-          CHROME_PATH: process.env.CHROME_PATH
-        });
-        
-        // Try multiple approaches to get the executable path
-        const executablePath = await chromium.executablePath();
-        console.log('chromium.path:', executablePath);
-              
-        if (!executablePath) {
-          throw new Error('Could not find chromium executable path. chromium.path returned undefined and manual path search failed.');
-        }
-        
-        console.log('Final executable path:', executablePath);
-        
-        browser = await puppeteer.launch({
-          args: launchArgs,
-          executablePath: executablePath,
-          headless: true
-        });
-        
-        console.log('Browser launched successfully with chromium package');
-      } catch (error) {
-        console.error('Chrome launch failed:', error);
-        console.error('Full error details:', {
-          message: (error as Error).message,
-          stack: (error as Error).stack,
-          name: (error as Error).name
-        });
-        throw new Error(`Chrome launch failed: ${(error as Error).message}`);
-      }
+      // Production: use @sparticuz/chromium
+      const executablePath = await chromium.executablePath();
+      console.log("Using Chromium path:", executablePath);
+
+      const headless: boolean | "shell" = chromium.headless === true ? true : "shell";
+
+      browser = await puppeteer.launch({
+        args: chromium.args,
+        defaultViewport: chromium.defaultViewport,
+        executablePath,
+        headless
+      });
+      
+      console.log('Browser launched successfully with chromium package');
     } else {
-      // Use regular puppeteer for local development
+      // Local development: use regular puppeteer
       browser = await puppeteer.launch({
         headless: true,
-        args: launchArgs
+        args: ['--no-sandbox']
       });
+      
+      console.log('Browser launched successfully with regular puppeteer');
     }
 
     const page = await browser.newPage();
