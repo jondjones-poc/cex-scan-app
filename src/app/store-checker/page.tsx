@@ -84,12 +84,13 @@ export default function StoreCheckerPage() {
     }
   };
 
-  const buildSearchUrl = (categoryId: string, store: string, page: number = 1) => {
+  const buildSearchUrl = (categoryId: string, storeName: string, page: number = 1) => {
     const baseUrl = "https://uk.webuy.com/search";
+    const storeId = settings?.allStores?.[storeName] || storeName;
     const params = new URLSearchParams({
       categoryIds: categoryId,
       sortBy: "prod_cex_uk_price_desc",
-      stores: store,
+      stores: storeId,
       page: page.toString()
     });
     return `${baseUrl}?${params.toString()}`;
@@ -181,7 +182,7 @@ export default function StoreCheckerPage() {
         ...(settings.discBasedGameCategoryIds || []).map((id: string) => ({ id, name: "Disc Games", type: "disc" }))
       ];
       
-      setProgress(`Checking store: ${selectedStore.replace(/\+/g, " ")}`);
+      setProgress(`Checking store: ${selectedStore}`);
         
         const storeProducts: Product[] = [];
         
@@ -251,12 +252,11 @@ export default function StoreCheckerPage() {
             }}
           >
             <option value="">-- Select a store --</option>
-            {stores
-              .flatMap(storeGroup => storeGroup.values)
-              .sort((a, b) => a.replace(/\+/g, " ").localeCompare(b.replace(/\+/g, " ")))
-              .map((store) => (
-                <option key={store} value={store}>
-                  {store.replace(/\+/g, " ")}
+            {settings?.allStores && Object.keys(settings.allStores)
+              .sort((a, b) => a.localeCompare(b))
+              .map((storeName) => (
+                <option key={storeName} value={storeName}>
+                  {storeName}
                 </option>
               ))
             }
@@ -359,7 +359,7 @@ export default function StoreCheckerPage() {
           {results.map((result, index) => (
             <div key={index} className="card" style={{ marginBottom: "24px" }}>
               <h3>
-                {result.store.replace(/\+/g, " ")} 
+                {result.store} 
                 <span style={{ fontSize: "14px", fontWeight: "400", color: "#666", marginLeft: "8px" }}>
                   ({result.totalFound} products - {result.retroGames} retro, {result.discGames} disc)
                 </span>
