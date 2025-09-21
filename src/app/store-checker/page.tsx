@@ -37,6 +37,8 @@ export default function StoreCheckerPage() {
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState<string>("");
   const [settings, setSettings] = useState<any>(null);
+  const [completedCategories, setCompletedCategories] = useState(0);
+  const [totalCategories, setTotalCategories] = useState(0);
 
   // Category ID to name mapping
   const getCategoryName = (categoryId: string) => {
@@ -174,7 +176,8 @@ export default function StoreCheckerPage() {
     setResults([]);
     setError(null);
     setProgress("Starting store check...");
-    
+    setCompletedCategories(0);
+
     try {
       const allResults: StoreCheckResult[] = [];
       const allCategories = [
@@ -182,13 +185,19 @@ export default function StoreCheckerPage() {
         ...(settings.discBasedGameCategoryIds || []).map((id: string) => ({ id, name: "Disc Games", type: "disc" }))
       ];
       
+      setTotalCategories(allCategories.length);
       setProgress(`Checking store: ${selectedStore}`);
         
         const storeProducts: Product[] = [];
         
-      for (const category of allCategories) {
+      for (let i = 0; i < allCategories.length; i++) {
+        const category = allCategories[i];
+        setProgress(`Checking ${category.name} (${i + 1}/${allCategories.length})...`);
+        
         const categoryProducts = await scrapeStoreCategory(selectedStore, category.id, category.name);
         storeProducts.push(...categoryProducts);
+        
+        setCompletedCategories(i + 1);
         
         // Small delay between requests to avoid overwhelming the server
         await new Promise(resolve => setTimeout(resolve, 1000));
@@ -235,9 +244,7 @@ export default function StoreCheckerPage() {
     <div className="container">
  
       {/* Store Selection and Check Button */}
-      <div className="card" style={{ marginBottom: "24px" }}>
-        <h2>Store Checker</h2>
-        
+      <div className="card" style={{ marginBottom: "12px" }}>
         <div style={{ 
           display: "flex", 
           gap: "16px", 
@@ -313,8 +320,26 @@ export default function StoreCheckerPage() {
                 animation: "spin 1s linear infinite"
               }}
             />
-            <span className="muted">{progress}</span>
+            <span className="muted">
+              {progress} ({completedCategories}{totalCategories ? `/${totalCategories}` : ''} categories completed)
+            </span>
           </div>
+          {totalCategories && totalCategories > 0 && (
+            <div style={{ 
+              width: "100%", 
+              height: "4px", 
+              backgroundColor: "#f0f0f0", 
+              borderRadius: "2px",
+              overflow: "hidden"
+            }}>
+              <div style={{
+                width: `${(completedCategories / totalCategories) * 100}%`,
+                height: "100%",
+                backgroundColor: "#007bff",
+                transition: "width 0.3s ease"
+              }} />
+            </div>
+          )}
         </div>
       )}
       
