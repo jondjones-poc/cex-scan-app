@@ -234,54 +234,69 @@ export default function StoreCheckerPage() {
   return (
     <div className="container">
  
-      {/* Store Selection */}
+      {/* Store Selection and Check Button */}
       <div className="card" style={{ marginBottom: "24px" }}>
-        {/* Store Selection */}
-        <div style={{ marginBottom: "16px" }}>
-          <h3>Select Store</h3>
-          <select
-            value={selectedStore}
-            onChange={(e) => setSelectedStore(e.target.value)}
+        <h2>Store Checker</h2>
+        
+        <div style={{ 
+          display: "flex", 
+          gap: "16px", 
+          alignItems: "flex-end",
+          marginTop: "16px"
+        }}>
+          {/* Check Button */}
+          <button
+            onClick={checkStores}
+            disabled={loading || !selectedStore}
             style={{
-              width: "100%",
-              padding: "8px",
-              border: "1px solid #ddd",
+              padding: "12px 24px",
+              backgroundColor: loading || !selectedStore ? "#ccc" : "#e20a03",
+              color: "#fff",
+              border: "none",
               borderRadius: "4px",
-              fontSize: "14px",
-              backgroundColor: "#fff"
+              cursor: loading || !selectedStore ? "not-allowed" : "pointer",
+              fontSize: "16px",
+              fontWeight: "600",
+              whiteSpace: "nowrap"
             }}
           >
-            <option value="">-- Select a store --</option>
-            {settings?.allStores && Object.keys(settings.allStores)
-              .sort((a, b) => a.localeCompare(b))
-              .map((storeName) => (
-                <option key={storeName} value={storeName}>
-                  {storeName}
-                </option>
-              ))
-            }
-          </select>
+            {loading ? "Checking Store..." : "Check Store"}
+          </button>
+          
+          {/* Store Selection */}
+          <div style={{ flex: "0 0 75%" }}>
+            <label style={{ 
+              display: "block", 
+              marginBottom: "8px", 
+              fontSize: "14px", 
+              fontWeight: "500" 
+            }}>
+              Select Store
+            </label>
+            <select
+              value={selectedStore}
+              onChange={(e) => setSelectedStore(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "8px",
+                border: "1px solid #ddd",
+                borderRadius: "4px",
+                fontSize: "14px",
+                backgroundColor: "#fff"
+              }}
+            >
+              <option value="">-- Select a store --</option>
+              {settings?.allStores && Object.keys(settings.allStores)
+                .sort((a, b) => a.localeCompare(b))
+                .map((storeName) => (
+                  <option key={storeName} value={storeName}>
+                    {storeName}
+                  </option>
+                ))
+              }
+            </select>
+          </div>
         </div>
-      </div>
-      
-      {/* Check Button */}
-      <div style={{ marginBottom: "24px" }}>
-        <button
-          onClick={checkStores}
-          disabled={loading || !selectedStore}
-          style={{
-            padding: "12px 24px",
-            backgroundColor: loading || !selectedStore ? "#ccc" : "#e20a03",
-            color: "#fff",
-            border: "none",
-            borderRadius: "4px",
-            cursor: loading || !selectedStore ? "not-allowed" : "pointer",
-            fontSize: "16px",
-            fontWeight: "600"
-          }}
-        >
-          {loading ? "Checking Store..." : "Check Store"}
-        </button>
       </div>
       
       {/* Progress */}
