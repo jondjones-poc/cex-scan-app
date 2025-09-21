@@ -1,5 +1,5 @@
 {
-  "/store-checker/page": "app/store-checker/page.js",
   "/page": "app/page.js",
+  "/store-checker/page": "app/store-checker/page.js",
   "/api/scrape-search-puppeteer/route": "app/api/scrape-search-puppeteer/route.js"
 }

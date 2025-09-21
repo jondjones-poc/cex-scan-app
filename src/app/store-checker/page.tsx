@@ -244,25 +244,6 @@ export default function StoreCheckerPage() {
           alignItems: "flex-end",
           marginTop: "16px"
         }}>
-          {/* Check Button */}
-          <button
-            onClick={checkStores}
-            disabled={loading || !selectedStore}
-            style={{
-              padding: "12px 24px",
-              backgroundColor: loading || !selectedStore ? "#ccc" : "#e20a03",
-              color: "#fff",
-              border: "none",
-              borderRadius: "4px",
-              cursor: loading || !selectedStore ? "not-allowed" : "pointer",
-              fontSize: "16px",
-              fontWeight: "600",
-              whiteSpace: "nowrap"
-            }}
-          >
-            {loading ? "Checking Store..." : "Check Store"}
-          </button>
-          
           {/* Store Selection */}
           <div style={{ flex: "0 0 75%" }}>
             <label style={{ 
@@ -296,6 +277,25 @@ export default function StoreCheckerPage() {
               }
             </select>
           </div>
+          
+          {/* Check Button */}
+          <button
+            onClick={checkStores}
+            disabled={loading || !selectedStore}
+            style={{
+              padding: "12px 24px",
+              backgroundColor: loading || !selectedStore ? "#ccc" : "#e20a03",
+              color: "#fff",
+              border: "none",
+              borderRadius: "4px",
+              cursor: loading || !selectedStore ? "not-allowed" : "pointer",
+              fontSize: "16px",
+              fontWeight: "600",
+              whiteSpace: "nowrap"
+            }}
+          >
+            {loading ? "Checking Store..." : "Check Store"}
+          </button>
         </div>
       </div>
       
