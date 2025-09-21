@@ -1,3 +1,4 @@
 {
-  "/api/scrape-search-puppeteer/route": "app/api/scrape-search-puppeteer/route.js"
+  "/api/scrape-search-puppeteer/route": "app/api/scrape-search-puppeteer/route.js",
+  "/store-checker/page": "app/store-checker/page.js"
 }

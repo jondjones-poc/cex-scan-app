@@ -74,19 +74,19 @@ export default function StoreCheckerPage() {
 
 
   const convertStoreNameForAPI = (storeName: string): string => {
-    return storeName
-      .replace(/-/g, '+-+')
-      .replace(/\s+/g, '+');
+    console.log(`Input store name: "${storeName}"`);
+    const step1 = storeName.replace(/-/g, '+-+');
+    console.log(`After replacing - with +-+: "${step1}"`);
+    const step2 = step1.replace(/\s+/g, '+');
+    console.log(`After replacing spaces with +: "${step2}"`);
+    return step2;
   };
 
   const buildSearchUrl = (categoryId: string, storeName: string, page: number = 1) => {
     const baseUrl = "https://uk.webuy.com/search";
     const convertedStoreName = convertStoreNameForAPI(storeName);
-    console.log(`Store name conversion: "${storeName}" -> "${convertedStoreName}"`);
     // Manually construct URL to avoid URLSearchParams encoding the + characters
-    const url = `${baseUrl}?categoryIds=${categoryId}&sortBy=prod_cex_uk_price_desc&stores=${convertedStoreName}&page=${page}`;
-    console.log(`Generated URL: ${url}`);
-    return url;
+    return `${baseUrl}?categoryIds=${categoryId}&sortBy=prod_cex_uk_price_desc&stores=${convertedStoreName}&page=${page}`;
   };
 
   const scrapeStoreCategory = async (store: string, categoryId: string, categoryName: string): Promise<Product[]> => {
