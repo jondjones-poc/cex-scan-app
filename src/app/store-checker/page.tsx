@@ -75,7 +75,6 @@ export default function StoreCheckerPage() {
 
   const convertStoreNameForAPI = (storeName: string): string => {
     return storeName
-      .toLowerCase()
       .replace(/-/g, '+-+')
       .replace(/\s+/g, '+');
   };

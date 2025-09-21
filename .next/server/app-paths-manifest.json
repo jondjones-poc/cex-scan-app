@@ -1,5 +1,6 @@
 {
   "/page": "app/page.js",
+  "/disc-based-games/page": "app/disc-based-games/page.js",
   "/store-checker/page": "app/store-checker/page.js",
-  "/disc-based-games/page": "app/disc-based-games/page.js"
+  "/api/scrape-search-puppeteer/route": "app/api/scrape-search-puppeteer/route.js"
 }
