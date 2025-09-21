@@ -17,6 +17,7 @@ export type AppSettings = {
   retroCategoryIds?: string[];
   discBasedGameCategoryIds?: string[];
   searchUrl?: string;
+  categoryMap?: { [key: string]: string };
 };
 
 const DEFAULTS: Required<Omit<AppSettings, "productIds" | "essentialProducts" | "oneDayProducts">> = {
@@ -26,7 +27,20 @@ const DEFAULTS: Required<Omit<AppSettings, "productIds" | "essentialProducts" | 
   stores: [],
   retroCategoryIds: ["1037"],
   discBasedGameCategoryIds: ["1178", "403", "1192", "782", "808", "1064", "795"],
-  searchUrl: "https://uk.webuy.com/search"
+  searchUrl: "https://uk.webuy.com/search",
+  categoryMap: {
+    "1037": "SNES",
+    "1055": "MegaDrive", 
+    "1052": "NES",
+    "1030": "N64",
+    "1178": "PS2 Rarities",
+    "403": "PS2",
+    "1192": "PS3 Software",
+    "782": "PlayStation",
+    "808": "Xbox 360",
+    "1064": "Switch",
+    "795": "Wii"
+  }
 };
 
 export async function readSettings(): Promise<AppSettings & typeof DEFAULTS> {
@@ -74,6 +88,21 @@ export async function readSettings(): Promise<AppSettings & typeof DEFAULTS> {
   }
   if (!Array.isArray(merged.discBasedGameCategoryIds)) {
     merged.discBasedGameCategoryIds = ["1178", "403", "1192", "782", "808", "1064", "795"];
+  }
+  if (!merged.categoryMap) {
+    merged.categoryMap = {
+      "1037": "SNES",
+      "1055": "MegaDrive", 
+      "1052": "NES",
+      "1030": "N64",
+      "1178": "PS2 Rarities",
+      "403": "PS2",
+      "1192": "PS3 Software",
+      "782": "PlayStation",
+      "808": "Xbox 360",
+      "1064": "Switch",
+      "795": "Wii"
+    };
   }
   return merged;
 }
