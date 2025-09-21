@@ -51,6 +51,8 @@ export default function StoreCheckerPage() {
         const response = await fetch('/api/settings');
         if (response.ok) {
           const loadedSettings = await response.json();
+          console.log('Loaded settings:', loadedSettings);
+          console.log('categoryMap in loaded settings:', loadedSettings.categoryMap);
           setSettings(loadedSettings);
           setStores(loadedSettings.stores || []);
         } else {
