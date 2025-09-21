@@ -32,7 +32,6 @@ interface StoreCheckResult {
 export default function StoreCheckerPage() {
   const [stores, setStores] = useState<Store[]>([]);
   const [selectedStore, setSelectedStore] = useState<string>("");
-  const [customStore, setCustomStore] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<StoreCheckResult[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -77,12 +76,6 @@ export default function StoreCheckerPage() {
     loadSettings();
   }, []);
 
-  const addCustomStore = () => {
-    if (customStore.trim()) {
-      setSelectedStore(customStore.trim());
-      setCustomStore("");
-    }
-  };
 
   const convertStoreNameForAPI = (storeName: string): string => {
     return storeName
@@ -268,41 +261,6 @@ export default function StoreCheckerPage() {
               ))
             }
           </select>
-        </div>
-        
-        {/* Custom Store Input */}
-        <div style={{ marginTop: "16px" }}>
-          <h3>Add Custom Store</h3>
-          <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-            <input
-              type="text"
-              value={customStore}
-              onChange={(e) => setCustomStore(e.target.value)}
-              placeholder="Enter store name (e.g., Manchester)"
-              style={{
-                padding: "8px 12px",
-                border: "1px solid #ddd",
-                borderRadius: "4px",
-                flex: 1,
-                fontSize: "14px"
-              }}
-              onKeyPress={(e) => e.key === 'Enter' && addCustomStore()}
-            />
-            <button
-              onClick={addCustomStore}
-              style={{
-                padding: "8px 16px",
-                backgroundColor: "#e20a03",
-                color: "#fff",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-                fontSize: "14px"
-              }}
-            >
-              Add
-            </button>
-          </div>
         </div>
       </div>
       
