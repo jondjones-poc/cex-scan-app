@@ -184,6 +184,113 @@ export default function WhatsInStockPage() {
   };
 
 
+  const handleScanAllCategories = async () => {
+    if (!settings || !settings.retroCategoryIds) {
+      setError("No categories configured");
+      return;
+    }
+    
+    setLoading(true);
+    setProducts([]);
+    setError(null);
+    setCurrentPage(1);
+    setTotalPages(0);
+    setCompletedPages(0);
+    setProgress("Starting scan of all categories...");
+    setSelectedCategory(""); // Clear selected category for "All" mode
+    
+    try {
+      const allProducts: ProductWithManual[] = [];
+      const totalCategories = settings.retroCategoryIds.length;
+      let completedCategories = 0;
+      
+      setCurrentCategory("All Categories");
+      
+      // Scan each category
+      for (const categoryId of settings.retroCategoryIds) {
+        const categoryName = categoryMap[categoryId] || `Category ${categoryId}`;
+        setProgress(`Scanning ${categoryName} (${completedCategories + 1}/${totalCategories})...`);
+        
+        let page = 1;
+        let hasNextPage = true;
+        let categoryProducts: ProductWithManual[] = [];
+        
+        // Scan all pages for this category
+        while (hasNextPage && page <= 5) { // Limit to 5 pages per category
+          const urls = buildSearchUrl(categoryId, page);
+          setProgress(`Scanning ${categoryName}, page ${page} (${completedCategories + 1}/${totalCategories})`);
+          
+          try {
+            const { products, hasNextPage: hasMore } = await scrapePage(urls, categoryId);
+            categoryProducts.push(...products);
+            
+            // Deduplicate products based on productId
+            const uniqueCategoryProducts = categoryProducts.filter((product, index, self) => 
+              index === self.findIndex(p => p.productId === product.productId)
+            );
+            categoryProducts.length = 0;
+            categoryProducts.push(...uniqueCategoryProducts);
+            
+            // Update products in real-time with all categories combined
+            const updatedProducts = [...allProducts, ...categoryProducts];
+            const sortedProducts = updatedProducts.sort((a: ProductWithManual, b: ProductWithManual) => {
+              const priceA = parseFloat(a.price.replace(/[£,]/g, '')) || 0;
+              const priceB = parseFloat(b.price.replace(/[£,]/g, '')) || 0;
+              return priceB - priceA; // Highest price first
+            });
+            setProducts(sortedProducts);
+            
+            setProgress(`Found ${sortedProducts.length} products so far... (${categoryName}, page ${page})`);
+            
+            if (!hasMore || products.length === 0) {
+              hasNextPage = false;
+            } else {
+              page++;
+              await new Promise(resolve => setTimeout(resolve, 500));
+            }
+          } catch (pageError) {
+            console.error(`Error scanning ${categoryName}, page ${page}:`, pageError);
+            setError(`Error scanning ${categoryName}, page ${page}: ${(pageError as Error).message}`);
+            hasNextPage = false;
+          }
+        }
+        
+        allProducts.push(...categoryProducts);
+        completedCategories++;
+        setCompletedPages(completedCategories);
+        setTotalPages(totalCategories);
+        
+        console.log(`${categoryName} completed: ${categoryProducts.length} products found`);
+        
+        // Small delay between categories
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+      
+      // Final deduplication across all products
+      const finalUniqueProducts = allProducts.filter((product, index, self) => 
+        index === self.findIndex(p => p.productId === product.productId)
+      );
+      
+      // Final sort by price (highest first)
+      const finalSortedProducts = finalUniqueProducts.sort((a: ProductWithManual, b: ProductWithManual) => {
+        const priceA = parseFloat(a.price.replace(/[£,]/g, '')) || 0;
+        const priceB = parseFloat(b.price.replace(/[£,]/g, '')) || 0;
+        return priceB - priceA;
+      });
+      
+      setProducts(finalSortedProducts);
+      setProgress(`Scan completed! Found ${finalSortedProducts.length} products across all categories`);
+      console.log(`Total products found across all categories: ${finalSortedProducts.length}`);
+      
+    } catch (error) {
+      console.error("Failed to scan all categories:", error);
+      setError(`Error: ${(error as Error).message}`);
+      setProgress("Scan failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleScanProducts = async (categoryId?: string) => {
     const targetCategoryId = categoryId || selectedCategory;
     
@@ -316,7 +423,7 @@ export default function WhatsInStockPage() {
                 }}
               />
               <span className="muted">
-                {progress} ({completedPages}{totalPages ? `/${totalPages}` : ''} pages completed)
+                {progress} ({currentCategory === "All Categories" ? `${completedPages}/${totalPages} categories` : `${completedPages}${totalPages ? `/${totalPages}` : ''} pages`} completed)
               </span>
             </div>
             <div style={{ 
@@ -381,6 +488,26 @@ export default function WhatsInStockPage() {
         <div style={{ marginBottom: "16px" }}>
           <div style={{ marginBottom: "12px" }}>
             <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+              {/* All button */}
+              <button
+                onClick={handleScanAllCategories}
+                disabled={loading}
+                style={{
+                  padding: "8px 12px",
+                  border: selectedCategory === "" && currentCategory === "All Categories" ? "2px solid #dc3545" : "1px solid #ccc",
+                  borderRadius: "4px",
+                  backgroundColor: selectedCategory === "" && currentCategory === "All Categories" ? "#dc3545" : "#fff",
+                  color: selectedCategory === "" && currentCategory === "All Categories" ? "#fff" : "#000",
+                  cursor: loading ? "not-allowed" : "pointer",
+                  fontSize: "14px",
+                  fontWeight: selectedCategory === "" && currentCategory === "All Categories" ? "bold" : "normal",
+                  opacity: loading ? 0.6 : 1
+                }}
+              >
+                All
+              </button>
+              
+              {/* Individual category buttons */}
               {settings?.retroCategoryIds?.map((categoryId) => {
                 const categoryName = categoryMap[categoryId] || `Category ${categoryId}`;
                 return (
@@ -486,7 +613,7 @@ export default function WhatsInStockPage() {
             
             <div style={{ marginTop: "16px" }}>
               <p className="muted">
-                <strong>Status:</strong> Scan completed! Found {products.length} products with manual included
+                <strong>Status:</strong> {currentCategory === "All Categories" ? `Scan completed! Found ${products.length} products across all categories with manual included` : `Scan completed! Found ${products.length} products with manual included`}
               </p>
             </div>
           </div>
