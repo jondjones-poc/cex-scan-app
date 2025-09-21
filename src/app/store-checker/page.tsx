@@ -368,7 +368,6 @@ export default function StoreCheckerPage() {
                 <table className="table" key={`table-${settings?.categoryMap ? 'loaded' : 'loading'}`}>
                   <thead>
                     <tr>
-                      <th>Image</th>
                       <th>Name</th>
                       <th>Price</th>
                       <th>Category</th>
@@ -378,39 +377,6 @@ export default function StoreCheckerPage() {
                   <tbody>
                     {result.products.map((product) => (
                       <tr key={product.productId}>
-                        <td>
-                          {product.imageUrl ? (
-                            <img 
-                              src={`/api/image-proxy?url=${encodeURIComponent(product.imageUrl)}`}
-                              alt={product.name || 'Product'} 
-                              style={{
-                                width: '40px',
-                                height: '40px',
-                                objectFit: 'cover',
-                                borderRadius: '4px',
-                                border: '1px solid #ddd'
-                              }}
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).style.display = 'none';
-                              }}
-                            />
-                          ) : (
-                            <div style={{
-                              width: '40px',
-                              height: '40px',
-                              backgroundColor: '#f0f0f0',
-                              borderRadius: '4px',
-                              border: '1px solid #ddd',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              fontSize: '12px',
-                              color: '#666'
-                            }}>
-                              No img
-                            </div>
-                          )}
-                        </td>
                         <td>{product.name}</td>
                         <td>{product.price}</td>
                         <td>{getCategoryName(product.categoryId)}</td>

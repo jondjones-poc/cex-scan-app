@@ -1,4 +1,5 @@
 {
+  "/store-checker/page": "app/store-checker/page.js",
   "/page": "app/page.js",
-  "/store-checker/page": "app/store-checker/page.js"
+  "/api/image-proxy/route": "app/api/image-proxy/route.js"
 }
