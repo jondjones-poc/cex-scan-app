@@ -1,6 +1,5 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { readSettings } from "@/lib/settings";
 import type { AppSettings } from "@/lib/settings";
 
 interface DiscBasedGame {
@@ -13,18 +12,16 @@ interface DiscBasedGame {
   categoryId: string;
 }
 
-// Category ID to name mapping for disc-based games
-const categoryMap: { [key: string]: string } = {
-  "1178": "Rare PS2",
-  "403": "PS2",
-  "1192": "Rare Xbox 360",
-  "782": "Xbox 360", 
-  "808": "PS3",
-  "1064": "Switch",
-  "795": "WII",
-};
+// Category ID to name mapping will be loaded from settings
 
 export default function DiscBasedGamesPage() {
+  // Helper function to get category name from settings
+  const getCategoryName = (categoryId: string) => {
+    if (!settings || !settings.categoryMap) {
+      return categoryId;
+    }
+    return settings.categoryMap[categoryId] || categoryId;
+  };
   const [products, setProducts] = useState<DiscBasedGame[]>([]);
   const [loading, setLoading] = useState(false);
   const [settings, setSettings] = useState<AppSettings | null>(null);
@@ -137,7 +134,7 @@ export default function DiscBasedGamesPage() {
 
       while (hasNextPage && page <= 10) { // Limit to 10 pages for safety
         const url = buildSearchUrl(categoryId, page);
-        setProgress(`Scanning page ${page} for ${categoryMap[categoryId] || categoryId}...`);
+        setProgress(`Scanning page ${page} for ${getCategoryName(categoryId)}...`);
         
         const result = await scrapePage(url);
         // Filter products using disc-based games specific filter
@@ -294,7 +291,7 @@ export default function DiscBasedGamesPage() {
             <div style={{ marginBottom: "12px" }}>
               <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
                 {settings.discBasedGameCategoryIds?.map((categoryId) => {
-                  const categoryName = categoryMap[categoryId] || categoryId;
+                  const categoryName = getCategoryName(categoryId);
                   return (
                     <button
                       key={categoryId}
