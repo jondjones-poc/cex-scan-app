@@ -74,12 +74,21 @@ export default function StoreCheckerPage() {
 
 
   const convertStoreNameForAPI = (storeName: string): string => {
-    console.log('FUNCTION CALLED:', storeName);
     const result = storeName
       .replace(/\s*-\s*/g, '+-+')  // Replace hyphen with optional spaces around it
       .replace(/\s+/g, '+');       // Replace remaining spaces with +
-    console.log('FUNCTION RESULT:', result);
     return result;
+  };
+
+  const filterProductName = (productName: string): string => {
+    return productName
+      .replace(/,\s*\+?\s*Manual\s*,?\s*Boxed\s*,?\s*$/i, '')  // Remove ", + Manual, Boxed" or ", Manual, Boxed" with optional trailing comma
+      .replace(/,\s*\+?\s*Manual\s*,?\s*$/i, '')                // Remove ", + Manual" or ", Manual" with optional trailing comma
+      .replace(/,\s*w\/\s*Manual\s*,?\s*Boxed\s*,?\s*$/i, '')   // Remove ", w/ Manual, Boxed" with optional trailing comma
+      .replace(/,\s*w\/\s*Manual\s*,?\s*$/i, '')                // Remove ", w/ Manual" with optional trailing comma
+      .replace(/,\s*Boxed\s*,?\s*$/i, '')                       // Remove ", Boxed" with optional trailing comma
+      .replace(/,\s*$/, '')                                     // Remove any remaining trailing comma
+      .trim();                                                  // Remove leading/trailing whitespace
   };
 
   const buildSearchUrl = (categoryId: string, storeName: string, page: number = 1) => {
