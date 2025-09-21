@@ -1,6 +1,5 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { readSettings } from "@/lib/settings";
 
 interface Store {
   name: string;
@@ -236,7 +235,7 @@ export default function StoreCheckerPage() {
   };
 
   return (
-    <div className="container">
+    <div>
  
       {/* Store Selection and Check Button */}
       <div className="card" style={{ marginBottom: "12px" }}>
