@@ -39,6 +39,26 @@ export default function StoreCheckerPage() {
   const [progress, setProgress] = useState<string>("");
   const [settings, setSettings] = useState<any>(null);
 
+  // Category ID to name mapping
+  const getCategoryName = (categoryId: string) => {
+    const categoryMap: { [key: string]: string } = {
+      // Retro categories
+      "1037": "SNES Software",
+      "1055": "Mega Drive Software", 
+      "1052": "NES Software",
+      "1030": "Game Boy Software",
+      // Disc-based categories
+      "1178": "PlayStation 2 Rarities",
+      "403": "PlayStation 2 Software",
+      "1192": "PlayStation 3 Software",
+      "782": "PlayStation Software",
+      "808": "Xbox 360 Software",
+      "1064": "Xbox Software",
+      "795": "GameCube Software"
+    };
+    return categoryMap[categoryId] || `Category ${categoryId}`;
+  };
+
   useEffect(() => {
     const loadSettings = async () => {
       try {
@@ -230,31 +250,36 @@ export default function StoreCheckerPage() {
         {stores.map((storeGroup, index) => (
           <div key={index} style={{ marginBottom: "16px" }}>
             <h3>{storeGroup.name}</h3>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+            <select
+              multiple
+              size={Math.min(storeGroup.values.length, 6)}
+              onChange={(e) => {
+                const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
+                const newSelectedStores = selectedStores.filter(store => !storeGroup.values.includes(store));
+                setSelectedStores([...newSelectedStores, ...selectedOptions]);
+              }}
+              style={{
+                width: "100%",
+                padding: "8px",
+                border: "1px solid #ddd",
+                borderRadius: "4px",
+                fontSize: "14px",
+                backgroundColor: "#fff"
+              }}
+            >
               {storeGroup.values.map((store) => (
-                <button
+                <option
                   key={store}
-                  onClick={() => {
-                    if (selectedStores.includes(store)) {
-                      removeStore(store);
-                    } else {
-                      setSelectedStores([...selectedStores, store]);
-                    }
-                  }}
-                  style={{
-                    padding: "8px 16px",
-                    border: "1px solid #ddd",
-                    borderRadius: "4px",
-                    backgroundColor: selectedStores.includes(store) ? "#e20a03" : "#fff",
-                    color: selectedStores.includes(store) ? "#fff" : "#000",
-                    cursor: "pointer",
-                    fontSize: "14px"
-                  }}
+                  value={store}
+                  selected={selectedStores.includes(store)}
                 >
                   {store.replace(/\+/g, " ")}
-                </button>
+                </option>
               ))}
-            </div>
+            </select>
+            <p style={{ fontSize: "12px", color: "#666", marginTop: "4px" }}>
+              Hold Ctrl/Cmd to select multiple stores
+            </p>
           </div>
         ))}
         
@@ -449,9 +474,7 @@ export default function StoreCheckerPage() {
                         </td>
                         <td>{product.name}</td>
                         <td>{product.price}</td>
-                        <td>
-                          {settings?.retroCategoryIds?.includes(product.categoryId) ? "Retro" : "Disc"}
-                        </td>
+                        <td>{getCategoryName(product.categoryId)}</td>
                         <td>
                           <a href={product.url} target="_blank" rel="noreferrer">Open</a>
                         </td>
