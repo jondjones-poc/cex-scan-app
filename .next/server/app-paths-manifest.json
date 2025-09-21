@@ -1,3 +1,5 @@
 {
-  "/store-checker/page": "app/store-checker/page.js"
+  "/store-checker/page": "app/store-checker/page.js",
+  "/api/settings/route": "app/api/settings/route.js",
+  "/disc-based-games/page": "app/disc-based-games/page.js"
 }

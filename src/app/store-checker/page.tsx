@@ -365,6 +365,7 @@ export default function StoreCheckerPage() {
                 <table className="table" key={`table-${settings?.categoryMap ? 'loaded' : 'loading'}`}>
                   <thead>
                     <tr>
+                      <th>Image</th>
                       <th>Name</th>
                       <th>Price</th>
                       <th>Category</th>
@@ -374,6 +375,34 @@ export default function StoreCheckerPage() {
                   <tbody>
                     {result.products.map((product) => (
                       <tr key={product.productId}>
+                        <td>
+                          {product.imageUrl ? (
+                            <img 
+                              src={`/api/image-proxy?url=${encodeURIComponent(product.imageUrl)}`}
+                              alt={product.name || 'Product'} 
+                              style={{
+                                width: '40px',
+                                height: '40px',
+                                objectFit: 'cover',
+                                borderRadius: '4px'
+                              }}
+                            />
+                          ) : (
+                            <div style={{
+                              width: '40px',
+                              height: '40px',
+                              backgroundColor: '#f0f0f0',
+                              borderRadius: '4px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: '12px',
+                              color: '#666'
+                            }}>
+                              No Image
+                            </div>
+                          )}
+                        </td>
                         <td>{product.name}</td>
                         <td>{product.price}</td>
                         <td>{getCategoryName(product.categoryId)}</td>
