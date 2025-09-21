@@ -1,5 +1,4 @@
 {
   "/store-checker/page": "app/store-checker/page.js",
-  "/api/settings/route": "app/api/settings/route.js",
   "/page": "app/page.js"
 }

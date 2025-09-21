@@ -232,13 +232,9 @@ export default function StoreCheckerPage() {
 
   return (
     <div className="container">
-      <h1>Store Checker</h1>
-      <p>Check stock at a specific CEX store for retro games and disc-based games.</p>
-      
+ 
       {/* Store Selection */}
       <div className="card" style={{ marginBottom: "24px" }}>
-        <h2>Select Store</h2>
-        
         {/* Store Selection */}
         <div style={{ marginBottom: "16px" }}>
           <h3>Select Store</h3>
@@ -255,13 +251,15 @@ export default function StoreCheckerPage() {
             }}
           >
             <option value="">-- Select a store --</option>
-            {stores.map((storeGroup) => 
-              storeGroup.values.map((store) => (
+            {stores
+              .flatMap(storeGroup => storeGroup.values)
+              .sort((a, b) => a.replace(/\+/g, " ").localeCompare(b.replace(/\+/g, " ")))
+              .map((store) => (
                 <option key={store} value={store}>
-                  {store.replace(/\+/g, " ")} ({storeGroup.name})
+                  {store.replace(/\+/g, " ")}
                 </option>
               ))
-            )}
+            }
           </select>
         </div>
         
