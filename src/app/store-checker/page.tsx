@@ -82,8 +82,11 @@ export default function StoreCheckerPage() {
   const buildSearchUrl = (categoryId: string, storeName: string, page: number = 1) => {
     const baseUrl = "https://uk.webuy.com/search";
     const convertedStoreName = convertStoreNameForAPI(storeName);
+    console.log(`Store name conversion: "${storeName}" -> "${convertedStoreName}"`);
     // Manually construct URL to avoid URLSearchParams encoding the + characters
-    return `${baseUrl}?categoryIds=${categoryId}&sortBy=prod_cex_uk_price_desc&stores=${convertedStoreName}&page=${page}`;
+    const url = `${baseUrl}?categoryIds=${categoryId}&sortBy=prod_cex_uk_price_desc&stores=${convertedStoreName}&page=${page}`;
+    console.log(`Generated URL: ${url}`);
+    return url;
   };
 
   const scrapeStoreCategory = async (store: string, categoryId: string, categoryName: string): Promise<Product[]> => {
