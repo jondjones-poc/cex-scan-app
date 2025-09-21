@@ -68,22 +68,22 @@ export default function Navigation() {
           >
             Disc Based Games
           </Link>
+          <Link 
+            href="/store-checker" 
+            style={{
+              color: "white",
+              textDecoration: "none",
+              fontWeight: pathname === "/store-checker" ? "600" : "400",
+              fontSize: "16px",
+              padding: "8px 16px",
+              borderRadius: "4px",
+              backgroundColor: pathname === "/store-checker" ? "rgba(255,255,255,0.2)" : "transparent",
+              transition: "all 0.2s ease"
+            }}
+          >
+            Store Checker
+          </Link>
         </div>
-        <Link 
-          href="/store-checker" 
-          style={{
-            color: "white",
-            textDecoration: "none",
-            fontWeight: pathname === "/store-checker" ? "600" : "400",
-            fontSize: "16px",
-            padding: "8px 16px",
-            borderRadius: "4px",
-            backgroundColor: pathname === "/store-checker" ? "rgba(255,255,255,0.2)" : "transparent",
-            transition: "all 0.2s ease"
-          }}
-        >
-          Store Checker
-        </Link>
       </div>
     </nav>
   );
