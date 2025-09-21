@@ -42,7 +42,10 @@ export default function StoreCheckerPage() {
 
   // Category ID to name mapping
   const getCategoryName = (categoryId: string) => {
-    return settings?.categoryMap?.[categoryId] || `Category ${categoryId}`;
+    if (!settings || !settings.categoryMap) {
+      return `Category ${categoryId}`;
+    }
+    return settings.categoryMap[categoryId] || `Category ${categoryId}`;
   };
 
   useEffect(() => {
@@ -51,8 +54,6 @@ export default function StoreCheckerPage() {
         const response = await fetch('/api/settings');
         if (response.ok) {
           const loadedSettings = await response.json();
-          console.log('Loaded settings:', loadedSettings);
-          console.log('categoryMap in loaded settings:', loadedSettings.categoryMap);
           setSettings(loadedSettings);
           setStores(loadedSettings.stores || []);
         } else {
@@ -64,6 +65,13 @@ export default function StoreCheckerPage() {
     };
     loadSettings();
   }, []);
+
+  // Force re-render when settings change to update category names
+  useEffect(() => {
+    if (settings && settings.categoryMap) {
+      // Settings are loaded, component will re-render automatically
+    }
+  }, [settings]);
 
 
   const convertStoreNameForAPI = (storeName: string): string => {
@@ -358,7 +366,7 @@ export default function StoreCheckerPage() {
               </h3>
               
               {result.products.length > 0 ? (
-                <table className="table">
+                <table className="table" key={`table-${settings?.categoryMap ? 'loaded' : 'loading'}`}>
                   <thead>
                     <tr>
                       <th>Image</th>
