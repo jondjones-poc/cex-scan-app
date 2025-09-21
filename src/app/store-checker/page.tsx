@@ -31,7 +31,7 @@ interface StoreCheckResult {
 
 export default function StoreCheckerPage() {
   const [stores, setStores] = useState<Store[]>([]);
-  const [selectedStores, setSelectedStores] = useState<string[]>([]);
+  const [selectedStore, setSelectedStore] = useState<string>("");
   const [customStore, setCustomStore] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<StoreCheckResult[]>([]);
@@ -78,14 +78,10 @@ export default function StoreCheckerPage() {
   }, []);
 
   const addCustomStore = () => {
-    if (customStore.trim() && !selectedStores.includes(customStore.trim())) {
-      setSelectedStores([...selectedStores, customStore.trim()]);
+    if (customStore.trim()) {
+      setSelectedStore(customStore.trim());
       setCustomStore("");
     }
-  };
-
-  const removeStore = (storeToRemove: string) => {
-    setSelectedStores(selectedStores.filter(store => store !== storeToRemove));
   };
 
   const buildSearchUrl = (categoryId: string, store: string, page: number = 1) => {
@@ -168,8 +164,8 @@ export default function StoreCheckerPage() {
   };
 
   const checkStores = async () => {
-    if (!settings || selectedStores.length === 0) {
-      setError("Please select at least one store");
+    if (!settings || !selectedStore) {
+      setError("Please select a store");
       return;
     }
     
@@ -185,48 +181,45 @@ export default function StoreCheckerPage() {
         ...(settings.discBasedGameCategoryIds || []).map((id: string) => ({ id, name: "Disc Games", type: "disc" }))
       ];
       
-      for (let i = 0; i < selectedStores.length; i++) {
-        const store = selectedStores[i];
-        setProgress(`Checking store ${i + 1}/${selectedStores.length}: ${store}`);
+      setProgress(`Checking store: ${selectedStore.replace(/\+/g, " ")}`);
         
         const storeProducts: Product[] = [];
         
-        for (const category of allCategories) {
-          const categoryProducts = await scrapeStoreCategory(store, category.id, category.name);
-          storeProducts.push(...categoryProducts);
-          
-          // Small delay between requests to avoid overwhelming the server
-          await new Promise(resolve => setTimeout(resolve, 1000));
-        }
+      for (const category of allCategories) {
+        const categoryProducts = await scrapeStoreCategory(selectedStore, category.id, category.name);
+        storeProducts.push(...categoryProducts);
         
-        // Deduplicate products by productId
-        const uniqueProducts = storeProducts.filter((product, index, self) => 
-          index === self.findIndex(p => p.productId === product.productId)
-        );
-        
-        // Sort by price (highest first)
-        const sortedProducts = uniqueProducts.sort((a, b) => {
-          const priceA = parseFloat(a.price.replace(/[£,]/g, '')) || 0;
-          const priceB = parseFloat(b.price.replace(/[£,]/g, '')) || 0;
-          return priceB - priceA;
-        });
-        
-        const retroCount = sortedProducts.filter(p => settings.retroCategoryIds?.includes(p.categoryId)).length;
-        const discCount = sortedProducts.filter(p => settings.discBasedGameCategoryIds?.includes(p.categoryId)).length;
-        
-        allResults.push({
-          store: store,
-          products: sortedProducts,
-          totalFound: sortedProducts.length,
-          retroGames: retroCount,
-          discGames: discCount
-        });
-        
-        // Update results in real-time
-        setResults([...allResults]);
+        // Small delay between requests to avoid overwhelming the server
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
       
-      setProgress(`Store check completed! Found products across ${allResults.length} stores`);
+      // Deduplicate products by productId
+      const uniqueProducts = storeProducts.filter((product, index, self) => 
+        index === self.findIndex(p => p.productId === product.productId)
+      );
+      
+      // Sort by price (highest first)
+      const sortedProducts = uniqueProducts.sort((a, b) => {
+        const priceA = parseFloat(a.price.replace(/[£,]/g, '')) || 0;
+        const priceB = parseFloat(b.price.replace(/[£,]/g, '')) || 0;
+        return priceB - priceA;
+      });
+      
+      const retroCount = sortedProducts.filter(p => settings.retroCategoryIds?.includes(p.categoryId)).length;
+      const discCount = sortedProducts.filter(p => settings.discBasedGameCategoryIds?.includes(p.categoryId)).length;
+      
+      allResults.push({
+        store: selectedStore,
+        products: sortedProducts,
+        totalFound: sortedProducts.length,
+        retroGames: retroCount,
+        discGames: discCount
+      });
+      
+      // Update results in real-time
+      setResults([...allResults]);
+      
+      setProgress(`Store check completed! Found ${allResults[0]?.totalFound || 0} products`);
       
     } catch (error) {
       console.error("Store check failed:", error);
@@ -240,48 +233,37 @@ export default function StoreCheckerPage() {
   return (
     <div className="container">
       <h1>Store Checker</h1>
-      <p>Check stock across multiple CEX stores for retro games and disc-based games.</p>
+      <p>Check stock at a specific CEX store for retro games and disc-based games.</p>
       
       {/* Store Selection */}
       <div className="card" style={{ marginBottom: "24px" }}>
-        <h2>Select Stores</h2>
+        <h2>Select Store</h2>
         
-        {/* Store Groups */}
-        {stores.map((storeGroup, index) => (
-          <div key={index} style={{ marginBottom: "16px" }}>
-            <h3>{storeGroup.name}</h3>
-            <select
-              multiple
-              size={Math.min(storeGroup.values.length, 6)}
-              onChange={(e) => {
-                const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
-                const newSelectedStores = selectedStores.filter(store => !storeGroup.values.includes(store));
-                setSelectedStores([...newSelectedStores, ...selectedOptions]);
-              }}
-              style={{
-                width: "100%",
-                padding: "8px",
-                border: "1px solid #ddd",
-                borderRadius: "4px",
-                fontSize: "14px",
-                backgroundColor: "#fff"
-              }}
-            >
-              {storeGroup.values.map((store) => (
-                <option
-                  key={store}
-                  value={store}
-                  selected={selectedStores.includes(store)}
-                >
-                  {store.replace(/\+/g, " ")}
+        {/* Store Selection */}
+        <div style={{ marginBottom: "16px" }}>
+          <h3>Select Store</h3>
+          <select
+            value={selectedStore}
+            onChange={(e) => setSelectedStore(e.target.value)}
+            style={{
+              width: "100%",
+              padding: "8px",
+              border: "1px solid #ddd",
+              borderRadius: "4px",
+              fontSize: "14px",
+              backgroundColor: "#fff"
+            }}
+          >
+            <option value="">-- Select a store --</option>
+            {stores.map((storeGroup) => 
+              storeGroup.values.map((store) => (
+                <option key={store} value={store}>
+                  {store.replace(/\+/g, " ")} ({storeGroup.name})
                 </option>
-              ))}
-            </select>
-            <p style={{ fontSize: "12px", color: "#666", marginTop: "4px" }}>
-              Hold Ctrl/Cmd to select multiple stores
-            </p>
-          </div>
-        ))}
+              ))
+            )}
+          </select>
+        </div>
         
         {/* Custom Store Input */}
         <div style={{ marginTop: "16px" }}>
@@ -317,65 +299,25 @@ export default function StoreCheckerPage() {
             </button>
           </div>
         </div>
-        
-        {/* Selected Stores */}
-        {selectedStores.length > 0 && (
-          <div style={{ marginTop: "16px" }}>
-            <h3>Selected Stores ({selectedStores.length})</h3>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-              {selectedStores.map((store) => (
-                <span
-                  key={store}
-                  style={{
-                    padding: "4px 8px",
-                    backgroundColor: "#e20a03",
-                    color: "#fff",
-                    borderRadius: "4px",
-                    fontSize: "12px",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "4px"
-                  }}
-                >
-                  {store.replace(/\+/g, " ")}
-                  <button
-                    onClick={() => removeStore(store)}
-                    style={{
-                      background: "none",
-                      border: "none",
-                      color: "#fff",
-                      cursor: "pointer",
-                      fontSize: "12px",
-                      padding: "0",
-                      marginLeft: "4px"
-                    }}
-                  >
-                    ×
-                  </button>
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
       
       {/* Check Button */}
       <div style={{ marginBottom: "24px" }}>
         <button
           onClick={checkStores}
-          disabled={loading || selectedStores.length === 0}
+          disabled={loading || !selectedStore}
           style={{
             padding: "12px 24px",
-            backgroundColor: loading || selectedStores.length === 0 ? "#ccc" : "#e20a03",
+            backgroundColor: loading || !selectedStore ? "#ccc" : "#e20a03",
             color: "#fff",
             border: "none",
             borderRadius: "4px",
-            cursor: loading || selectedStores.length === 0 ? "not-allowed" : "pointer",
+            cursor: loading || !selectedStore ? "not-allowed" : "pointer",
             fontSize: "16px",
             fontWeight: "600"
           }}
         >
-          {loading ? "Checking Stores..." : `Check ${selectedStores.length} Store${selectedStores.length !== 1 ? 's' : ''}`}
+          {loading ? "Checking Store..." : "Check Store"}
         </button>
       </div>
       
