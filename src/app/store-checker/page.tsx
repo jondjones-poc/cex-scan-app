@@ -76,8 +76,8 @@ export default function StoreCheckerPage() {
   const convertStoreNameForAPI = (storeName: string): string => {
     console.log('FUNCTION CALLED:', storeName);
     const result = storeName
-      .replace(/-/g, '+-+')
-      .replace(/\s+/g, '+');
+      .replace(/\s*-\s*/g, '+-+')  // Replace hyphen with optional spaces around it
+      .replace(/\s+/g, '+');       // Replace remaining spaces with +
     console.log('FUNCTION RESULT:', result);
     return result;
   };
