@@ -49,21 +49,6 @@ export default function Navigation() {
           What's in Stock
         </Link>
         <Link 
-          href="/disc-based-games" 
-          style={{
-            color: "white",
-            textDecoration: "none",
-            fontWeight: pathname === "/disc-based-games" ? "600" : "400",
-            fontSize: "16px",
-            padding: "8px 16px",
-            borderRadius: "4px",
-            backgroundColor: pathname === "/disc-based-games" ? "rgba(255,255,255,0.2)" : "transparent",
-            transition: "all 0.2s ease"
-          }}
-        >
-          Disc Based Games
-        </Link>
-        <Link 
           href="/store-checker" 
           style={{
             color: "white",
@@ -77,6 +62,21 @@ export default function Navigation() {
           }}
         >
           Store Checker
+        </Link>
+        <Link 
+          href="/disc-based-games" 
+          style={{
+            color: "white",
+            textDecoration: "none",
+            fontWeight: pathname === "/disc-based-games" ? "600" : "400",
+            fontSize: "16px",
+            padding: "8px 16px",
+            borderRadius: "4px",
+            backgroundColor: pathname === "/disc-based-games" ? "rgba(255,255,255,0.2)" : "transparent",
+            transition: "all 0.2s ease"
+          }}
+        >
+          Disc Based Games
         </Link>
       </div>
     </nav>
