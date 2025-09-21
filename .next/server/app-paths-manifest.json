@@ -1,5 +1,5 @@
 {
-  "/api/settings/route": "app/api/settings/route.js",
   "/page": "app/page.js",
+  "/disc-based-games/page": "app/disc-based-games/page.js",
   "/whats-in-stock/page": "app/whats-in-stock/page.js"
 }
