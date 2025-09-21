@@ -3,10 +3,10 @@
     {
       "name": "Home",
       "values": [
-        "Boscombe",
-        "Bournemouth", 
-        "Bournemouth+-+Castlepoint",
-        "Poole"
+    "Boscombe",
+    "Bournemouth", 
+    "Bournemouth+-+Castlepoint",
+    "Poole"
       ]
     },
     {
@@ -79,8 +79,6 @@
       "Basingstoke": "82",
       "Barking": "94",
       "Ballymena": "58",
-      "Ballymena": "58",
-      "Basingstoke": "82",
       "Bayswater": "219",
       "Bearwood": "3167",
       "Bedford": "77",
@@ -436,5 +434,18 @@
     },
   "retroCategoryIds": ["1037", "1055", "1052", "1030"],
   "discBasedGameCategoryIds": ["1178", "403", "1192", "782", "808", "1064", "795"],
-  "searchUrl": "https://uk.webuy.com/search"
+  "searchUrl": "https://uk.webuy.com/search",
+  "categoryMap": {
+    "1037": "SNES",
+    "1055": "MegaDrive", 
+    "1052": "NES",
+    "1030": "N64",
+    "1178": "PS2 Rarities",
+    "403": "PS2",
+    "1192": "PS3 Software",
+    "782": "PlayStation",
+    "808": "Xbox 360",
+    "1064": "Switch",
+    "795": "Wii"
+  }
 }

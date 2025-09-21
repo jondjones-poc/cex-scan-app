@@ -42,22 +42,7 @@ export default function StoreCheckerPage() {
 
   // Category ID to name mapping
   const getCategoryName = (categoryId: string) => {
-    const categoryMap: { [key: string]: string } = {
-      // Retro categories
-      "1037": "SNES Software",
-      "1055": "Mega Drive Software", 
-      "1052": "NES Software",
-      "1030": "Game Boy Software",
-      // Disc-based categories
-      "1178": "PlayStation 2 Rarities",
-      "403": "PlayStation 2 Software",
-      "1192": "PlayStation 3 Software",
-      "782": "PlayStation Software",
-      "808": "Xbox 360 Software",
-      "1064": "Xbox Software",
-      "795": "GameCube Software"
-    };
-    return categoryMap[categoryId] || `Category ${categoryId}`;
+    return settings?.categoryMap?.[categoryId] || `Category ${categoryId}`;
   };
 
   useEffect(() => {
