@@ -38,6 +38,8 @@ export default function StoreCheckerPage() {
   const [settings, setSettings] = useState<any>(null);
   const [completedCategories, setCompletedCategories] = useState(0);
   const [totalCategories, setTotalCategories] = useState(0);
+  const [scanMode, setScanMode] = useState<'quick' | 'full'>('quick');
+  const [categoryMode, setCategoryMode] = useState<'retro' | 'all'>('all');
 
   // Category ID to name mapping
   const getCategoryName = (categoryId: string) => {
@@ -91,8 +93,11 @@ export default function StoreCheckerPage() {
 
   const scrapeStoreCategory = async (store: string, categoryId: string, categoryName: string): Promise<Product[]> => {
     try {
-      const url = buildSearchUrl(categoryId, store);
-      console.log(`Scraping ${store} - ${categoryName}: ${url}`);
+      // For Quick mode, only scrape first page. For Full mode, could scrape multiple pages
+      // For now, we'll implement the same logic as other pages - just first page for both modes
+      // but the structure is ready for pagination if needed
+      const url = buildSearchUrl(categoryId, store, 1);
+      console.log(`Scraping ${store} - ${categoryName} (${scanMode} mode): ${url}`);
       
       const response = await fetch('/api/scrape-search-puppeteer', {
         method: 'POST',
@@ -171,10 +176,19 @@ export default function StoreCheckerPage() {
 
     try {
       const allResults: StoreCheckResult[] = [];
-      const allCategories = [
-        ...(settings.retroCategoryIds || []).map((id: string) => ({ id, name: "Retro Games", type: "retro" })),
-        ...(settings.discBasedGameCategoryIds || []).map((id: string) => ({ id, name: "Disc Games", type: "disc" }))
-      ];
+      
+      // Determine which categories to scan based on categoryMode
+      let allCategories;
+      if (categoryMode === 'retro') {
+        // Only scan retro categories
+        allCategories = (settings.retroCategoryIds || []).map((id: string) => ({ id, name: "Retro Games", type: "retro" }));
+      } else {
+        // Scan all categories (current behavior)
+        allCategories = [
+          ...(settings.retroCategoryIds || []).map((id: string) => ({ id, name: "Retro Games", type: "retro" })),
+          ...(settings.discBasedGameCategoryIds || []).map((id: string) => ({ id, name: "Disc Games", type: "disc" }))
+        ];
+      }
       
       setTotalCategories(allCategories.length);
       setProgress(`Checking store: ${selectedStore}`);
@@ -233,6 +247,96 @@ export default function StoreCheckerPage() {
 
   return (
     <div>
+      {/* Quick/Full Mode Buttons */}
+      <div className="card" style={{ marginBottom: "12px" }}>
+        <div style={{ marginBottom: "24px" }}>
+          <div style={{ display: "flex", gap: "12px" }}>
+            <button
+              onClick={() => setScanMode('quick')}
+              disabled={loading}
+              style={{
+                flex: 1,
+                padding: "16px 24px",
+                border: scanMode === 'quick' ? "2px solid #28a745" : "2px solid #fff",
+                borderRadius: "8px",
+                backgroundColor: "transparent",
+                color: scanMode === 'quick' ? "#28a745" : "#fff",
+                cursor: loading ? "not-allowed" : "pointer",
+                fontSize: "16px",
+                fontWeight: scanMode === 'quick' ? "bold" : "normal",
+                opacity: loading ? 0.6 : 1,
+                transition: "all 0.2s ease"
+              }}
+            >
+              ⚡ Quick
+            </button>
+            <button
+              onClick={() => setScanMode('full')}
+              disabled={loading}
+              style={{
+                flex: 1,
+                padding: "16px 24px",
+                border: scanMode === 'full' ? "2px solid #dc3545" : "2px solid #fff",
+                borderRadius: "8px",
+                backgroundColor: "transparent",
+                color: scanMode === 'full' ? "#dc3545" : "#fff",
+                cursor: loading ? "not-allowed" : "pointer",
+                fontSize: "16px",
+                fontWeight: scanMode === 'full' ? "bold" : "normal",
+                opacity: loading ? 0.6 : 1,
+                transition: "all 0.2s ease"
+              }}
+            >
+              🔍 Full
+            </button>
+          </div>
+        </div>
+        
+        {/* Category Mode Buttons */}
+        <div style={{ marginTop: "16px" }}>
+          <div style={{ display: "flex", gap: "12px" }}>
+            <button
+              onClick={() => setCategoryMode('retro')}
+              disabled={loading}
+              style={{
+                flex: 1,
+                padding: "12px 20px",
+                border: categoryMode === 'retro' ? "2px solid #ffc107" : "2px solid #fff",
+                borderRadius: "6px",
+                backgroundColor: "transparent",
+                color: categoryMode === 'retro' ? "#ffc107" : "#fff",
+                cursor: loading ? "not-allowed" : "pointer",
+                fontSize: "14px",
+                fontWeight: categoryMode === 'retro' ? "bold" : "normal",
+                opacity: loading ? 0.6 : 1,
+                transition: "all 0.2s ease"
+              }}
+            >
+              🎮 Retro Games
+            </button>
+            <button
+              onClick={() => setCategoryMode('all')}
+              disabled={loading}
+              style={{
+                flex: 1,
+                padding: "12px 20px",
+                border: categoryMode === 'all' ? "2px solid #17a2b8" : "2px solid #fff",
+                borderRadius: "6px",
+                backgroundColor: "transparent",
+                color: categoryMode === 'all' ? "#17a2b8" : "#fff",
+                cursor: loading ? "not-allowed" : "pointer",
+                fontSize: "14px",
+                fontWeight: categoryMode === 'all' ? "bold" : "normal",
+                opacity: loading ? 0.6 : 1,
+                transition: "all 0.2s ease"
+              }}
+            >
+              📦 All Categories
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* Store Selection and Check Button */}
       <div className="card" style={{ marginBottom: "12px" }}>
         <div style={{ 

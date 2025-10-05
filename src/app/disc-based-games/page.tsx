@@ -33,6 +33,7 @@ export default function DiscBasedGamesPage() {
   const [progress, setProgress] = useState("");
   const [selectedStoreGroup, setSelectedStoreGroup] = useState<string>("Home");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [scanMode, setScanMode] = useState<'quick' | 'full'>('quick');
 
   useEffect(() => {
     // Load settings on component mount
@@ -145,8 +146,9 @@ export default function DiscBasedGamesPage() {
         let hasNextPage = true;
         let categoryProducts: DiscBasedGame[] = [];
         
-        // Scan all pages for this category
-        while (hasNextPage && page <= 10) { // Limit to 10 pages per category
+        // Scan pages based on mode
+        const maxPages = scanMode === 'quick' ? 1 : 10; // Quick: 1 page, Full: up to 10 pages
+        while (hasNextPage && page <= maxPages) {
           const url = buildSearchUrl(categoryId, page);
           setProgress(`Scanning ${categoryName}, page ${page} (${completedCategories + 1}/${totalCategories})`);
           
@@ -242,7 +244,9 @@ export default function DiscBasedGamesPage() {
       let page = 1;
       let hasNextPage = true;
 
-      while (hasNextPage && page <= 10) { // Limit to 10 pages for safety
+      // Scan pages based on mode
+      const maxPages = scanMode === 'quick' ? 1 : 10; // Quick: 1 page, Full: up to 10 pages
+      while (hasNextPage && page <= maxPages) {
         const url = buildSearchUrl(categoryId, page);
         setProgress(`Scanning page ${page} for ${getCategoryName(categoryId)}...`);
         
@@ -366,6 +370,50 @@ export default function DiscBasedGamesPage() {
 
       {settings && (
         <>
+          {/* Quick/Full Mode Buttons */}
+          <div style={{ marginBottom: "24px" }}>
+            <div style={{ display: "flex", gap: "12px" }}>
+              <button
+                onClick={() => setScanMode('quick')}
+                disabled={loading}
+                style={{
+                  flex: 1,
+                  padding: "16px 24px",
+                  border: scanMode === 'quick' ? "2px solid #28a745" : "2px solid #fff",
+                  borderRadius: "8px",
+                  backgroundColor: "transparent",
+                  color: scanMode === 'quick' ? "#28a745" : "#fff",
+                  cursor: loading ? "not-allowed" : "pointer",
+                  fontSize: "16px",
+                  fontWeight: scanMode === 'quick' ? "bold" : "normal",
+                  opacity: loading ? 0.6 : 1,
+                  transition: "all 0.2s ease"
+                }}
+              >
+                ⚡ Quick
+              </button>
+              <button
+                onClick={() => setScanMode('full')}
+                disabled={loading}
+                style={{
+                  flex: 1,
+                  padding: "16px 24px",
+                  border: scanMode === 'full' ? "2px solid #dc3545" : "2px solid #fff",
+                  borderRadius: "8px",
+                  backgroundColor: "transparent",
+                  color: scanMode === 'full' ? "#dc3545" : "#fff",
+                  cursor: loading ? "not-allowed" : "pointer",
+                  fontSize: "16px",
+                  fontWeight: scanMode === 'full' ? "bold" : "normal",
+                  opacity: loading ? 0.6 : 1,
+                  transition: "all 0.2s ease"
+                }}
+              >
+                🔍 Full
+              </button>
+            </div>
+          </div>
+
           {/* Store Selection */}
           <div style={{ marginBottom: "16px" }}>
             <div style={{ marginBottom: "12px" }}>

@@ -20,6 +20,11 @@
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/whats-in-stock/page.js"
+    ],
+    "/disc-based-games/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/disc-based-games/page.js"
     ]
   }
 }
