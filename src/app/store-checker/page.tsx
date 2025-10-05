@@ -39,7 +39,7 @@ export default function StoreCheckerPage() {
   const [completedCategories, setCompletedCategories] = useState(0);
   const [totalCategories, setTotalCategories] = useState(0);
   const [scanMode, setScanMode] = useState<'quick' | 'full'>('quick');
-  const [categoryMode, setCategoryMode] = useState<'retro' | 'all'>('all');
+  const [categoryMode, setCategoryMode] = useState<'retro' | 'all'>('retro');
 
   // Category ID to name mapping
   const getCategoryName = (categoryId: string) => {
