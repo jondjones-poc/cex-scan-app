@@ -84,6 +84,43 @@ export async function POST(request: NextRequest) {
       } else if (box?.thumbnail) {
         imageUrl = box.thumbnail;
       }
+
+      // Extract price from API response - try various possible price fields
+      let price = undefined;
+      const possiblePriceFields = [
+        box?.sellPrice,        // Main selling price
+        box?.cashPrice,        // Cash price
+        box?.exchangePrice,    // Exchange price
+        box?.firstPrice,       // First price
+        box?.previousPrice,    // Previous price
+        box?.sellingPrice,
+        box?.price,
+        box?.cost,
+        box?.amount,
+        box?.value,
+        box?.ecomSellingPrice,
+        box?.webPrice,
+        box?.onlinePrice
+      ];
+
+      for (const priceField of possiblePriceFields) {
+        if (priceField !== undefined && priceField !== null && priceField > 0) {
+          // Convert to string and format as currency
+          const priceStr = priceField.toString();
+          const priceMatch = priceStr.match(/([0-9]+\.?[0-9]*)/);
+          if (priceMatch) {
+            price = `£${priceMatch[1]}`;
+            console.log(`Found price in API for ${productId}: ${price} (from field: ${Object.keys(box || {}).find(key => box?.[key] === priceField) || 'unknown'})`);
+            break;
+          }
+        }
+      }
+
+      if (!price) {
+        console.log(`No price found in API response for ${productId}. Available fields:`, Object.keys(box || {}).filter(key => 
+          typeof box?.[key] === 'number' && key.toLowerCase().includes('price')
+        ));
+      }
       
       return NextResponse.json({
         success: true,
@@ -95,7 +132,8 @@ export async function POST(request: NextRequest) {
         apiUrl: `https://api.webuy.com/api/v2/boxes/${encodeURIComponent(productId)}`,
         url: `https://uk.webuy.com/product-detail/?id=${encodeURIComponent(productId)}`,
         quantity: qty,
-        imageUrl: imageUrl
+        imageUrl: imageUrl,
+        price: price
       });
     }
 
@@ -204,6 +242,35 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Extract price from HTML - look for various price patterns
+    let price = undefined;
+    const pricePatterns = [
+      /£([0-9]+\.?[0-9]*)/,  // £42.00 or £42
+      /price[^>]*>([^<]*£[0-9]+\.?[0-9]*[^<]*)</i,  // price>£42.00<
+      /cost[^>]*>([^<]*£[0-9]+\.?[0-9]*[^<]*)</i,   // cost>£42.00<
+      /amount[^>]*>([^<]*£[0-9]+\.?[0-9]*[^<]*)</i, // amount>£42.00<
+      /<span[^>]*class[^>]*price[^>]*>([^<]*£[0-9]+\.?[0-9]*[^<]*)</i, // <span class="price">£42.00</span>
+      /<div[^>]*class[^>]*price[^>]*>([^<]*£[0-9]+\.?[0-9]*[^<]*)</i   // <div class="price">£42.00</div>
+    ];
+
+    for (const pattern of pricePatterns) {
+      const match = html.match(pattern);
+      if (match) {
+        // Extract the price value and format it
+        const priceText = match[1] || match[0];
+        const priceMatch = priceText.match(/£([0-9]+\.?[0-9]*)/);
+        if (priceMatch) {
+          price = `£${priceMatch[1]}`;
+          console.log(`Found price for ${productId}: ${price}`);
+          break;
+        }
+      }
+    }
+
+    if (!price) {
+      console.log(`No price found for ${productId} in HTML`);
+    }
+
     return NextResponse.json({
       success: true,
       productId,
@@ -213,7 +280,8 @@ export async function POST(request: NextRequest) {
       httpStatus: response.status,
       url: productUrl,
       quantity: inStock ? 1 : 0, // Default quantity for HTML fallback
-      imageUrl: imageUrl
+      imageUrl: imageUrl,
+      price: price
     });
 
   } catch (error) {

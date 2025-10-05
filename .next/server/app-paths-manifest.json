@@ -1,6 +1,8 @@
 {
-  "/api/scrape-search-puppeteer/route": "app/api/scrape-search-puppeteer/route.js",
-  "/api/image-proxy/route": "app/api/image-proxy/route.js",
+  "/page": "app/page.js",
+  "/api/settings/route": "app/api/settings/route.js",
+  "/api/check-product/route": "app/api/check-product/route.js",
   "/whats-in-stock/page": "app/whats-in-stock/page.js",
-  "/disc-based-games/page": "app/disc-based-games/page.js"
+  "/api/image-proxy/route": "app/api/image-proxy/route.js",
+  "/api/scrape-search-puppeteer/route": "app/api/scrape-search-puppeteer/route.js"
 }

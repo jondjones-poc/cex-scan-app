@@ -13,48 +13,54 @@ interface StatusTableProps {
 
 export default function StatusTable({ results, loading, onCheckProducts, canCheck, totalProducts, checkType }: StatusTableProps) {
 
-  // Separate results into successful and unsuccessful
-  // Successful: Has a real product name AND no errors AND successful API call
-  const successfulResults = useMemo(() => {
+  // Separate results into in stock and out of stock based on quantity
+  // In Stock: Has quantity > 0
+  const inStockResults = useMemo(() => {
     const filtered = results.filter(r => 
       r.name && 
       !r.stockNote?.includes("Error") && 
-      r.httpStatus === 200
+      r.httpStatus === 200 &&
+      (r.quantity || 0) > 0
     );
     
-    // Sort by stock status first (in stock first), then by price (highest first)
+    // Sort by quantity (highest first)
     return filtered.sort((a, b) => {
-      // First sort by stock status (in stock items first)
-      if (a.inStock !== b.inStock) {
-        return a.inStock ? -1 : 1;
-      }
-      
-      // Then sort by price (highest first) - extract numeric value from price
-      const priceA = parseFloat((a.quantity || 0).toString()) || 0;
-      const priceB = parseFloat((b.quantity || 0).toString()) || 0;
-      return priceB - priceA;
+      const quantityA = parseFloat((a.quantity || 0).toString()) || 0;
+      const quantityB = parseFloat((b.quantity || 0).toString()) || 0;
+      return quantityB - quantityA;
     });
   }, [results]);
 
-  // Unsuccessful: No real name OR has errors OR failed API call
-  const unsuccessfulResults = useMemo(() => {
+  // Out of Stock: Has quantity = 0
+  const outOfStockResults = useMemo(() => {
+    const filtered = results.filter(r => 
+      r.name && 
+      !r.stockNote?.includes("Error") && 
+      r.httpStatus === 200 &&
+      (r.quantity || 0) === 0
+    );
+    
+    // Sort by name alphabetically
+    return filtered.sort((a, b) => {
+      const nameA = a.name || '';
+      const nameB = b.name || '';
+      return nameA.localeCompare(nameB);
+    });
+  }, [results]);
+
+  // Failed: No real name OR has errors OR failed API call
+  const failedResults = useMemo(() => {
     const filtered = results.filter(r => 
       !r.name || 
       r.stockNote?.includes("Error") || 
       r.httpStatus !== 200
     );
     
-    // Sort by stock status first (in stock first), then by price (highest first)
+    // Sort by name alphabetically
     return filtered.sort((a, b) => {
-      // First sort by stock status (in stock items first)
-      if (a.inStock !== b.inStock) {
-        return a.inStock ? -1 : 1;
-      }
-      
-      // Then sort by price (highest first) - extract numeric value from price
-      const priceA = parseFloat((a.quantity || 0).toString()) || 0;
-      const priceB = parseFloat((b.quantity || 0).toString()) || 0;
-      return priceB - priceA;
+      const nameA = a.name || 'N/A';
+      const nameB = b.name || 'N/A';
+      return nameA.localeCompare(nameB);
     });
   }, [results]);
 
@@ -101,29 +107,29 @@ export default function StatusTable({ results, loading, onCheckProducts, canChec
           {/* Sort Info */}
           <div style={{ marginBottom: "16px" }}>
             <span className="muted" style={{ fontSize: "14px" }}>
-              Sorted by: Stock status (in stock first) → Price (highest first)
+              In Stock: Sorted by quantity (highest first) | Out of Stock: Sorted by name (A-Z)
             </span>
           </div>
 
-          {/* Successful Results - Always show this section */}
+          {/* In Stock Results - Always show this section */}
           <div style={{ marginBottom: "24px" }}>
-            <h3 style={{ margin: "0 0 8px 0", color: "#28a745" }}>✅ Successful ({successfulResults.length})</h3>
-            {successfulResults.length > 0 ? (
-              <table className="table">
+            <h3 style={{ margin: "0 0 8px 0", color: "#28a745" }}>✅ In Stock ({inStockResults.length})</h3>
+            {inStockResults.length > 0 ? (
+              <table className="table" style={{ textAlign: 'center' }}>
                 <thead>
                   <tr>
-                    <th>Image</th>
-                    <th>Name</th>
-                    <th>Quantity</th>
-                    <th>Product ID</th>
-                    <th>Status</th>
-                    <th>Product</th>
+                    <th style={{ textAlign: 'center', width: '80px' }}>Image</th>
+                    <th style={{ textAlign: 'center', width: '200px' }}>Name</th>
+                    <th style={{ textAlign: 'center', width: '80px' }}>Price</th>
+                    <th style={{ textAlign: 'center', width: '80px' }}>Quantity</th>
+                    <th style={{ textAlign: 'center', width: '120px' }}>Product ID</th>
+                    <th style={{ textAlign: 'center', width: '80px' }}>Product</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {successfulResults.map(r => (
+                  {inStockResults.map(r => (
                     <tr key={r.productId}>
-                      <td>
+                      <td style={{ textAlign: 'center' }}>
                         {r.imageUrl ? (
                           <img 
                             src={`/api/image-proxy?url=${encodeURIComponent(r.imageUrl)}`}
@@ -151,19 +157,18 @@ export default function StatusTable({ results, loading, onCheckProducts, canChec
                             alignItems: 'center',
                             justifyContent: 'center',
                             fontSize: '12px',
-                            color: '#666'
+                            color: '#666',
+                            margin: '0 auto'
                           }}>
                             No img
                           </div>
                         )}
                       </td>
-                      <td>{r.name}</td>
-                      <td>{r.quantity ?? 0}</td>
-                      <td>{r.productId}</td>
-                      <td className={r.inStock ? "ok" : "bad"}>
-                        {r.inStock ? "In stock" : "Out"}
-                      </td>
-                      <td>
+                      <td style={{ textAlign: 'center' }}>{r.name}</td>
+                      <td style={{ textAlign: 'center' }}>{r.price || "N/A"}</td>
+                      <td style={{ textAlign: 'center' }}>{r.quantity ?? 0}</td>
+                      <td style={{ textAlign: 'center' }}>{r.productId}</td>
+                      <td style={{ textAlign: 'center' }}>
                         <a href={r.url} target="_blank" rel="noreferrer">Open</a>
                       </td>
                     </tr>
@@ -172,31 +177,30 @@ export default function StatusTable({ results, loading, onCheckProducts, canChec
               </table>
             ) : (
               <p className="muted" style={{ margin: "8px 0", fontStyle: "italic" }}>
-                No products loaded successfully
+                No products in stock
               </p>
             )}
           </div>
 
-          {/* Unsuccessful Results - Only show if there are failed products */}
-          {unsuccessfulResults.length > 0 && (
-            <div>
-              <h3 style={{ margin: "0 0 8px 0", color: "#dc3545" }}>❌ Failed ({unsuccessfulResults.length})</h3>
-              <table className="table">
+          {/* Out of Stock Results - Always show this section */}
+          <div style={{ marginBottom: "24px" }}>
+            <h3 style={{ margin: "0 0 8px 0", color: "#dc3545" }}>❌ Out of Stock ({outOfStockResults.length})</h3>
+            {outOfStockResults.length > 0 ? (
+              <table className="table" style={{ textAlign: 'center' }}>
                 <thead>
                   <tr>
-                    <th>Image</th>
-                    <th>Name</th>
-                    <th>Quantity</th>
-                    <th>Product ID</th>
-                    <th>Status</th>
-                    <th>Error Details</th>
-                    <th>Product</th>
+                    <th style={{ textAlign: 'center', width: '80px' }}>Image</th>
+                    <th style={{ textAlign: 'center', width: '200px' }}>Name</th>
+                    <th style={{ textAlign: 'center', width: '80px' }}>Price</th>
+                    <th style={{ textAlign: 'center', width: '80px' }}>Quantity</th>
+                    <th style={{ textAlign: 'center', width: '120px' }}>Product ID</th>
+                    <th style={{ textAlign: 'center', width: '80px' }}>Product</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {unsuccessfulResults.map(r => (
+                  {outOfStockResults.map(r => (
                     <tr key={r.productId}>
-                      <td>
+                      <td style={{ textAlign: 'center' }}>
                         {r.imageUrl ? (
                           <img 
                             src={`/api/image-proxy?url=${encodeURIComponent(r.imageUrl)}`}
@@ -224,20 +228,95 @@ export default function StatusTable({ results, loading, onCheckProducts, canChec
                             alignItems: 'center',
                             justifyContent: 'center',
                             fontSize: '12px',
-                            color: '#666'
+                            color: '#666',
+                            margin: '0 auto'
                           }}>
                             No img
                           </div>
                         )}
                       </td>
-                      <td>{r.name || "N/A"}</td>
-                      <td>{r.quantity ?? 0}</td>
-                      <td>{r.productId}</td>
-                      <td className="bad">
+                      <td style={{ textAlign: 'center' }}>{r.name}</td>
+                      <td style={{ textAlign: 'center' }}>{r.price || "N/A"}</td>
+                      <td style={{ textAlign: 'center' }}>{r.quantity ?? 0}</td>
+                      <td style={{ textAlign: 'center' }}>{r.productId}</td>
+                      <td style={{ textAlign: 'center' }}>
+                        <a href={r.url} target="_blank" rel="noreferrer">Open</a>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p className="muted" style={{ margin: "8px 0", fontStyle: "italic" }}>
+                No products out of stock
+              </p>
+            )}
+          </div>
+
+          {/* Failed Results - Only show if there are failed products */}
+          {failedResults.length > 0 && (
+            <div>
+              <h3 style={{ margin: "0 0 8px 0", color: "#ffc107" }}>⚠️ Failed ({failedResults.length})</h3>
+              <table className="table" style={{ textAlign: 'center' }}>
+                <thead>
+                  <tr>
+                    <th style={{ textAlign: 'center', width: '80px' }}>Image</th>
+                    <th style={{ textAlign: 'center', width: '150px' }}>Name</th>
+                    <th style={{ textAlign: 'center', width: '80px' }}>Price</th>
+                    <th style={{ textAlign: 'center', width: '80px' }}>Quantity</th>
+                    <th style={{ textAlign: 'center', width: '120px' }}>Product ID</th>
+                    <th style={{ textAlign: 'center', width: '80px' }}>Status</th>
+                    <th style={{ textAlign: 'center', width: '150px' }}>Error Details</th>
+                    <th style={{ textAlign: 'center', width: '80px' }}>Product</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {failedResults.map(r => (
+                    <tr key={r.productId}>
+                      <td style={{ textAlign: 'center' }}>
+                        {r.imageUrl ? (
+                          <img 
+                            src={`/api/image-proxy?url=${encodeURIComponent(r.imageUrl)}`}
+                            alt={r.name || 'Product'} 
+                            style={{
+                              width: '40px',
+                              height: '40px',
+                              objectFit: 'cover',
+                              borderRadius: '4px',
+                              border: '1px solid #ddd'
+                            }}
+                            onError={(e) => {
+                              // Hide image if it fails to load
+                              (e.target as HTMLImageElement).style.display = 'none';
+                            }}
+                          />
+                        ) : (
+                          <div style={{
+                            width: '40px',
+                            height: '40px',
+                            backgroundColor: '#f0f0f0',
+                            borderRadius: '4px',
+                            border: '1px solid #ddd',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '12px',
+                            color: '#666',
+                            margin: '0 auto'
+                          }}>
+                            No img
+                          </div>
+                        )}
+                      </td>
+                      <td style={{ textAlign: 'center' }}>{r.name || "N/A"}</td>
+                      <td style={{ textAlign: 'center' }}>{r.price || "N/A"}</td>
+                      <td style={{ textAlign: 'center' }}>{r.quantity ?? 0}</td>
+                      <td style={{ textAlign: 'center' }}>{r.productId}</td>
+                      <td style={{ textAlign: 'center' }} className="bad">
                         {r.stockNote?.includes("Error") ? "Error" : "Failed"}
                       </td>
-                      <td className="muted">{r.stockNote || ""}</td>
-                      <td>
+                      <td style={{ textAlign: 'center' }} className="muted">{r.stockNote || ""}</td>
+                      <td style={{ textAlign: 'center' }}>
                         <a href={r.url} target="_blank" rel="noreferrer">Open</a>
                       </td>
                     </tr>

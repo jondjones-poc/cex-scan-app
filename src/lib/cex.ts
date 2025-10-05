@@ -10,6 +10,7 @@ export type ProductCheckResult = {
   httpStatus?: number;
   quantity?: number;
   imageUrl?: string;
+  price?: string;
 };
 
 function buildProductUrl(baseUrl: string, productId: string): string {
@@ -184,7 +185,8 @@ export async function checkProducts(
             stockNote: result.stockNote,
             httpStatus: result.httpStatus,
             quantity: result.quantity,
-            imageUrl: result.imageUrl
+            imageUrl: result.imageUrl,
+            price: result.price
           };
         } else {
           return {

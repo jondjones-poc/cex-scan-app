@@ -65,14 +65,6 @@ export default function StoreCheckerPage() {
     loadSettings();
   }, []);
 
-  // Force re-render when settings change to update category names
-  useEffect(() => {
-    if (settings && settings.categoryMap) {
-      // Settings are loaded, component will re-render automatically
-    }
-  }, [settings]);
-
-
   const convertStoreNameForAPI = (storeName: string): string => {
     const result = storeName
       .replace(/\s*-\s*/g, '+-+')  // Replace hyphen with optional spaces around it
@@ -94,7 +86,6 @@ export default function StoreCheckerPage() {
   const buildSearchUrl = (categoryId: string, storeName: string, page: number = 1) => {
     const baseUrl = "https://uk.webuy.com/search";
     const convertedStoreName = convertStoreNameForAPI(storeName);
-    // Manually construct URL to avoid URLSearchParams encoding the + characters
     return `${baseUrl}?categoryIds=${categoryId}&sortBy=prod_cex_uk_price_desc&stores=${convertedStoreName}&page=${page}`;
   };
 
@@ -188,7 +179,7 @@ export default function StoreCheckerPage() {
       setTotalCategories(allCategories.length);
       setProgress(`Checking store: ${selectedStore}`);
         
-        const storeProducts: Product[] = [];
+      const storeProducts: Product[] = [];
         
       for (let i = 0; i < allCategories.length; i++) {
         const category = allCategories[i];
@@ -242,7 +233,6 @@ export default function StoreCheckerPage() {
 
   return (
     <div>
- 
       {/* Store Selection and Check Button */}
       <div className="card" style={{ marginBottom: "12px" }}>
         <div style={{ 
@@ -371,59 +361,95 @@ export default function StoreCheckerPage() {
               </h3>
               
               {result.products.length > 0 ? (
-                <table className="table" key={`table-${settings?.categoryMap ? 'loaded' : 'loading'}`}>
-                  <thead>
-                    <tr>
-                      <th>Image</th>
-                      <th>Name</th>
-                      <th>Price</th>
-                      <th>Category</th>
-                      <th>Product</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {result.products.map((product) => (
-                      <tr key={product.productId}>
-                        <td>
-                          {product.imageUrl ? (
-                            <img 
-                              src={`/api/image-proxy?url=${encodeURIComponent(product.imageUrl)}`}
-                              alt={product.name || 'Product'} 
-                              style={{
-                                width: '40px',
-                                height: '40px',
-                                objectFit: 'cover',
-                                borderRadius: '4px'
-                              }}
-                            />
-                          ) : (
-                            <div style={{
-                              width: '40px',
-                              height: '40px',
-                              backgroundColor: '#f0f0f0',
-                              borderRadius: '4px',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              fontSize: '12px',
-                              color: '#666'
-                            }}>
-                              No Image
-                            </div>
-                          )}
-                        </td>
-                        <td>{product.name}</td>
-                        <td>{product.price}</td>
-                        <td>{getCategoryName(product.categoryId)}</td>
-                        <td>
-                          <a href={product.url} target="_blank" rel="noreferrer">Open</a>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                <div>
+                  {/* In Stock Products */}
+                  <div style={{ marginBottom: "24px" }}>
+                    <h4 style={{ margin: "0 0 12px 0", color: "#28a745" }}>
+                      ✅ In Stock ({result.products.length})
+                    </h4>
+                    <table className="table" key={`in-stock-table-${settings?.categoryMap ? 'loaded' : 'loading'}`}>
+                      <thead>
+                        <tr>
+                          <th>Image</th>
+                          <th>Name</th>
+                          <th>Price</th>
+                          <th>Category</th>
+                          <th>Product</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {result.products.map((product) => (
+                          <tr key={product.productId}>
+                            <td>
+                              {product.imageUrl ? (
+                                <img 
+                                  src={`/api/image-proxy?url=${encodeURIComponent(product.imageUrl)}`}
+                                  alt={product.name || 'Product'} 
+                                  style={{
+                                    width: '40px',
+                                    height: '40px',
+                                    objectFit: 'cover',
+                                    borderRadius: '4px'
+                                  }}
+                                />
+                              ) : (
+                                <div style={{
+                                  width: '40px',
+                                  height: '40px',
+                                  backgroundColor: '#f0f0f0',
+                                  borderRadius: '4px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  fontSize: '12px',
+                                  color: '#666'
+                                }}>
+                                  No Image
+                                </div>
+                              )}
+                            </td>
+                            <td>{product.name}</td>
+                            <td>{product.price}</td>
+                            <td>{getCategoryName(product.categoryId)}</td>
+                            <td>
+                              <a href={product.url} target="_blank" rel="noreferrer">Open</a>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Out of Stock Products - Currently empty but structure ready */}
+                  <div>
+                    <h4 style={{ margin: "0 0 12px 0", color: "#dc3545" }}>
+                      ❌ Out of Stock (0)
+                    </h4>
+                    <p className="muted" style={{ margin: "8px 0", fontStyle: "italic" }}>
+                      No out of stock products detected. All found products are currently in stock at this store.
+                    </p>
+                  </div>
+                </div>
               ) : (
-                <p className="muted">No products found for this store.</p>
+                <div>
+                  {/* In Stock Products */}
+                  <div style={{ marginBottom: "24px" }}>
+                    <h4 style={{ margin: "0 0 12px 0", color: "#28a745" }}>
+                      ✅ In Stock (0)
+                    </h4>
+                    <p className="muted">No products found for this store.</p>
+                  </div>
+
+                  {/* Out of Stock Products */}
+                  <div>
+                    <h4 style={{ margin: "0 0 12px 0", color: "#dc3545" }}>
+                      ❌ Out of Stock (0)
+                    </h4>
+                    <p className="muted" style={{ margin: "8px 0", fontStyle: "italic" }}>
+                      No products checked for this store.
+                    </p>
+                  </div>
+                </div>
               )}
             </div>
           ))}
