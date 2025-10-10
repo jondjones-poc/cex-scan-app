@@ -1,15 +1,15 @@
 {
   "/_not-found/page": "app/_not-found/page.js",
   "/api/scrape-disc-games/route": "app/api/scrape-disc-games/route.js",
-  "/cex-link/page": "app/cex-link/page.js",
   "/api/settings/route": "app/api/settings/route.js",
+  "/cex-link/page": "app/cex-link/page.js",
   "/store-checker/page": "app/store-checker/page.js",
   "/whats-in-stock/page": "app/whats-in-stock/page.js",
-  "/disc-based-games/page": "app/disc-based-games/page.js",
   "/page": "app/page.js",
+  "/disc-based-games/page": "app/disc-based-games/page.js",
   "/api/check/route": "app/api/check/route.js",
-  "/api/image-proxy/route": "app/api/image-proxy/route.js",
-  "/api/scrape-search-puppeteer/route": "app/api/scrape-search-puppeteer/route.js",
   "/api/check-product/route": "app/api/check-product/route.js",
+  "/api/scrape-search-puppeteer/route": "app/api/scrape-search-puppeteer/route.js",
+  "/api/image-proxy/route": "app/api/image-proxy/route.js",
   "/api/scrape-search/route": "app/api/scrape-search/route.js"
 }

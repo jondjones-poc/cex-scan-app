@@ -14,6 +14,7 @@ export type AppSettings = {
   userAgent?: string;
   webhookUrlEnv?: string;
   stores?: StoreGroup[];
+  allStores?: { [key: string]: string }; // All CEX stores with their IDs
   retroCategoryIds?: string[];
   discBasedGameCategoryIds?: string[];
   searchUrl?: string;
@@ -25,6 +26,7 @@ const DEFAULTS: Required<Omit<AppSettings, "productIds" | "essentialProducts" | 
   userAgent: "Mozilla/5.0 (compatible; CeX-Monitor/0.1; +https://example.local)",
   webhookUrlEnv: "NOTIFY_WEBHOOK_URL",
   stores: [],
+  allStores: {},
   retroCategoryIds: ["1037"],
   discBasedGameCategoryIds: ["1178", "403", "1192", "782", "808", "1064", "795"],
   searchUrl: "https://uk.webuy.com/search",
@@ -70,6 +72,9 @@ export async function readSettings(): Promise<AppSettings & typeof DEFAULTS> {
   
   if (!Array.isArray(merged.stores)) {
     merged.stores = [];
+  }
+  if (!merged.allStores || typeof merged.allStores !== 'object') {
+    merged.allStores = {};
   }
   if (!Array.isArray(merged.retroCategoryIds)) {
     merged.retroCategoryIds = ["1037"];

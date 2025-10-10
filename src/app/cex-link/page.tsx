@@ -65,11 +65,6 @@ export default function CEXLinkPage() {
     ...(settings?.discBasedGameCategoryIds || [])
   ];
 
-  // Get all individual store names from store groups
-  const allStoreNames = settings?.stores
-    ? settings.stores.flatMap((group: { name: string; values: string[] }) => group.values)
-    : [];
-
   return (
     <div style={{ 
       padding: "20px",
@@ -123,13 +118,14 @@ export default function CEXLinkPage() {
               }}
             >
               <option value="" style={{ backgroundColor: "#1a1a2e", color: "#ffffff" }}>-- Select a store --</option>
-              {allStoreNames
+              {settings?.allStores && Object.keys(settings.allStores)
                 .sort((a, b) => a.localeCompare(b))
                 .map((storeName) => (
                   <option key={storeName} value={storeName} style={{ backgroundColor: "#1a1a2e", color: "#ffffff" }}>
                     {storeName}
                   </option>
-                ))}
+                ))
+              }
             </select>
           </div>
 
