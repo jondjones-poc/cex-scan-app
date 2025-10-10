@@ -132,16 +132,6 @@ export default function CEXLinkPage() {
           {/* Category Links */}
           {selectedStore && allCategories.length > 0 && (
             <div style={{ marginTop: "32px" }}>
-              <h2 style={{ 
-                marginBottom: "24px", 
-                fontSize: "24px", 
-                fontWeight: "600",
-                color: "#333",
-                textAlign: "center"
-              }}>
-                CEX Links for {selectedStore}
-              </h2>
-
               <div style={{ 
                 display: "grid", 
                 gap: "24px",
@@ -158,7 +148,7 @@ export default function CEXLinkPage() {
                       style={{
                         padding: "24px",
                         borderRadius: "12px",
-                        backgroundColor: "#ffffff",
+                        backgroundColor: "#1a1a2e",
                         transition: "all 0.3s ease",
                         position: "relative",
                         overflow: "hidden",
@@ -169,7 +159,7 @@ export default function CEXLinkPage() {
                         fontSize: "20px",
                         fontWeight: "700",
                         marginBottom: "16px",
-                        color: "#0a0a0a",
+                        color: "#ffffff",
                         letterSpacing: "0.5px"
                       }}>
                         {categoryName}
