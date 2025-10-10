@@ -65,7 +65,7 @@ export default function StatusTable({ results, loading, onCheckProducts, canChec
   }, [results]);
 
   return (
-    <div className="card">
+    <div>
       {loading && (
         <div style={{ marginBottom: 16 }}>
           <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: 8 }}>
@@ -334,14 +334,40 @@ export default function StatusTable({ results, loading, onCheckProducts, canChec
             onClick={() => onCheckProducts('essential')}
             disabled={loading || !canCheck}
             style={{
-              padding: "12px 24px",
-              fontSize: "16px",
-              backgroundColor: loading || !canCheck ? "#ccc" : (checkType === 'essential' ? "#28a745" : "#007bff"),
+              padding: "14px 24px",
+              fontSize: "15px",
+              fontWeight: "600",
+              backgroundColor: loading || !canCheck ? "#ccc" : "#ff0066",
               color: "white",
-              border: "none",
-              borderRadius: "4px",
+              border: (checkType === 'essential' && !loading && canCheck) ? "3px solid #ff66a3" : "none",
+              borderRadius: "8px",
               cursor: loading || !canCheck ? "not-allowed" : "pointer",
-              minWidth: "140px"
+              minWidth: "140px",
+              boxShadow: (checkType === 'essential' && !loading && canCheck)
+                ? "0 0 0 3px rgba(255, 102, 163, 0.3), 0 6px 20px rgba(255, 0, 102, 0.5)"
+                : (loading || !canCheck) ? "none" : "0 4px 15px rgba(255, 0, 102, 0.3)",
+              transition: "all 0.3s ease",
+              transform: (checkType === 'essential' && !loading && canCheck) ? "scale(1.05)" : "scale(1)"
+            }}
+            onMouseOver={(e) => {
+              if (!loading && canCheck) {
+                e.currentTarget.style.backgroundColor = "#cc0052";
+                const isSelected = checkType === 'essential';
+                e.currentTarget.style.boxShadow = isSelected
+                  ? "0 0 0 3px rgba(255, 102, 163, 0.3), 0 6px 20px rgba(255, 0, 102, 0.5)"
+                  : "0 6px 20px rgba(255, 0, 102, 0.5)";
+                e.currentTarget.style.transform = "scale(1.02)";
+              }
+            }}
+            onMouseOut={(e) => {
+              if (!loading && canCheck) {
+                const isSelected = checkType === 'essential';
+                e.currentTarget.style.backgroundColor = "#ff0066";
+                e.currentTarget.style.boxShadow = isSelected
+                  ? "0 0 0 3px rgba(255, 102, 163, 0.3), 0 6px 20px rgba(255, 0, 102, 0.5)"
+                  : "0 4px 15px rgba(255, 0, 102, 0.3)";
+                e.currentTarget.style.transform = isSelected ? "scale(1.05)" : "scale(1)";
+              }
             }}
           >
             {loading && checkType === 'essential' ? "Checking..." : "Essentials"}
@@ -350,14 +376,40 @@ export default function StatusTable({ results, loading, onCheckProducts, canChec
             onClick={() => onCheckProducts('oneDay')}
             disabled={loading || !canCheck}
             style={{
-              padding: "12px 24px",
-              fontSize: "16px",
-              backgroundColor: loading || !canCheck ? "#ccc" : (checkType === 'oneDay' ? "#28a745" : "#6c757d"),
+              padding: "14px 24px",
+              fontSize: "15px",
+              fontWeight: "600",
+              backgroundColor: loading || !canCheck ? "#ccc" : "#ff0066",
               color: "white",
-              border: "none",
-              borderRadius: "4px",
+              border: (checkType === 'oneDay' && !loading && canCheck) ? "3px solid #ff66a3" : "none",
+              borderRadius: "8px",
               cursor: loading || !canCheck ? "not-allowed" : "pointer",
-              minWidth: "140px"
+              minWidth: "140px",
+              boxShadow: (checkType === 'oneDay' && !loading && canCheck)
+                ? "0 0 0 3px rgba(255, 102, 163, 0.3), 0 6px 20px rgba(255, 0, 102, 0.5)"
+                : (loading || !canCheck) ? "none" : "0 4px 15px rgba(255, 0, 102, 0.3)",
+              transition: "all 0.3s ease",
+              transform: (checkType === 'oneDay' && !loading && canCheck) ? "scale(1.05)" : "scale(1)"
+            }}
+            onMouseOver={(e) => {
+              if (!loading && canCheck) {
+                e.currentTarget.style.backgroundColor = "#cc0052";
+                const isSelected = checkType === 'oneDay';
+                e.currentTarget.style.boxShadow = isSelected
+                  ? "0 0 0 3px rgba(255, 102, 163, 0.3), 0 6px 20px rgba(255, 0, 102, 0.5)"
+                  : "0 6px 20px rgba(255, 0, 102, 0.5)";
+                e.currentTarget.style.transform = "scale(1.02)";
+              }
+            }}
+            onMouseOut={(e) => {
+              if (!loading && canCheck) {
+                const isSelected = checkType === 'oneDay';
+                e.currentTarget.style.backgroundColor = "#ff0066";
+                e.currentTarget.style.boxShadow = isSelected
+                  ? "0 0 0 3px rgba(255, 102, 163, 0.3), 0 6px 20px rgba(255, 0, 102, 0.5)"
+                  : "0 4px 15px rgba(255, 0, 102, 0.3)";
+                e.currentTarget.style.transform = isSelected ? "scale(1.05)" : "scale(1)";
+              }
             }}
           >
             {loading && checkType === 'oneDay' ? "Checking..." : "Nice to Have"}

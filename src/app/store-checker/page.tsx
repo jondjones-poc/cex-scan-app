@@ -40,6 +40,7 @@ export default function StoreCheckerPage() {
   const [totalCategories, setTotalCategories] = useState(0);
   const [scanMode, setScanMode] = useState<'quick' | 'full'>('quick');
   const [categoryMode, setCategoryMode] = useState<'retro' | 'all'>('retro');
+  const [hasAutoRun, setHasAutoRun] = useState(false);
 
   // Category ID to name mapping
   const getCategoryName = (categoryId: string) => {
@@ -66,6 +67,13 @@ export default function StoreCheckerPage() {
     };
     loadSettings();
   }, []);
+
+  // Auto-run check when store is selected
+  useEffect(() => {
+    if (selectedStore && settings && !loading) {
+      checkStores();
+    }
+  }, [selectedStore]);
 
   const convertStoreNameForAPI = (storeName: string): string => {
     const result = storeName
@@ -247,69 +255,49 @@ export default function StoreCheckerPage() {
 
   return (
     <div>
-      {/* Quick/Full Mode Buttons */}
-      <div className="card" style={{ marginBottom: "12px" }}>
-        <div style={{ marginBottom: "24px" }}>
-          <div style={{ display: "flex", gap: "12px" }}>
-            <button
-              onClick={() => setScanMode('quick')}
-              disabled={loading}
-              style={{
-                flex: 1,
-                padding: "16px 24px",
-                border: scanMode === 'quick' ? "2px solid #28a745" : "2px solid #fff",
-                borderRadius: "8px",
-                backgroundColor: "transparent",
-                color: scanMode === 'quick' ? "#28a745" : "#fff",
-                cursor: loading ? "not-allowed" : "pointer",
-                fontSize: "16px",
-                fontWeight: scanMode === 'quick' ? "bold" : "normal",
-                opacity: loading ? 0.6 : 1,
-                transition: "all 0.2s ease"
-              }}
-            >
-              ⚡ Quick
-            </button>
-            <button
-              onClick={() => setScanMode('full')}
-              disabled={loading}
-              style={{
-                flex: 1,
-                padding: "16px 24px",
-                border: scanMode === 'full' ? "2px solid #dc3545" : "2px solid #fff",
-                borderRadius: "8px",
-                backgroundColor: "transparent",
-                color: scanMode === 'full' ? "#dc3545" : "#fff",
-                cursor: loading ? "not-allowed" : "pointer",
-                fontSize: "16px",
-                fontWeight: scanMode === 'full' ? "bold" : "normal",
-                opacity: loading ? 0.6 : 1,
-                transition: "all 0.2s ease"
-              }}
-            >
-              🔍 Full
-            </button>
-          </div>
-        </div>
-        
-        {/* Category Mode Buttons */}
-        <div style={{ marginTop: "16px" }}>
-          <div style={{ display: "flex", gap: "12px" }}>
+      {/* Category and Scan Mode Controls */}
+      <div style={{ marginBottom: "12px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "16px", justifyContent: "space-between" }}>
+          {/* Category Mode Buttons (Left - Red) */}
+          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", flex: 1 }}>
             <button
               onClick={() => setCategoryMode('retro')}
               disabled={loading}
               style={{
-                flex: 1,
-                padding: "12px 20px",
-                border: categoryMode === 'retro' ? "2px solid #ffc107" : "2px solid #fff",
-                borderRadius: "6px",
-                backgroundColor: "transparent",
-                color: categoryMode === 'retro' ? "#ffc107" : "#fff",
+                padding: "14px 20px",
+                border: categoryMode === 'retro' ? "3px solid #ff66a3" : "none",
+                borderRadius: "8px",
+                backgroundColor: "#ff0066",
+                color: "#fff",
                 cursor: loading ? "not-allowed" : "pointer",
-                fontSize: "14px",
-                fontWeight: categoryMode === 'retro' ? "bold" : "normal",
+                fontSize: "15px",
+                fontWeight: "600",
                 opacity: loading ? 0.6 : 1,
-                transition: "all 0.2s ease"
+                boxShadow: categoryMode === 'retro'
+                  ? "0 0 0 3px rgba(255, 102, 163, 0.3), 0 6px 20px rgba(255, 0, 102, 0.5)" 
+                  : "0 4px 15px rgba(255, 0, 102, 0.3)",
+                transition: "all 0.3s ease",
+                transform: categoryMode === 'retro' ? "scale(1.05)" : "scale(1)"
+              }}
+              onMouseOver={(e) => {
+                if (!loading) {
+                  e.currentTarget.style.backgroundColor = "#cc0052";
+                  const isSelected = categoryMode === 'retro';
+                  e.currentTarget.style.boxShadow = isSelected 
+                    ? "0 0 0 3px rgba(255, 102, 163, 0.3), 0 6px 20px rgba(255, 0, 102, 0.5)"
+                    : "0 6px 20px rgba(255, 0, 102, 0.5)";
+                  e.currentTarget.style.transform = "scale(1.02)";
+                }
+              }}
+              onMouseOut={(e) => {
+                if (!loading) {
+                  const isSelected = categoryMode === 'retro';
+                  e.currentTarget.style.backgroundColor = "#ff0066";
+                  e.currentTarget.style.boxShadow = isSelected 
+                    ? "0 0 0 3px rgba(255, 102, 163, 0.3), 0 6px 20px rgba(255, 0, 102, 0.5)" 
+                    : "0 4px 15px rgba(255, 0, 102, 0.3)";
+                  e.currentTarget.style.transform = isSelected ? "scale(1.05)" : "scale(1)";
+                }
               }}
             >
               🎮 Retro Games
@@ -318,40 +306,105 @@ export default function StoreCheckerPage() {
               onClick={() => setCategoryMode('all')}
               disabled={loading}
               style={{
-                flex: 1,
-                padding: "12px 20px",
-                border: categoryMode === 'all' ? "2px solid #17a2b8" : "2px solid #fff",
-                borderRadius: "6px",
-                backgroundColor: "transparent",
-                color: categoryMode === 'all' ? "#17a2b8" : "#fff",
+                padding: "14px 20px",
+                border: categoryMode === 'all' ? "3px solid #ff66a3" : "none",
+                borderRadius: "8px",
+                backgroundColor: "#ff0066",
+                color: "#fff",
                 cursor: loading ? "not-allowed" : "pointer",
-                fontSize: "14px",
-                fontWeight: categoryMode === 'all' ? "bold" : "normal",
+                fontSize: "15px",
+                fontWeight: "600",
                 opacity: loading ? 0.6 : 1,
-                transition: "all 0.2s ease"
+                boxShadow: categoryMode === 'all'
+                  ? "0 0 0 3px rgba(255, 102, 163, 0.3), 0 6px 20px rgba(255, 0, 102, 0.5)" 
+                  : "0 4px 15px rgba(255, 0, 102, 0.3)",
+                transition: "all 0.3s ease",
+                transform: categoryMode === 'all' ? "scale(1.05)" : "scale(1)"
+              }}
+              onMouseOver={(e) => {
+                if (!loading) {
+                  e.currentTarget.style.backgroundColor = "#cc0052";
+                  const isSelected = categoryMode === 'all';
+                  e.currentTarget.style.boxShadow = isSelected 
+                    ? "0 0 0 3px rgba(255, 102, 163, 0.3), 0 6px 20px rgba(255, 0, 102, 0.5)"
+                    : "0 6px 20px rgba(255, 0, 102, 0.5)";
+                  e.currentTarget.style.transform = "scale(1.02)";
+                }
+              }}
+              onMouseOut={(e) => {
+                if (!loading) {
+                  const isSelected = categoryMode === 'all';
+                  e.currentTarget.style.backgroundColor = "#ff0066";
+                  e.currentTarget.style.boxShadow = isSelected 
+                    ? "0 0 0 3px rgba(255, 102, 163, 0.3), 0 6px 20px rgba(255, 0, 102, 0.5)" 
+                    : "0 4px 15px rgba(255, 0, 102, 0.3)";
+                  e.currentTarget.style.transform = isSelected ? "scale(1.05)" : "scale(1)";
+                }
               }}
             >
               📦 All Categories
             </button>
           </div>
+
+          {/* Quick/Full Mode Toggle (Right) */}
+          <div 
+            onClick={() => !loading && setScanMode(scanMode === 'quick' ? 'full' : 'quick')}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              padding: "4px",
+              backgroundColor: "rgba(100, 150, 200, 0.08)",
+              border: "2px solid rgba(100, 150, 200, 0.25)",
+              borderRadius: "20px",
+              cursor: loading ? "not-allowed" : "pointer",
+              transition: "all 0.3s ease",
+              opacity: loading ? 0.6 : 1,
+              boxShadow: "0 2px 8px rgba(100, 150, 200, 0.15)",
+              flexShrink: 0
+            }}
+          >
+            <div style={{
+              padding: "6px 14px",
+              borderRadius: "16px",
+              fontSize: "13px",
+              fontWeight: "600",
+              transition: "all 0.3s ease",
+              backgroundColor: scanMode === 'quick' ? "rgba(100, 150, 200, 0.9)" : "transparent",
+              color: scanMode === 'quick' ? "#ffffff" : "rgba(100, 150, 200, 0.9)",
+              boxShadow: scanMode === 'quick' ? "0 2px 6px rgba(100, 150, 200, 0.3)" : "none"
+            }}>
+              ⚡ Quick
+            </div>
+            <div style={{
+              padding: "6px 14px",
+              borderRadius: "16px",
+              fontSize: "13px",
+              fontWeight: "600",
+              transition: "all 0.3s ease",
+              backgroundColor: scanMode === 'full' ? "rgba(100, 150, 200, 0.9)" : "transparent",
+              color: scanMode === 'full' ? "#ffffff" : "rgba(100, 150, 200, 0.9)",
+              boxShadow: scanMode === 'full' ? "0 2px 6px rgba(100, 150, 200, 0.3)" : "none"
+            }}>
+              🔍 Full
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Store Selection and Check Button */}
-      <div className="card" style={{ marginBottom: "12px" }}>
-        <div style={{ 
-          display: "flex", 
-          gap: "16px", 
-          alignItems: "flex-end",
-          marginTop: "16px"
-        }}>
+      {/* Store Selection */}
+      <div style={{ marginBottom: "12px" }}>
+        <div style={{ marginTop: "16px", marginBottom: "32px" }}>
           {/* Store Selection */}
-          <div style={{ flex: "0 0 75%" }}>
+          <div>
             <label style={{ 
               display: "block", 
-              marginBottom: "8px", 
-              fontSize: "14px", 
-              fontWeight: "500" 
+              marginBottom: "12px", 
+              fontSize: "16px",
+              fontWeight: "600",
+              color: "#00ffff",
+              textTransform: "uppercase",
+              letterSpacing: "1px"
             }}>
               Select Store
             </label>
@@ -360,43 +413,29 @@ export default function StoreCheckerPage() {
               onChange={(e) => setSelectedStore(e.target.value)}
               style={{
                 width: "100%",
-                padding: "8px",
-                border: "1px solid #ddd",
-                borderRadius: "4px",
-                fontSize: "14px",
-                backgroundColor: "#fff"
+                padding: "16px",
+                fontSize: "16px",
+                border: "2px solid rgba(0, 255, 255, 0.3)",
+                borderRadius: "8px",
+                backgroundColor: "#1a1a2e",
+                color: "#ffffff",
+                cursor: "pointer",
+                fontWeight: "500",
+                boxShadow: "0 4px 20px rgba(0, 255, 255, 0.2)",
+                transition: "all 0.3s ease"
               }}
             >
-              <option value="">-- Select a store --</option>
+              <option value="" style={{ backgroundColor: "#1a1a2e", color: "#ffffff" }}>-- Select a store --</option>
               {settings?.allStores && Object.keys(settings.allStores)
                 .sort((a, b) => a.localeCompare(b))
                 .map((storeName) => (
-                  <option key={storeName} value={storeName}>
+                  <option key={storeName} value={storeName} style={{ backgroundColor: "#1a1a2e", color: "#ffffff" }}>
                     {storeName}
                   </option>
                 ))
               }
             </select>
           </div>
-          
-          {/* Check Button */}
-          <button
-            onClick={checkStores}
-            disabled={loading || !selectedStore}
-            style={{
-              padding: "12px 24px",
-              backgroundColor: loading || !selectedStore ? "#ccc" : "#e20a03",
-              color: "#fff",
-              border: "none",
-              borderRadius: "4px",
-              cursor: loading || !selectedStore ? "not-allowed" : "pointer",
-              fontSize: "16px",
-              fontWeight: "600",
-              whiteSpace: "nowrap"
-            }}
-          >
-            {loading ? "Checking Store..." : "Check Store"}
-          </button>
         </div>
       </div>
       
@@ -456,7 +495,7 @@ export default function StoreCheckerPage() {
         <div>
           <h2>Store Results</h2>
           {results.map((result, index) => (
-            <div key={index} className="card" style={{ marginBottom: "24px" }}>
+            <div key={index} style={{ marginBottom: "24px" }}>
               <h3>
                 {result.store} 
                 <span style={{ fontSize: "14px", fontWeight: "400", color: "#666", marginLeft: "8px" }}>

@@ -410,7 +410,7 @@ export default function WhatsInStockPage() {
 
   return (
     <main>
-      <div className="card">
+      <div>
         {/* Progress Bar */}
         {loading && (
           <div style={{ marginBottom: "16px" }}>
@@ -460,95 +460,142 @@ export default function WhatsInStockPage() {
         
         {settings && (
           <>
-            {/* Quick/Full Mode Buttons */}
-            <div style={{ marginBottom: "24px" }}>
-              <div style={{ display: "flex", gap: "12px" }}>
-                <button
-                  onClick={() => setScanMode('quick')}
-                  disabled={loading}
+            {/* Store Selection with Toggle */}
+            <div style={{ marginBottom: "16px" }}>
+              <div style={{ marginBottom: "12px", display: "flex", alignItems: "center", gap: "16px", justifyContent: "space-between" }}>
+                {/* Store Buttons */}
+                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", flex: 1 }}>
+                  {settings?.stores?.map((storeGroup) => {
+                const isSelected = selectedStoreGroup === storeGroup.name;
+                return (
+                  <button
+                    key={storeGroup.name}
+                    onClick={() => setSelectedStoreGroup(storeGroup.name)}
+                    style={{
+                      padding: "14px 20px",
+                      border: isSelected ? "3px solid #c77dff" : "none",
+                      borderRadius: "8px",
+                      backgroundColor: "#7b2cbf",
+                      color: "#fff",
+                      cursor: "pointer",
+                      fontSize: "15px",
+                      fontWeight: "600",
+                      boxShadow: isSelected 
+                        ? "0 0 0 3px rgba(199, 125, 255, 0.3), 0 6px 20px rgba(157, 78, 221, 0.5)" 
+                        : "0 4px 15px rgba(123, 44, 191, 0.3)",
+                      transition: "all 0.3s ease",
+                      transform: isSelected ? "scale(1.05)" : "scale(1)"
+                    }}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.backgroundColor = "#5a189a";
+                      e.currentTarget.style.boxShadow = isSelected 
+                        ? "0 0 0 3px rgba(199, 125, 255, 0.3), 0 6px 20px rgba(157, 78, 221, 0.5)"
+                        : "0 6px 20px rgba(157, 78, 221, 0.5)";
+                      e.currentTarget.style.transform = "scale(1.02)";
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.backgroundColor = "#7b2cbf";
+                      e.currentTarget.style.boxShadow = isSelected 
+                        ? "0 0 0 3px rgba(199, 125, 255, 0.3), 0 6px 20px rgba(157, 78, 221, 0.5)" 
+                        : "0 4px 15px rgba(123, 44, 191, 0.3)";
+                      e.currentTarget.style.transform = isSelected ? "scale(1.05)" : "scale(1)";
+                    }}
+                  >
+                    {storeGroup.name}
+                  </button>
+                );
+              })}
+                </div>
+
+                {/* Quick/Full Mode Toggle */}
+                <div 
+                  onClick={() => !loading && setScanMode(scanMode === 'quick' ? 'full' : 'quick')}
                   style={{
-                    flex: 1,
-                    padding: "16px 24px",
-                    border: scanMode === 'quick' ? "2px solid #28a745" : "2px solid #fff",
-                    borderRadius: "8px",
-                    backgroundColor: "transparent",
-                    color: scanMode === 'quick' ? "#28a745" : "#fff",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    padding: "4px",
+                    backgroundColor: "rgba(100, 150, 200, 0.08)",
+                    border: "2px solid rgba(100, 150, 200, 0.25)",
+                    borderRadius: "20px",
                     cursor: loading ? "not-allowed" : "pointer",
-                    fontSize: "16px",
-                    fontWeight: scanMode === 'quick' ? "bold" : "normal",
+                    transition: "all 0.3s ease",
                     opacity: loading ? 0.6 : 1,
-                    transition: "all 0.2s ease"
+                    boxShadow: "0 2px 8px rgba(100, 150, 200, 0.15)",
+                    flexShrink: 0
                   }}
                 >
-                  ⚡ Quick
-                </button>
-                <button
-                  onClick={() => setScanMode('full')}
-                  disabled={loading}
-                  style={{
-                    flex: 1,
-                    padding: "16px 24px",
-                    border: scanMode === 'full' ? "2px solid #dc3545" : "2px solid #fff",
-                    borderRadius: "8px",
-                    backgroundColor: "transparent",
-                    color: scanMode === 'full' ? "#dc3545" : "#fff",
-                    cursor: loading ? "not-allowed" : "pointer",
-                    fontSize: "16px",
-                    fontWeight: scanMode === 'full' ? "bold" : "normal",
-                    opacity: loading ? 0.6 : 1,
-                    transition: "all 0.2s ease"
-                  }}
-                >
-                  🔍 Full
-                </button>
+                  <div style={{
+                    padding: "6px 14px",
+                    borderRadius: "16px",
+                    fontSize: "13px",
+                    fontWeight: "600",
+                    transition: "all 0.3s ease",
+                    backgroundColor: scanMode === 'quick' ? "rgba(100, 150, 200, 0.9)" : "transparent",
+                    color: scanMode === 'quick' ? "#ffffff" : "rgba(100, 150, 200, 0.9)",
+                    boxShadow: scanMode === 'quick' ? "0 2px 6px rgba(100, 150, 200, 0.3)" : "none"
+                  }}>
+                    ⚡ Quick
+                  </div>
+                  <div style={{
+                    padding: "6px 14px",
+                    borderRadius: "16px",
+                    fontSize: "13px",
+                    fontWeight: "600",
+                    transition: "all 0.3s ease",
+                    backgroundColor: scanMode === 'full' ? "rgba(100, 150, 200, 0.9)" : "transparent",
+                    color: scanMode === 'full' ? "#ffffff" : "rgba(100, 150, 200, 0.9)",
+                    boxShadow: scanMode === 'full' ? "0 2px 6px rgba(100, 150, 200, 0.3)" : "none"
+                  }}>
+                    🔍 Full
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div style={{ marginBottom: "16px" }}>
-              <div style={{ marginBottom: "12px" }}>
-                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                  {settings?.stores?.map((storeGroup) => (
-                <button
-                  key={storeGroup.name}
-                  onClick={() => setSelectedStoreGroup(storeGroup.name)}
-                  style={{
-                    padding: "8px 12px",
-                    border: selectedStoreGroup === storeGroup.name ? "2px solid #0070f3" : "1px solid #ccc",
-                    borderRadius: "4px",
-                    backgroundColor: selectedStoreGroup === storeGroup.name ? "#0070f3" : "#fff",
-                    color: selectedStoreGroup === storeGroup.name ? "#fff" : "#000",
-                    cursor: "pointer",
-                    fontSize: "14px",
-                    fontWeight: selectedStoreGroup === storeGroup.name ? "bold" : "normal"
-                  }}
-                >
-                  {storeGroup.name}
-                </button>
-              ))}
-            </div>
-          </div>
-          <p className="muted" style={{ margin: "0 0 8px 0", fontSize: "14px" }}>
-            <strong>Selected Stores:</strong> {settings?.stores?.find((group) => group.name === selectedStoreGroup)?.values?.join(", ") || "None configured"}
-          </p>
-        </div>
-
-        <div style={{ marginBottom: "16px" }}>
-          <div style={{ marginBottom: "12px" }}>
-            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+          {/* Category Selection */}
+          <div style={{ marginBottom: "16px" }}>
+            <div style={{ marginBottom: "12px" }}>
+              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
               {/* All button */}
               <button
                 onClick={handleScanAllCategories}
                 disabled={loading}
                 style={{
-                  padding: "8px 12px",
-                  border: selectedCategory === "" && currentCategory === "All Categories" ? "2px solid #dc3545" : "1px solid #ccc",
-                  borderRadius: "4px",
-                  backgroundColor: selectedCategory === "" && currentCategory === "All Categories" ? "#dc3545" : "#fff",
-                  color: selectedCategory === "" && currentCategory === "All Categories" ? "#fff" : "#000",
+                  padding: "14px 20px",
+                  border: (selectedCategory === "" && currentCategory === "All Categories") ? "3px solid #ff66a3" : "none",
+                  borderRadius: "8px",
+                  backgroundColor: "#ff0066",
+                  color: "#fff",
                   cursor: loading ? "not-allowed" : "pointer",
-                  fontSize: "14px",
-                  fontWeight: selectedCategory === "" && currentCategory === "All Categories" ? "bold" : "normal",
-                  opacity: loading ? 0.6 : 1
+                  fontSize: "15px",
+                  fontWeight: "600",
+                  opacity: loading ? 0.6 : 1,
+                  boxShadow: (selectedCategory === "" && currentCategory === "All Categories")
+                    ? "0 0 0 3px rgba(255, 102, 163, 0.3), 0 6px 20px rgba(255, 0, 102, 0.5)" 
+                    : "0 4px 15px rgba(255, 0, 102, 0.3)",
+                  transition: "all 0.3s ease",
+                  transform: (selectedCategory === "" && currentCategory === "All Categories") ? "scale(1.05)" : "scale(1)"
+                }}
+                onMouseOver={(e) => {
+                  if (!loading) {
+                    e.currentTarget.style.backgroundColor = "#cc0052";
+                    const isSelected = selectedCategory === "" && currentCategory === "All Categories";
+                    e.currentTarget.style.boxShadow = isSelected 
+                      ? "0 0 0 3px rgba(255, 102, 163, 0.3), 0 6px 20px rgba(255, 0, 102, 0.5)"
+                      : "0 6px 20px rgba(255, 0, 102, 0.5)";
+                    e.currentTarget.style.transform = "scale(1.02)";
+                  }
+                }}
+                onMouseOut={(e) => {
+                  if (!loading) {
+                    const isSelected = selectedCategory === "" && currentCategory === "All Categories";
+                    e.currentTarget.style.backgroundColor = "#ff0066";
+                    e.currentTarget.style.boxShadow = isSelected 
+                      ? "0 0 0 3px rgba(255, 102, 163, 0.3), 0 6px 20px rgba(255, 0, 102, 0.5)" 
+                      : "0 4px 15px rgba(255, 0, 102, 0.3)";
+                    e.currentTarget.style.transform = isSelected ? "scale(1.05)" : "scale(1)";
+                  }
                 }}
               >
                 All
@@ -557,6 +604,7 @@ export default function WhatsInStockPage() {
               {/* Individual category buttons */}
               {settings?.retroCategoryIds?.map((categoryId) => {
                 const categoryName = categoryMap[categoryId] || `Category ${categoryId}`;
+                const isSelected = selectedCategory === categoryId;
                 return (
                   <button
                     key={categoryId}
@@ -566,15 +614,38 @@ export default function WhatsInStockPage() {
                     }}
                     disabled={loading}
                     style={{
-                      padding: "8px 12px",
-                      border: selectedCategory === categoryId ? "2px solid #28a745" : "1px solid #ccc",
-                      borderRadius: "4px",
-                      backgroundColor: selectedCategory === categoryId ? "#28a745" : "#fff",
-                      color: selectedCategory === categoryId ? "#fff" : "#000",
+                      padding: "14px 20px",
+                      border: isSelected ? "3px solid #ff66a3" : "none",
+                      borderRadius: "8px",
+                      backgroundColor: "#ff0066",
+                      color: "#fff",
                       cursor: loading ? "not-allowed" : "pointer",
-                      fontSize: "14px",
-                      fontWeight: selectedCategory === categoryId ? "bold" : "normal",
-                      opacity: loading ? 0.6 : 1
+                      fontSize: "15px",
+                      fontWeight: "600",
+                      opacity: loading ? 0.6 : 1,
+                      boxShadow: isSelected 
+                        ? "0 0 0 3px rgba(255, 102, 163, 0.3), 0 6px 20px rgba(255, 0, 102, 0.5)" 
+                        : "0 4px 15px rgba(255, 0, 102, 0.3)",
+                      transition: "all 0.3s ease",
+                      transform: isSelected ? "scale(1.05)" : "scale(1)"
+                    }}
+                    onMouseOver={(e) => {
+                      if (!loading) {
+                        e.currentTarget.style.backgroundColor = "#cc0052";
+                        e.currentTarget.style.boxShadow = isSelected 
+                          ? "0 0 0 3px rgba(255, 102, 163, 0.3), 0 6px 20px rgba(255, 0, 102, 0.5)"
+                          : "0 6px 20px rgba(255, 0, 102, 0.5)";
+                        e.currentTarget.style.transform = "scale(1.02)";
+                      }
+                    }}
+                    onMouseOut={(e) => {
+                      if (!loading) {
+                        e.currentTarget.style.backgroundColor = "#ff0066";
+                        e.currentTarget.style.boxShadow = isSelected 
+                          ? "0 0 0 3px rgba(255, 102, 163, 0.3), 0 6px 20px rgba(255, 0, 102, 0.5)" 
+                          : "0 4px 15px rgba(255, 0, 102, 0.3)";
+                        e.currentTarget.style.transform = isSelected ? "scale(1.05)" : "scale(1)";
+                      }
                     }}
                   >
                     {categoryName}
@@ -583,8 +654,14 @@ export default function WhatsInStockPage() {
               })}
             </div>
           </div>
+          
+          {/* Stores Info */}
+          <div style={{ marginTop: "8px", fontSize: "14px", color: "#e0e0e0" }}>
+            <strong>Stores:</strong> {settings?.stores?.find((group) => group.name === selectedStoreGroup)?.values?.join(", ") || "None configured"}
+          </div>
+          
           {!loading && progress && (
-            <p className="muted">
+            <p className="muted" style={{ marginTop: "8px" }}>
               <strong>Status:</strong> {progress}
             </p>
           )}

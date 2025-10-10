@@ -1,7 +1,9 @@
 {
+  "/_not-found/page": "app/_not-found/page.js",
   "/page": "app/page.js",
-  "/whats-in-stock/page": "app/whats-in-stock/page.js",
   "/disc-based-games/page": "app/disc-based-games/page.js",
   "/api/settings/route": "app/api/settings/route.js",
+  "/whats-in-stock/page": "app/whats-in-stock/page.js",
+  "/cex-link/page": "app/cex-link/page.js",
   "/store-checker/page": "app/store-checker/page.js"
 }

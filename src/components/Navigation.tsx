@@ -83,6 +83,21 @@ export default function Navigation() {
           >
             Store Checker
           </Link>
+          <Link 
+            href="/cex-link" 
+            style={{
+              color: "white",
+              textDecoration: "none",
+              fontWeight: pathname === "/cex-link" ? "600" : "400",
+              fontSize: "16px",
+              padding: "8px 16px",
+              borderRadius: "4px",
+              backgroundColor: pathname === "/cex-link" ? "rgba(255,255,255,0.2)" : "transparent",
+              transition: "all 0.2s ease"
+            }}
+          >
+            CEX Links
+          </Link>
         </div>
       </div>
     </nav>
