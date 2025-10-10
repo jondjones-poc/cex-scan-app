@@ -1,40 +1,58 @@
 {
   "pages": {
-    "/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/page.js"
+    "/_not-found/page": [
+      "static/chunks/webpack-c84e7b3dbc67fa68.js",
+      "static/chunks/fd9d1056-86a7a8de46c326ec.js",
+      "static/chunks/23-780e2176a68198bf.js",
+      "static/chunks/main-app-d43a7ea82aba2ac7.js",
+      "static/chunks/app/_not-found/page-581197d8adff9ab0.js"
     ],
     "/layout": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/layout.css",
-      "static/chunks/app/layout.js"
-    ],
-    "/store-checker/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/store-checker/page.js"
+      "static/chunks/webpack-c84e7b3dbc67fa68.js",
+      "static/chunks/fd9d1056-86a7a8de46c326ec.js",
+      "static/chunks/23-780e2176a68198bf.js",
+      "static/chunks/main-app-d43a7ea82aba2ac7.js",
+      "static/css/a44bd1f0d9fe54d0.css",
+      "static/chunks/291-2a5a6c2d60b81eee.js",
+      "static/chunks/app/layout-11045e0da81a8e6f.js"
     ],
     "/cex-link/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/cex-link/page.js"
+      "static/chunks/webpack-c84e7b3dbc67fa68.js",
+      "static/chunks/fd9d1056-86a7a8de46c326ec.js",
+      "static/chunks/23-780e2176a68198bf.js",
+      "static/chunks/main-app-d43a7ea82aba2ac7.js",
+      "static/chunks/app/cex-link/page-b56b0f352fb11b12.js"
     ],
-    "/disc-based-games/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/disc-based-games/page.js"
+    "/store-checker/page": [
+      "static/chunks/webpack-c84e7b3dbc67fa68.js",
+      "static/chunks/fd9d1056-86a7a8de46c326ec.js",
+      "static/chunks/23-780e2176a68198bf.js",
+      "static/chunks/main-app-d43a7ea82aba2ac7.js",
+      "static/chunks/app/store-checker/page-88b6dcd807e67ef7.js"
     ],
     "/whats-in-stock/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/whats-in-stock/page.js"
+      "static/chunks/webpack-c84e7b3dbc67fa68.js",
+      "static/chunks/fd9d1056-86a7a8de46c326ec.js",
+      "static/chunks/23-780e2176a68198bf.js",
+      "static/chunks/main-app-d43a7ea82aba2ac7.js",
+      "static/chunks/59-ca9a748560221271.js",
+      "static/chunks/app/whats-in-stock/page-6bd17cf66aa30313.js"
     ],
-    "/_not-found/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/_not-found/page.js"
+    "/disc-based-games/page": [
+      "static/chunks/webpack-c84e7b3dbc67fa68.js",
+      "static/chunks/fd9d1056-86a7a8de46c326ec.js",
+      "static/chunks/23-780e2176a68198bf.js",
+      "static/chunks/main-app-d43a7ea82aba2ac7.js",
+      "static/chunks/59-ca9a748560221271.js",
+      "static/chunks/app/disc-based-games/page-6491a472e6ba052b.js"
+    ],
+    "/page": [
+      "static/chunks/webpack-c84e7b3dbc67fa68.js",
+      "static/chunks/fd9d1056-86a7a8de46c326ec.js",
+      "static/chunks/23-780e2176a68198bf.js",
+      "static/chunks/main-app-d43a7ea82aba2ac7.js",
+      "static/chunks/59-ca9a748560221271.js",
+      "static/chunks/app/page-ae6ffa53046a573b.js"
     ]
   }
 }
