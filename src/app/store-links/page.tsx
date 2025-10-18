@@ -2,9 +2,9 @@
 import React, { useState, useEffect } from "react";
 import type { AppSettings } from "@/lib/settings";
 
-export default function CEXLinkPage() {
+export default function StoreLinksPage() {
   const [settings, setSettings] = useState<AppSettings | null>(null);
-  const [selectedStore, setSelectedStore] = useState<string>("");
+  const [selectedStoreGroup, setSelectedStoreGroup] = useState<string>("Home");
   const [error, setError] = useState<string | null>(null);
   const [copiedCategoryId, setCopiedCategoryId] = useState<string | null>(null);
 
@@ -35,17 +35,19 @@ export default function CEXLinkPage() {
     return settings.categoryMap[categoryId] || `Category ${categoryId}`;
   };
 
-  const convertStoreNameForAPI = (storeName: string): string => {
-    return storeName
-      .replace(/\s*-\s*/g, '+-+')  // Replace hyphen with optional spaces around it
-      .replace(/\s+/g, '+');       // Replace remaining spaces with +
-  };
-
-  const buildCEXLink = (categoryId: string, storeName: string) => {
+  const buildStoreGroupLink = (categoryId: string, storeGroupName: string) => {
     const baseUrl = "https://uk.webuy.com/search";
-    const convertedStoreName = convertStoreNameForAPI(storeName);
-    // Manually construct URL to avoid URLSearchParams encoding the + characters
-    return `${baseUrl}?categoryIds=${categoryId}&sortBy=prod_cex_uk_price_desc&stores=${convertedStoreName}`;
+    
+    // Find the store group and get its values
+    const storeGroup = settings?.stores?.find(group => group.name === storeGroupName);
+    if (!storeGroup) {
+      return "";
+    }
+    
+    // Join all store values with ~ separator
+    const storeValues = storeGroup.values.join("~");
+    
+    return `${baseUrl}?categoryIds=${categoryId}&sortBy=prod_cex_uk_price_desc&stores=${storeValues}`;
   };
 
   const copyToClipboard = async (text: string, categoryId: string) => {
@@ -89,7 +91,7 @@ export default function CEXLinkPage() {
 
       {settings && (
         <>
-          {/* Store Dropdown */}
+          {/* Store Group Dropdown */}
           <div style={{ marginBottom: "32px" }}>
             <label style={{ 
               display: "block", 
@@ -100,11 +102,11 @@ export default function CEXLinkPage() {
               textTransform: "uppercase",
               letterSpacing: "1px"
             }}>
-              Select Store
+              Select Area
             </label>
             <select 
-              value={selectedStore} 
-              onChange={(e) => setSelectedStore(e.target.value)}
+              value={selectedStoreGroup} 
+              onChange={(e) => setSelectedStoreGroup(e.target.value)}
               style={{
                 width: "100%",
                 padding: "16px",
@@ -119,20 +121,16 @@ export default function CEXLinkPage() {
                 transition: "all 0.3s ease"
               }}
             >
-              <option value="" style={{ backgroundColor: "#1a1a2e", color: "#ffffff" }}>-- Select a store --</option>
-              {settings?.allStores && Object.keys(settings.allStores)
-                .sort((a, b) => a.localeCompare(b))
-                .map((storeName) => (
-                  <option key={storeName} value={storeName} style={{ backgroundColor: "#1a1a2e", color: "#ffffff" }}>
-                    {storeName}
-                  </option>
-                ))
-              }
+              {settings?.stores?.map((storeGroup) => (
+                <option key={storeGroup.name} value={storeGroup.name} style={{ backgroundColor: "#1a1a2e", color: "#ffffff" }}>
+                  {storeGroup.name}
+                </option>
+              ))}
             </select>
           </div>
 
           {/* Game Category Links */}
-          {selectedStore && gameCategories.length > 0 && (
+          {selectedStoreGroup && gameCategories.length > 0 && (
             <div style={{ marginTop: "32px" }}>
               <div style={{ 
                 display: "grid", 
@@ -141,7 +139,7 @@ export default function CEXLinkPage() {
               }}>
                 {gameCategories.map((categoryId) => {
                   const categoryName = getCategoryName(categoryId);
-                  const link = buildCEXLink(categoryId, selectedStore);
+                  const link = buildStoreGroupLink(categoryId, selectedStoreGroup);
                   const isCopied = copiedCategoryId === categoryId;
                   
                   return (
@@ -254,7 +252,7 @@ export default function CEXLinkPage() {
           )}
 
           {/* Horizontal Rule */}
-          {selectedStore && gameCategories.length > 0 && dvdCategories.length > 0 && (
+          {selectedStoreGroup && gameCategories.length > 0 && dvdCategories.length > 0 && (
             <hr style={{
               border: "none",
               height: "2px",
@@ -264,7 +262,7 @@ export default function CEXLinkPage() {
           )}
 
           {/* DVD Category Links */}
-          {selectedStore && dvdCategories.length > 0 && (
+          {selectedStoreGroup && dvdCategories.length > 0 && (
             <div style={{ marginTop: gameCategories.length > 0 ? "0" : "32px" }}>
               <div style={{ 
                 display: "grid", 
@@ -273,7 +271,7 @@ export default function CEXLinkPage() {
               }}>
                 {dvdCategories.map((categoryId) => {
                   const categoryName = getCategoryName(categoryId);
-                  const link = buildCEXLink(categoryId, selectedStore);
+                  const link = buildStoreGroupLink(categoryId, selectedStoreGroup);
                   const isCopied = copiedCategoryId === categoryId;
                   
                   return (
@@ -385,7 +383,7 @@ export default function CEXLinkPage() {
             </div>
           )}
 
-          {selectedStore && gameCategories.length === 0 && dvdCategories.length === 0 && (
+          {selectedStoreGroup && gameCategories.length === 0 && dvdCategories.length === 0 && (
             <div style={{
               padding: "32px",
               backgroundColor: "rgba(255, 193, 7, 0.1)",
@@ -400,7 +398,7 @@ export default function CEXLinkPage() {
             </div>
           )}
 
-          {!selectedStore && (
+          {!selectedStoreGroup && (
             <div style={{
               padding: "60px 40px",
               textAlign: "center",
@@ -408,7 +406,7 @@ export default function CEXLinkPage() {
               fontSize: "18px",
               fontWeight: "500"
             }}>
-              Please select a store to view CEX links
+              Please select a store group to view CEX links
             </div>
           )}
         </>
@@ -416,4 +414,3 @@ export default function CEXLinkPage() {
     </div>
   );
 }
-

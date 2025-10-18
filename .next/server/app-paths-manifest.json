@@ -1,5 +1,6 @@
 {
-  "/cex-link/page": "app/cex-link/page.js",
-  "/page": "app/page.js",
-  "/api/settings/route": "app/api/settings/route.js"
+  "/dvds/page": "app/dvds/page.js",
+  "/api/scrape-dvd-horror/route": "app/api/scrape-dvd-horror/route.js",
+  "/api/settings/route": "app/api/settings/route.js",
+  "/api/image-proxy/route": "app/api/image-proxy/route.js"
 }

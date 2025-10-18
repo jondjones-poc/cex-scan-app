@@ -214,7 +214,7 @@ export default function DiscBasedGamesPage() {
       });
       
       setProducts(finalSortedProducts);
-      setProgress(`Scan completed! Found ${finalSortedProducts.length} disc-based games over £20 across all categories`);
+      setProgress(`Scan completed! Found ${finalSortedProducts.length} modern games across all categories`);
       console.log(`Total disc-based games found across all categories: ${finalSortedProducts.length}`);
       
     } catch (error) {
@@ -281,7 +281,7 @@ export default function DiscBasedGamesPage() {
       // Set final values
       setTotalPages(page - 1);
       setCompletedPages(page - 1);
-      setProgress(`Scan completed! Found ${allProducts.length} disc-based games over £20`);
+      setProgress(`Scan completed! Found ${allProducts.length} modern games`);
     } catch (error) {
       console.error("Scan products error:", error);
       setError("Failed to scan products: " + (error as Error).message);
@@ -319,7 +319,8 @@ export default function DiscBasedGamesPage() {
   };
 
   return (
-    <div style={{ padding: "20px", maxWidth: "1200px", margin: "0 auto" }}>
+    <main style={{ backgroundColor: "#0a0a0a", minHeight: "100vh", padding: "20px" }}>
+      <div>
       {error && (
         <div style={{ 
           padding: "12px", 
@@ -571,77 +572,118 @@ export default function DiscBasedGamesPage() {
 
           {/* Results */}
           {products.length > 0 && (
-            <div style={{ marginTop: "20px" }}>
-              <table className="table">
-                     <thead>
-                       <tr>
-                         <th></th>
-                         <th>Product</th>
-                         <th>Price ↓</th>
-                         <th>URL</th>
-                       </tr>
-                     </thead>
-                <tbody>
-                  {products.map((product, index) => (
-                    <tr key={`${product.productId}-${index}`}>
-                      <td>
-                        {product.imageUrl ? (
-                          <img 
-                            src={`/api/image-proxy?url=${encodeURIComponent(product.imageUrl)}`}
-                            alt={product.name || 'Product'} 
-                            style={{
-                              width: '40px',
-                              height: '40px',
-                              objectFit: 'cover',
-                              borderRadius: '4px',
-                              border: '1px solid #ddd'
-                            }}
-                            onError={(e) => {
-                              // Hide image if it fails to load
-                              (e.target as HTMLImageElement).style.display = 'none';
-                            }}
-                          />
-                        ) : (
-                          <div style={{
-                            width: '40px',
-                            height: '40px',
-                            backgroundColor: '#f0f0f0',
-                            borderRadius: '4px',
-                            border: '1px solid #ddd',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: '12px',
-                            color: '#666'
-                          }}>
-                            No img
-                          </div>
-                        )}
-                      </td>
-                      <td>{cleanDiscBasedGameName(product.name)}</td>
-                      <td style={{ 
-                        textAlign: "center",
-                        fontWeight: "bold",
-                        color: "#28a745"
-                      }}>
-                        {product.price}
-                      </td>
-                      <td>
+            <div style={{ marginTop: "24px" }}>
+              <h2 style={{ marginBottom: "16px", fontSize: "20px", fontWeight: "600", color: "#ffffff" }}>
+                {selectedCategory === "All Categories" ? "All Modern Game Categories" : settings?.categoryMap?.[selectedCategory] || selectedCategory} ({products.length} games)
+              </h2>
+              
+              <div style={{ 
+                display: "grid", 
+                gap: "16px", 
+                gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))" 
+              }}>
+                {products.map((product, index) => (
+                  <div 
+                    key={`${product.productId}-${index}`}
+                    style={{
+                      padding: "16px",
+                      border: "1px solid #7b2cbf",
+                      borderRadius: "8px",
+                      backgroundColor: "#1a1a2e",
+                      transition: "all 0.2s ease"
+                    }}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.boxShadow = "0 4px 12px rgba(123, 44, 191, 0.3)";
+                      e.currentTarget.style.transform = "translateY(-2px)";
+                      e.currentTarget.style.borderColor = "#c084fc";
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.boxShadow = "none";
+                      e.currentTarget.style.transform = "translateY(0)";
+                      e.currentTarget.style.borderColor = "#7b2cbf";
+                    }}
+                  >
+                    <div style={{ display: "flex", gap: "12px" }}>
+                      {product.imageUrl ? (
+                        <img 
+                          src={`/api/image-proxy?url=${encodeURIComponent(product.imageUrl)}`}
+                          alt={product.name || 'Product'} 
+                          style={{
+                            width: "60px",
+                            height: "60px",
+                            objectFit: "cover",
+                            borderRadius: "4px",
+                            flexShrink: 0
+                          }}
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none";
+                          }}
+                        />
+                      ) : (
+                        <div style={{
+                          width: "60px",
+                          height: "60px",
+                          backgroundColor: "#2a2a3e",
+                          borderRadius: "4px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: "12px",
+                          color: "#a0a0a0",
+                          flexShrink: 0
+                        }}>
+                          No Image
+                        </div>
+                      )}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <h3 style={{ 
+                          fontSize: "16px", 
+                          fontWeight: "600", 
+                          marginBottom: "8px", 
+                          color: "#ffffff",
+                          lineHeight: "1.3"
+                        }}>
+                          {cleanDiscBasedGameName(product.name)}
+                        </h3>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                          <span style={{ fontSize: "18px", fontWeight: "700", color: "#ff66a3" }}>
+                            {product.price}
+                          </span>
+                          <span style={{ fontSize: "12px", color: "#c084fc", backgroundColor: "rgba(123, 44, 191, 0.2)", padding: "2px 6px", borderRadius: "4px" }}>
+                            {settings?.categoryMap?.[product.categoryId] || product.categoryId}
+                          </span>
+                        </div>
+                        <div style={{ fontSize: "12px", color: "#a0a0a0", marginBottom: "8px" }}>
+                          {product.store}
+                        </div>
                         <a 
                           href={product.url} 
                           target="_blank" 
                           rel="noopener noreferrer"
+                          style={{
+                            display: "inline-block",
+                            padding: "6px 12px",
+                            backgroundColor: "#7b2cbf",
+                            color: "white",
+                            textDecoration: "none",
+                            borderRadius: "4px",
+                            fontSize: "12px",
+                            fontWeight: "500",
+                            transition: "all 0.2s ease"
+                          }}
+                          onMouseOver={(e) => {
+                            e.currentTarget.style.backgroundColor = "#6b21a8";
+                          }}
+                          onMouseOut={(e) => {
+                            e.currentTarget.style.backgroundColor = "#7b2cbf";
+                          }}
                         >
-                          View Game
+                          View on CEX →
                         </a>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-
-              <div className="muted" style={{ marginTop: "16px", fontSize: "14px" }}>
-                {currentCategory === "All Disc-Based Categories" ? `Found ${products.length} disc-based games over £20 across all categories` : `Found ${products.length} disc-based games over £20`}
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           )}
@@ -656,6 +698,7 @@ export default function DiscBasedGamesPage() {
           100% { transform: rotate(360deg); }
         }
       `}</style>
-    </div>
+      </div>
+    </main>
   );
 }

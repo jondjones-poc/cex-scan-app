@@ -13,13 +13,7 @@ interface ProductWithManual {
   categoryId: string;
 }
 
-// Category ID to name mapping
-const categoryMap: { [key: string]: string } = {
-  "1037": "SNES",
-  "1055": "Mega Drive", 
-  "1052": "NES",
-  "1030": "N64",
-};
+// Category ID to name mapping - will be loaded from settings
 
 export default function WhatsInStockPage() {
   const [products, setProducts] = useState<ProductWithManual[]>([]);
@@ -152,7 +146,7 @@ export default function WhatsInStockPage() {
               price: extractedProduct.price || "N/A",
               url: extractedProduct.url || "",
               imageUrl: extractedProduct.imageUrl || undefined,
-              store: "Unknown",
+              store: extractedProduct.store || "Unknown",
               categoryId: categoryId
             });
           }
@@ -209,7 +203,7 @@ export default function WhatsInStockPage() {
       
       // Scan each category
       for (const categoryId of settings.retroCategoryIds) {
-        const categoryName = categoryMap[categoryId] || `Category ${categoryId}`;
+        const categoryName = settings.categoryMap?.[categoryId] || `Category ${categoryId}`;
         setProgress(`Scanning ${categoryName} (${completedCategories + 1}/${totalCategories})...`);
         
         let page = 1;
@@ -316,7 +310,7 @@ export default function WhatsInStockPage() {
     
     try {
       const allProducts: ProductWithManual[] = [];
-      const categoryName = categoryMap[targetCategoryId] || `Category ${targetCategoryId}`;
+      const categoryName = settings.categoryMap?.[targetCategoryId] || `Category ${targetCategoryId}`;
       
       setCurrentCategory(categoryName);
       setProgress(`Scanning ${categoryName}...`);
@@ -409,7 +403,7 @@ export default function WhatsInStockPage() {
 
 
   return (
-    <main>
+    <main style={{ backgroundColor: "#0a0a0a", minHeight: "100vh", padding: "20px" }}>
       <div>
         {/* Progress Bar */}
         {loading && (
@@ -603,7 +597,7 @@ export default function WhatsInStockPage() {
               
               {/* Individual category buttons */}
               {settings?.retroCategoryIds?.map((categoryId) => {
-                const categoryName = categoryMap[categoryId] || `Category ${categoryId}`;
+                const categoryName = settings.categoryMap?.[categoryId] || `Category ${categoryId}`;
                 const isSelected = selectedCategory === categoryId;
                 return (
                   <button
@@ -660,11 +654,6 @@ export default function WhatsInStockPage() {
             <strong>Stores:</strong> {settings?.stores?.find((group) => group.name === selectedStoreGroup)?.values?.join(", ") || "None configured"}
           </div>
           
-          {!loading && progress && (
-            <p className="muted" style={{ marginTop: "8px" }}>
-              <strong>Status:</strong> {progress}
-            </p>
-          )}
         </div>
           </>
         )}
@@ -677,69 +666,119 @@ export default function WhatsInStockPage() {
         
         {products.length > 0 && (
           <div style={{ marginTop: "24px" }}>
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Image</th>
-                  <th style={{ textAlign: "left" }}>Product</th>
-                  <th>Price ↓</th>
-                  <th>Category</th>
-                  <th>URL</th>
-                </tr>
-              </thead>
-              <tbody>
-                {products.map((product, index) => (
-                  <tr key={`${product.productId}-${index}`}>
-                    <td>
-                      {product.imageUrl ? (
-                        <img 
-                          src={`/api/image-proxy?url=${encodeURIComponent(product.imageUrl)}`}
-                          alt={product.name || 'Product'} 
-                          style={{
-                            width: '40px',
-                            height: '40px',
-                            objectFit: 'cover',
-                            borderRadius: '4px',
-                            border: '1px solid #ddd'
-                          }}
-                          onError={(e) => {
-                            // Hide image if it fails to load
-                            (e.target as HTMLImageElement).style.display = 'none';
-                          }}
-                        />
-                      ) : (
-                        <div style={{
-                          width: '40px',
-                          height: '40px',
-                          backgroundColor: '#f0f0f0',
-                          borderRadius: '4px',
-                          border: '1px solid #ddd',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '12px',
-                          color: '#666'
-                        }}>
-                          No img
-                        </div>
-                      )}
-                    </td>
-                    <td style={{ textAlign: "left" }}>{product.name.replace(/, (w\/|w\/o) Manual(, (Boxed|Unboxed))?.*$/, '').trim()}</td>
-                    <td>{product.price}</td>
-                    <td>{categoryMap[product.categoryId] || product.categoryId}</td>
-                    <td>
-                      <a href={product.url} target="_blank" rel="noreferrer">View Game</a>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <h2 style={{ marginBottom: "16px", fontSize: "20px", fontWeight: "600", color: "#ffffff" }}>
+              {selectedCategory === "All Categories" ? "All Retro Categories" : settings?.categoryMap?.[selectedCategory] || selectedCategory} ({products.length} products)
+            </h2>
             
-            <div style={{ marginTop: "16px" }}>
-              <p className="muted">
-                <strong>Status:</strong> {currentCategory === "All Categories" ? `Scan completed! Found ${products.length} products across all categories with manual included` : `Scan completed! Found ${products.length} products with manual included`}
-              </p>
+            <div style={{ 
+              display: "grid", 
+              gap: "16px", 
+              gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))" 
+            }}>
+              {products.map((product, index) => (
+                <div 
+                  key={`${product.productId}-${index}`}
+                  style={{
+                    padding: "16px",
+                    border: "1px solid #7b2cbf",
+                    borderRadius: "8px",
+                    backgroundColor: "#1a1a2e",
+                    transition: "all 0.2s ease"
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.boxShadow = "0 4px 12px rgba(123, 44, 191, 0.3)";
+                    e.currentTarget.style.transform = "translateY(-2px)";
+                    e.currentTarget.style.borderColor = "#c084fc";
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.boxShadow = "none";
+                    e.currentTarget.style.transform = "translateY(0)";
+                    e.currentTarget.style.borderColor = "#7b2cbf";
+                  }}
+                >
+                  <div style={{ display: "flex", gap: "12px" }}>
+                    {product.imageUrl ? (
+                      <img 
+                        src={`/api/image-proxy?url=${encodeURIComponent(product.imageUrl)}`}
+                        alt={product.name || 'Product'} 
+                        style={{
+                          width: "60px",
+                          height: "60px",
+                          objectFit: "cover",
+                          borderRadius: "4px",
+                          flexShrink: 0
+                        }}
+                        onError={(e) => {
+                          e.currentTarget.style.display = "none";
+                        }}
+                      />
+                    ) : (
+                      <div style={{
+                        width: "60px",
+                        height: "60px",
+                        backgroundColor: "#2a2a3e",
+                        borderRadius: "4px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "12px",
+                        color: "#a0a0a0",
+                        flexShrink: 0
+                      }}>
+                        No Image
+                      </div>
+                    )}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <h3 style={{ 
+                        fontSize: "16px", 
+                        fontWeight: "600", 
+                        marginBottom: "8px", 
+                        color: "#ffffff",
+                        lineHeight: "1.3"
+                      }}>
+                        {product.name.replace(/, (w\/|w\/o) Manual(, (Boxed|Unboxed))?.*$/, '').trim()}
+                      </h3>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                        <span style={{ fontSize: "18px", fontWeight: "700", color: "#ff66a3" }}>
+                          {product.price}
+                        </span>
+                        <span style={{ fontSize: "12px", color: "#c084fc", backgroundColor: "rgba(123, 44, 191, 0.2)", padding: "2px 6px", borderRadius: "4px" }}>
+                          {settings?.categoryMap?.[product.categoryId] || product.categoryId}
+                        </span>
+                      </div>
+                      <div style={{ fontSize: "12px", color: "#a0a0a0", marginBottom: "8px" }}>
+                        {product.store}
+                      </div>
+                      <a 
+                        href={product.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        style={{
+                          display: "inline-block",
+                          padding: "6px 12px",
+                          backgroundColor: "#7b2cbf",
+                          color: "white",
+                          textDecoration: "none",
+                          borderRadius: "4px",
+                          fontSize: "12px",
+                          fontWeight: "500",
+                          transition: "all 0.2s ease"
+                        }}
+                        onMouseOver={(e) => {
+                          e.currentTarget.style.backgroundColor = "#6b21a8";
+                        }}
+                        onMouseOut={(e) => {
+                          e.currentTarget.style.backgroundColor = "#7b2cbf";
+                        }}
+                      >
+                        View on CEX →
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
+            
           </div>
         )}
         

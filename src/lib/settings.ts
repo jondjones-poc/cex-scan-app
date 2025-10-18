@@ -17,6 +17,7 @@ export type AppSettings = {
   allStores?: { [key: string]: string }; // All CEX stores with their IDs
   retroCategoryIds?: string[];
   discBasedGameCategoryIds?: string[];
+  dvdCategoryIds?: string[];
   searchUrl?: string;
   categoryMap?: { [key: string]: string };
 };
@@ -29,6 +30,7 @@ const DEFAULTS: Required<Omit<AppSettings, "productIds" | "essentialProducts" | 
   allStores: {},
   retroCategoryIds: ["1037"],
   discBasedGameCategoryIds: ["1178", "403", "1192", "782", "808", "1064", "795"],
+  dvdCategoryIds: ["709", "746"],
   searchUrl: "https://uk.webuy.com/search",
   categoryMap: {}
 };
@@ -81,6 +83,9 @@ export async function readSettings(): Promise<AppSettings & typeof DEFAULTS> {
   }
   if (!Array.isArray(merged.discBasedGameCategoryIds)) {
     merged.discBasedGameCategoryIds = ["1178", "403", "1192", "782", "808", "1064", "795"];
+  }
+  if (!Array.isArray(merged.dvdCategoryIds)) {
+    merged.dvdCategoryIds = ["709", "746"];
   }
   if (!merged.categoryMap) {
     merged.categoryMap = {};

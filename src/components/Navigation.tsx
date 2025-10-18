@@ -1,10 +1,57 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 export default function Navigation() {
   const pathname = usePathname();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  const navItems = [
+    { href: "/", label: "Stock Checker" },
+    { href: "/whats-in-stock", label: "Retro Games" },
+    { href: "/disc-based-games", label: "Modern Games" },
+    { href: "/store-checker", label: "Store Checker" },
+    { href: "/cex-link", label: "Store Links" },
+    { href: "/store-links", label: "Location Links" },
+    { href: "/dvds", label: "DVDs" }
+  ];
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const linkStyle = (href: string) => ({
+    color: "white",
+    textDecoration: "none",
+    fontWeight: pathname === href ? "600" : "400",
+    fontSize: "16px",
+    padding: "8px 16px",
+    borderRadius: "4px",
+    backgroundColor: pathname === href ? "rgba(255,255,255,0.2)" : "transparent",
+    transition: "all 0.2s ease",
+    display: "block",
+    width: "100%",
+    textAlign: "left" as const
+  });
+
+  const desktopLinkStyle = (href: string) => ({
+    color: "white",
+    textDecoration: "none",
+    fontWeight: pathname === href ? "600" : "400",
+    fontSize: "16px",
+    padding: "8px 16px",
+    borderRadius: "4px",
+    backgroundColor: pathname === href ? "rgba(255,255,255,0.2)" : "transparent",
+    transition: "all 0.2s ease"
+  });
 
   return (
     <nav style={{
@@ -18,88 +65,68 @@ export default function Navigation() {
         justifyContent: "space-between",
         alignItems: "center"
       }}>
-        <div style={{
-          display: "flex",
-          gap: "24px",
-          alignItems: "center"
-        }}>
-          <Link 
-            href="/" 
-            style={{
-              color: "white",
-              textDecoration: "none",
-              fontWeight: pathname === "/" ? "600" : "400",
-              fontSize: "16px",
-              padding: "8px 16px",
-              borderRadius: "4px",
-              backgroundColor: pathname === "/" ? "rgba(255,255,255,0.2)" : "transparent",
-              transition: "all 0.2s ease"
-            }}
-          >
-            Stock Checker
-          </Link>
-          <Link 
-            href="/whats-in-stock" 
-            style={{
-              color: "white",
-              textDecoration: "none",
-              fontWeight: pathname === "/whats-in-stock" ? "600" : "400",
-              fontSize: "16px",
-              padding: "8px 16px",
-              borderRadius: "4px",
-              backgroundColor: pathname === "/whats-in-stock" ? "rgba(255,255,255,0.2)" : "transparent",
-              transition: "all 0.2s ease"
-            }}
-          >
-            What's in Stock
-          </Link>
-          <Link 
-            href="/disc-based-games" 
-            style={{
-              color: "white",
-              textDecoration: "none",
-              fontWeight: pathname === "/disc-based-games" ? "600" : "400",
-              fontSize: "16px",
-              padding: "8px 16px",
-              borderRadius: "4px",
-              backgroundColor: pathname === "/disc-based-games" ? "rgba(255,255,255,0.2)" : "transparent",
-              transition: "all 0.2s ease"
-            }}
-          >
-            Disc Based Games
-          </Link>
-          <Link 
-            href="/store-checker" 
-            style={{
-              color: "white",
-              textDecoration: "none",
-              fontWeight: pathname === "/store-checker" ? "600" : "400",
-              fontSize: "16px",
-              padding: "8px 16px",
-              borderRadius: "4px",
-              backgroundColor: pathname === "/store-checker" ? "rgba(255,255,255,0.2)" : "transparent",
-              transition: "all 0.2s ease"
-            }}
-          >
-            Store Checker
-          </Link>
-          <Link 
-            href="/cex-link" 
-            style={{
-              color: "white",
-              textDecoration: "none",
-              fontWeight: pathname === "/cex-link" ? "600" : "400",
-              fontSize: "16px",
-              padding: "8px 16px",
-              borderRadius: "4px",
-              backgroundColor: pathname === "/cex-link" ? "rgba(255,255,255,0.2)" : "transparent",
-              transition: "all 0.2s ease"
-            }}
-          >
-            CEX Links
-          </Link>
-        </div>
+        {/* Desktop Navigation */}
+        {!isMobile && (
+          <div style={{
+            display: "flex",
+            gap: "24px",
+            alignItems: "center"
+          }}>
+            {navItems.map((item) => (
+              <Link 
+                key={item.href}
+                href={item.href} 
+                style={desktopLinkStyle(item.href)}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        )}
+
+        {/* Mobile Menu Button */}
+        {isMobile && (
+          <div>
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              style={{
+                background: "none",
+                border: "none",
+                color: "white",
+                fontSize: "24px",
+                cursor: "pointer",
+                padding: "8px"
+              }}
+              aria-label="Toggle mobile menu"
+            >
+              ☰
+            </button>
+          </div>
+        )}
       </div>
+
+      {/* Mobile Dropdown Menu */}
+      {isMobile && isMobileMenuOpen && (
+        <div style={{
+          marginTop: "16px",
+          paddingTop: "16px",
+          borderTop: "1px solid rgba(255,255,255,0.2)"
+        }}>
+          {navItems.map((item) => (
+            <Link 
+              key={item.href}
+              href={item.href} 
+              onClick={() => setIsMobileMenuOpen(false)}
+              style={{
+                ...linkStyle(item.href),
+                marginBottom: "8px"
+              }}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </div>
+      )}
     </nav>
   );
 }

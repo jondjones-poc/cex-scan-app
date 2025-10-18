@@ -434,18 +434,22 @@
     },
   "retroCategoryIds": ["1037", "1055", "1052", "1030"],
   "discBasedGameCategoryIds": ["1178", "403", "1192", "782", "808", "1064", "795"],
+  "dvdCategoryIds": [ "747", "709", "746"],
   "searchUrl": "https://uk.webuy.com/search",
   "categoryMap": {
     "1037": "SNES",
     "1055": "MegaDrive", 
     "1052": "NES",
     "1030": "N64",
-    "1178": "PS2",
+    "1178": "PS2 Rare",
     "403": "PS2",
-    "1192": "Xbox 360",
+    "1192": "Xbox 360 Rare",
     "782": "PlayStation",
-    "808": "Xbox 360",
+    "808": "PS3",
     "1064": "Switch",
-    "795": "Wii"
+    "795": "Wii",
+    "709": "Wrestling",
+    "746": "Anime",
+    "747": "Cartoons"
   }
 }
