@@ -1,6 +1,6 @@
 {
+  "/store-links/page": "app/store-links/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
   "/dvds/page": "app/dvds/page.js",
-  "/api/scrape-dvd-horror/route": "app/api/scrape-dvd-horror/route.js",
-  "/api/settings/route": "app/api/settings/route.js",
-  "/api/image-proxy/route": "app/api/image-proxy/route.js"
+  "/api/settings/route": "app/api/settings/route.js"
 }

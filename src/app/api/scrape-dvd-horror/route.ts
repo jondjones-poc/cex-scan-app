@@ -234,7 +234,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Extract product information
-    const products = await page.evaluate((showAllProducts) => {
+    const products = await page.evaluate((showAllProducts: boolean) => {
       const productElements = document.querySelectorAll('[data-testid="product-tile"], .product-tile, .product-item, [class*="product"], .search-result-item, [class*="search-result"]');
       console.log(`Found ${productElements.length} potential product elements`);
       
