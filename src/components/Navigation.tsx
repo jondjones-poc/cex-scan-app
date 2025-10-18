@@ -20,13 +20,43 @@ export default function Navigation() {
 
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
+      // Check screen width
+      const isSmallScreen = window.innerWidth <= 768;
+      
+      // Check user agent for mobile devices
+      const isMobileUserAgent = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      
+      // Check for touch capability
+      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      
+      // Consider it mobile if any of these conditions are true
+      const isMobileDevice = isSmallScreen || (isMobileUserAgent && isTouchDevice);
+      
+      console.log('Mobile detection:', { isSmallScreen, isMobileUserAgent, isTouchDevice, isMobileDevice });
+      setIsMobile(isMobileDevice);
     };
     
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  // Close mobile menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isMobileMenuOpen && isMobile) {
+        const target = event.target as HTMLElement;
+        if (!target.closest('nav')) {
+          setIsMobileMenuOpen(false);
+        }
+      }
+    };
+
+    if (isMobileMenuOpen) {
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  }, [isMobileMenuOpen, isMobile]);
 
   const linkStyle = (href: string) => ({
     color: "white",
@@ -89,13 +119,24 @@ export default function Navigation() {
           <div>
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              onTouchEnd={(e) => {
+                e.preventDefault();
+                setIsMobileMenuOpen(!isMobileMenuOpen);
+              }}
               style={{
                 background: "none",
                 border: "none",
                 color: "white",
                 fontSize: "24px",
                 cursor: "pointer",
-                padding: "8px"
+                padding: "12px",
+                minWidth: "44px",
+                minHeight: "44px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                touchAction: "manipulation",
+                WebkitTapHighlightColor: "transparent"
               }}
               aria-label="Toggle mobile menu"
             >
@@ -110,16 +151,26 @@ export default function Navigation() {
         <div style={{
           marginTop: "16px",
           paddingTop: "16px",
-          borderTop: "1px solid rgba(255,255,255,0.2)"
+          borderTop: "1px solid rgba(255,255,255,0.2)",
+          position: "relative",
+          zIndex: 1000,
+          backgroundColor: "#e20a03",
+          borderRadius: "0 0 8px 8px"
         }}>
           {navItems.map((item) => (
             <Link 
               key={item.href}
               href={item.href} 
               onClick={() => setIsMobileMenuOpen(false)}
+              onTouchEnd={() => setIsMobileMenuOpen(false)}
               style={{
                 ...linkStyle(item.href),
-                marginBottom: "8px"
+                marginBottom: "8px",
+                minHeight: "44px",
+                display: "flex",
+                alignItems: "center",
+                touchAction: "manipulation",
+                WebkitTapHighlightColor: "transparent"
               }}
             >
               {item.label}
