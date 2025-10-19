@@ -161,222 +161,181 @@ export async function POST(request: NextRequest) {
         args: chromium.args,
         defaultViewport: chromium.defaultViewport,
         executablePath,
-        headless,
-        ignoreHTTPSErrors: true,
+        headless
       });
+      
+      console.log('Browser launched successfully with chromium package');
     } else {
       // Local development: use regular puppeteer
       browser = await puppeteer.launch({
         headless: true,
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-accelerated-2d-canvas',
-          '--no-first-run',
-          '--no-zygote',
-          '--disable-gpu',
-          '--disable-web-security',
-          '--disable-features=VizDisplayCompositor'
-        ],
-        ignoreHTTPSErrors: true,
+        args: ['--no-sandbox']
       });
+      
+      console.log('Browser launched successfully with regular puppeteer');
     }
-
-    console.log("Browser launched successfully with regular puppeteer");
 
     const page = await browser.newPage();
     
-    // Set user agent to avoid detection
-    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
-    
-    // Set viewport
-    await page.setViewport({ width: 1920, height: 1080 });
-    
-    // Set extra headers
-    await page.setExtraHTTPHeaders({
-      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-      'Accept-Language': 'en-US,en;q=0.5',
-      'Accept-Encoding': 'gzip, deflate',
-      'DNT': '1',
-      'Connection': 'keep-alive',
-      'Upgrade-Insecure-Requests': '1',
+    // Block images, stylesheets, and fonts for faster loading
+    await page.setRequestInterception(true);
+    page.on('request', (req: any) => {
+      if (req.resourceType() === 'image' || req.resourceType() === 'stylesheet' || req.resourceType() === 'font') {
+        req.abort();
+      } else {
+        req.continue();
+      }
     });
 
-    console.log("Page loaded, waiting for products to load...");
-    
-    // Navigate to the page with optimized settings
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
+
+    console.log('Navigating to page...');
     await page.goto(url, { 
       waitUntil: 'domcontentloaded',
       timeout: 30000 
     });
 
     console.log('Page loaded, waiting for products to load...');
-
-    // Wait for products to load - look for product elements with reduced timeout
+    
+    // Get page title and URL for debugging
+    const pageTitle = await page.title();
+    const currentUrl = page.url();
+    console.log(`Page title: ${pageTitle}`);
+    console.log(`Current URL: ${currentUrl}`);
+    
+    // Wait for product elements to appear
     try {
-      await page.waitForSelector('a[href*="product-detail"], .search-result-item, [class*="search-result"]', { 
-        timeout: 6000 
-      });
+      await page.waitForSelector('a[href*="/product/"]', { timeout: 8000 });
       console.log('Found product links, waiting for content to load...');
     } catch (error) {
-      console.log('No product selectors found, continuing anyway...');
+      console.log('No product links found, continuing...');
     }
 
-    // Try to wait for any loading indicators to disappear with reduced timeout
+    // Wait for loading indicators to disappear
     try {
-      await page.waitForFunction(() => {
-        const loadingElements = document.querySelectorAll('[class*="loading"], [class*="spinner"], .loading, .spinner');
-        return loadingElements.length === 0;
-      }, { timeout: 3000 });
+      await page.waitForFunction(
+        () => !document.querySelector('.loading, .spinner, [class*="loading"]'),
+        { timeout: 5000 }
+      );
+      console.log('Loading indicators cleared');
     } catch (error) {
       console.log('Loading indicators still present, continuing...');
     }
 
-    // Extract products using JavaScript evaluation
-    const products = await page.evaluate((showAllProducts: boolean) => {
+    const products = await page.evaluate(() => {
       const productElements: Array<{
         name: string;
         url: string;
         containerText: string;
         priceText: string;
-        imageUrl: string;
         element: string;
       }> = [];
+
+      // Find all product links
+      const links = document.querySelectorAll('a[href*="/product/"]');
+      console.log(`Found ${links.length} potential product elements`);
       
-      // Look for product links specifically
-      const productLinks = document.querySelectorAll('a[href*="product-detail"]');
+      // Also try alternative selectors
+      const altLinks = document.querySelectorAll('a[href*="product"]');
+      console.log(`Found ${altLinks.length} alternative product links`);
       
-      console.log(`Found ${productLinks.length} product links`);
-      
-      productLinks.forEach((link, index) => {
-        if (link.textContent && link?.textContent.trim().length > 5) {
-          // Get the parent container to find price and other details
-          const container = link.closest('div') || link.parentElement;
-          const containerText = container && container.textContent ? container.textContent.trim() : '';
-          
-          // Also look for price elements near the link - try multiple selectors including CeX specific class
-          let priceElement = container ? container.querySelector('.product-main-price, [class*="price"], [class*="cost"], [class*="amount"], [class*="value"], .price, .cost, .amount') : null;
-          let priceText = priceElement && priceElement.textContent ? priceElement.textContent.trim() : '';
-          
-          // If no price found in container, look in the parent container or nearby elements
-          if (!priceText && container) {
-            const parentContainer = container.parentElement;
-            if (parentContainer) {
-              priceElement = parentContainer.querySelector('.product-main-price, [class*="price"], [class*="cost"], [class*="amount"], [class*="value"], .price, .cost, .amount');
-              priceText = priceElement && priceElement.textContent ? priceElement.textContent.trim() : '';
-            }
-          }
-          
-          // If still no price, look for any element with product-main-price class in the entire document
-          if (!priceText) {
-            const allPriceElements = document.querySelectorAll('.product-main-price');
-            // Try to find the price element that's closest to this product link
-            let closestPriceElement: Element | null = null;
-            let minDistance = Infinity;
-            
-            allPriceElements.forEach(priceEl => {
-              const distance = Math.abs(priceEl.compareDocumentPosition(link));
-              if (distance < minDistance) {
-                minDistance = distance;
-                closestPriceElement = priceEl;
-              }
-            });
-            
-            if (closestPriceElement && (closestPriceElement as Element).textContent) {
-              priceText = (closestPriceElement as Element).textContent!.trim();
-            }
-          }
-          
-          // If no price element found, look for any text that looks like a price in the container
-          let fallbackPrice = '';
-          if (!priceText && container) {
-            const containerHTML = container.innerHTML;
-            const priceMatch = containerHTML.match(/£[0-9]+\.?[0-9]*/);
-            if (priceMatch) {
-              fallbackPrice = priceMatch[0];
-            }
-          }
-          
-          // Use the best price we found
-          const finalPrice = priceText || fallbackPrice || 'Price not found';
-          
-          // Get product image
-          const imgElement = container ? container.querySelector('img') : null;
-          const imageUrl = imgElement && imgElement.src ? imgElement.src : '';
-          
-          // Get product ID from URL
-          let productId = '';
-          const linkElement = link as HTMLAnchorElement;
-          if (linkElement.href) {
-            const urlMatch = linkElement.href.match(/\/product\/([^\/\?]+)/);
-            if (urlMatch) {
-              productId = urlMatch[1];
-            }
-          }
-          
-          // Generate a fallback ID if none found
-          if (!productId) {
-            productId = `dvd-horror-${index}-${Date.now()}`;
-          }
-          
-          // Check for manual/box indicators
-          const hasManual = /w\/\s*manual|with\s+manual|\+\s*manual|manual\s+included/i.test(containerText);
-          const isBoxed = /boxed|in\s+box|original\s+box/i.test(containerText) && !/unboxed|loose|no\s+box|disc\s+only/i.test(containerText);
-          
-          console.log(`Debug - Product: "${link.textContent.trim()}"`);
-          console.log(`Debug - Container text: "${containerText}"`);
-          console.log(`Debug - Price text: "${finalPrice}"`);
-          console.log(`Debug - All text: "${containerText}"`);
-          console.log(`Debug - Found price: ${finalPrice} using pattern: /£([0-9]+\.?[0-9]*)/`);
-          console.log(`Found product: "${link.textContent.trim()}" - Price: ${finalPrice} - Manual: ${hasManual} - Boxed: ${isBoxed} - ProductID: ${productId}`);
-          
-          productElements.push({
-            name: link.textContent.trim(),
-            url: linkElement.href,
-            containerText,
-            priceText: finalPrice,
-            imageUrl,
-            element: link.outerHTML
-          });
-        }
-      });
-      
-      // Convert to the expected format
-      const products: any[] = [];
-      const seenProducts = new Set<string>();
-      
-      productElements.forEach((product, index) => {
-        // Skip if we've seen this product before
-        if (seenProducts.has(product.name)) {
-          return;
-        }
-        seenProducts.add(product.name);
+      // Check for any links at all
+      const allLinks = document.querySelectorAll('a');
+      console.log(`Found ${allLinks.length} total links on page`);
+
+      links.forEach((link, index) => {
+        if (index >= 50) return; // Limit to first 50 products
         
-        products.push({
-          productId: `dvd-horror-${index}-${Date.now()}`,
-          name: product.name,
-          price: product.priceText,
-          url: product.url,
-          imageUrl: product.imageUrl,
-          store: 'Unknown', // Will be updated by the calling page
-          categoryId: 'horror', // DVD Horror category
-          hasManual: /w\/\s*manual|with\s+manual|\+\s*manual|manual\s+included/i.test(product.containerText),
-          isBoxed: /boxed|in\s+box|original\s+box/i.test(product.containerText) && !/unboxed|loose|no\s+box|disc\s+only/i.test(product.containerText)
+        const href = (link as HTMLAnchorElement).href;
+        const name = link.textContent?.trim() || '';
+        
+        if (!name || name.length < 3) return;
+        
+        // Get container text for price extraction
+        const container = link.closest('[class*="product"], [class*="item"], [class*="card"]') || link.parentElement;
+        const containerText = container ? container.textContent || '' : '';
+        
+        // Try to find price element
+        let priceText = '';
+        const priceElement = container?.querySelector('[class*="price"], [class*="cost"], .product-main-price');
+        if (priceElement && priceElement.textContent) {
+          priceText = priceElement.textContent.trim();
+        }
+        
+        productElements.push({
+          name,
+          url: href,
+          containerText,
+          priceText,
+          element: container?.outerHTML?.substring(0, 200) || ''
         });
       });
-      
-      return products;
-    }, showAllProducts);
 
-    console.log(`Processed ${products.length} unique products`);
-    
+      return productElements;
+    });
+
+    console.log(`Found ${products.length} potential products`);
+
+    const processedProducts: Array<{
+      name: string;
+      price: string;
+      url: string;
+      categoryId: string;
+    }> = [];
+
+    // Extract category ID from URL
+    const categoryMatch = url.match(/categoryIds=(\d+)/);
+    const categoryId = categoryMatch ? categoryMatch[1] : 'horror';
+
+    for (const product of products) {
+      let cleanName = product.name;
+      
+      // Clean up the product name
+      cleanName = cleanName
+        .replace(/^\d+/, '') // Remove leading numbers
+        .replace(/£\d+(\.\d{2})?/g, '') // Remove prices
+        .replace(/^,\s*/, '') // Remove leading commas
+        .trim();
+
+      if (cleanName.length < 3) continue;
+
+      // Extract price
+      let price = 'N/A';
+      const pricePatterns = [
+        /£([0-9]+\.?[0-9]*)/,
+        /([0-9]+\.?[0-9]*)\s*£/,
+        /price[:\s]*£([0-9]+\.?[0-9]*)/i
+      ];
+
+      const allText = `${product.name} ${product.containerText} ${product.priceText}`;
+      
+      for (const pattern of pricePatterns) {
+        const match = allText.match(pattern);
+        if (match) {
+          price = `£${match[1]}`;
+          break;
+        }
+      }
+
+      // For Horror DVDs, we don't filter by manual/boxed - just include all products
+      if (cleanName.length > 3) {
+        processedProducts.push({
+          name: cleanName,
+          price: price,
+          url: product.url,
+          categoryId: categoryId
+        });
+      }
+    }
+
+    console.log(`Processed ${processedProducts.length} unique products`);
+
     await browser.close();
-    
-    return NextResponse.json({ 
-      success: true, 
-      products: products,
-      count: products.length 
+
+    return NextResponse.json({
+      products: processedProducts,
+      hasNextPage: false, // For now, just return first page
+      totalFound: processedProducts.length
     });
     
   } catch (error) {

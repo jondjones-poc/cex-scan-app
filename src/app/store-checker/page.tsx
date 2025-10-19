@@ -605,15 +605,6 @@ export default function StoreCheckerPage() {
                     </div>
                   </div>
 
-                  {/* Out of Stock Products - Currently empty but structure ready */}
-                  <div>
-                    <h4 style={{ margin: "0 0 12px 0", color: "#dc3545" }}>
-                      ❌ Out of Stock (0)
-                    </h4>
-                    <p className="muted" style={{ margin: "8px 0", fontStyle: "italic" }}>
-                      No out of stock products detected. All found products are currently in stock at this store.
-                    </p>
-                  </div>
                 </div>
               ) : (
                 <div>
@@ -625,15 +616,6 @@ export default function StoreCheckerPage() {
                     <p className="muted">No products found for this store.</p>
                   </div>
 
-                  {/* Out of Stock Products */}
-                  <div>
-                    <h4 style={{ margin: "0 0 12px 0", color: "#dc3545" }}>
-                      ❌ Out of Stock (0)
-                    </h4>
-                    <p className="muted" style={{ margin: "8px 0", fontStyle: "italic" }}>
-                      No products checked for this store.
-                    </p>
-                  </div>
                 </div>
               )}
             </div>
