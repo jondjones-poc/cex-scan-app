@@ -189,48 +189,58 @@ export async function POST(request: NextRequest) {
 
     const page = await browser.newPage();
     
-    // Set user agent to avoid detection
-    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
-    
-    // Set viewport
-    await page.setViewport({ width: 1920, height: 1080 });
-    
-    // Set extra headers
-    await page.setExtraHTTPHeaders({
-      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-      'Accept-Language': 'en-US,en;q=0.5',
-      'Accept-Encoding': 'gzip, deflate',
-      'DNT': '1',
-      'Connection': 'keep-alive',
-      'Upgrade-Insecure-Requests': '1',
+    // Block images, stylesheets, and fonts for faster loading
+    await page.setRequestInterception(true);
+    page.on('request', (req: any) => {
+      if (req.resourceType() === 'image' || req.resourceType() === 'stylesheet' || req.resourceType() === 'font') {
+        req.abort();
+      } else {
+        req.continue();
+      }
     });
 
-    console.log("Page loaded, waiting for products to load...");
-    
-    // Navigate to the page with optimized settings
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
+
+    console.log('Navigating to page...');
     await page.goto(url, { 
       waitUntil: 'domcontentloaded',
       timeout: 30000 
     });
 
     console.log('Page loaded, waiting for products to load...');
-
-    // Wait for products to load - look for product elements with reduced timeout
+    
+    // Get page title and URL for debugging
+    const pageTitle = await page.title();
+    const currentUrl = page.url();
+    console.log(`Page title: ${pageTitle}`);
+    console.log(`Current URL: ${currentUrl}`);
+    
+    // Debug: Check what's actually on the page
+    const pageContent = await page.evaluate(() => {
+      return {
+        totalLinks: document.querySelectorAll('a').length,
+        productLinks: document.querySelectorAll('a[href*="product"]').length,
+        searchResults: document.querySelectorAll('[class*="search-result"]').length,
+        bodyText: document.body.textContent?.substring(0, 500) || 'No body text'
+      };
+    });
+    console.log('Page debug info:', pageContent);
+    
+    // Wait for product elements to appear
     try {
-      await page.waitForSelector('a[href*="product-detail"], .search-result-item, [class*="search-result"]', { 
-        timeout: 6000 
-      });
+      await page.waitForSelector('a[href*="/product/"]', { timeout: 8000 });
       console.log('Found product links, waiting for content to load...');
     } catch (error) {
-      console.log('No product selectors found, continuing anyway...');
+      console.log('No product links found, continuing...');
     }
 
-    // Try to wait for any loading indicators to disappear with reduced timeout
+    // Wait for loading indicators to disappear
     try {
-      await page.waitForFunction(() => {
-        const loadingElements = document.querySelectorAll('[class*="loading"], [class*="spinner"], .loading, .spinner');
-        return loadingElements.length === 0;
-      }, { timeout: 3000 });
+      await page.waitForFunction(
+        () => !document.querySelector('.loading, .spinner, [class*="loading"]'),
+        { timeout: 5000 }
+      );
+      console.log('Loading indicators cleared');
     } catch (error) {
       console.log('Loading indicators still present, continuing...');
     }
