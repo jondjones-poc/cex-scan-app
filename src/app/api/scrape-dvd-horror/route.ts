@@ -203,9 +203,20 @@ export async function POST(request: NextRequest) {
     console.log(`Page title: ${pageTitle}`);
     console.log(`Current URL: ${currentUrl}`);
     
-    // Wait for product elements to appear
+    // Debug: Check what's actually on the page
+    const pageContent = await page.evaluate(() => {
+      return {
+        totalLinks: document.querySelectorAll('a').length,
+        productLinks: document.querySelectorAll('a[href*="product"]').length,
+        searchResults: document.querySelectorAll('[class*="search-result"]').length,
+        bodyText: document.body.textContent?.substring(0, 500) || 'No body text'
+      };
+    });
+    console.log('Page debug info:', pageContent);
+    
+    // Wait for product elements to appear - try multiple selectors for Horror DVDs
     try {
-      await page.waitForSelector('a[href*="/product/"]', { timeout: 8000 });
+      await page.waitForSelector('a[href*="/product/"], a[href*="product-detail"], .search-result-item, [class*="search-result"]', { timeout: 8000 });
       console.log('Found product links, waiting for content to load...');
     } catch (error) {
       console.log('No product links found, continuing...');
@@ -221,6 +232,9 @@ export async function POST(request: NextRequest) {
     } catch (error) {
       console.log('Loading indicators still present, continuing...');
     }
+    
+    // Additional wait for Horror DVDs to load
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
     const products = await page.evaluate(() => {
       const productElements: Array<{
@@ -231,19 +245,35 @@ export async function POST(request: NextRequest) {
         element: string;
       }> = [];
 
-      // Find all product links
-      const links = document.querySelectorAll('a[href*="/product/"]');
-      console.log(`Found ${links.length} potential product elements`);
+      // Try multiple selectors for Horror DVDs
+      const selectors = [
+        'a[href*="/product/"]',
+        'a[href*="product-detail"]', 
+        'a[href*="product"]',
+        '.search-result-item a',
+        '[class*="search-result"] a'
+      ];
       
-      // Also try alternative selectors
-      const altLinks = document.querySelectorAll('a[href*="product"]');
-      console.log(`Found ${altLinks.length} alternative product links`);
+      let allLinks: NodeListOf<Element> | null = null;
+      let selectorUsed = '';
       
-      // Check for any links at all
-      const allLinks = document.querySelectorAll('a');
-      console.log(`Found ${allLinks.length} total links on page`);
+      for (const selector of selectors) {
+        allLinks = document.querySelectorAll(selector);
+        console.log(`Trying selector "${selector}": Found ${allLinks.length} links`);
+        if (allLinks.length > 0) {
+          selectorUsed = selector;
+          break;
+        }
+      }
+      
+      if (!allLinks || allLinks.length === 0) {
+        console.log('No product links found with any selector');
+        return productElements;
+      }
+      
+      console.log(`Using selector "${selectorUsed}" with ${allLinks.length} links`);
 
-      links.forEach((link, index) => {
+      allLinks.forEach((link, index) => {
         if (index >= 50) return; // Limit to first 50 products
         
         const href = (link as HTMLAnchorElement).href;
@@ -252,7 +282,7 @@ export async function POST(request: NextRequest) {
         if (!name || name.length < 3) return;
         
         // Get container text for price extraction
-        const container = link.closest('[class*="product"], [class*="item"], [class*="card"]') || link.parentElement;
+        const container = link.closest('[class*="product"], [class*="item"], [class*="card"], [class*="search-result"]') || link.parentElement;
         const containerText = container ? container.textContent || '' : '';
         
         // Try to find price element
@@ -261,6 +291,8 @@ export async function POST(request: NextRequest) {
         if (priceElement && priceElement.textContent) {
           priceText = priceElement.textContent.trim();
         }
+        
+        console.log(`Product ${index}: "${name}" - Price: "${priceText}"`);
         
         productElements.push({
           name,
