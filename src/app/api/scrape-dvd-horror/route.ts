@@ -16,6 +16,7 @@ if (isNetlify) {
 }
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 30;
 
 // Helper function to validate if a string looks like a product name
 function isValidProductName(text: string, showAllProducts: boolean = false): boolean {
@@ -207,15 +208,15 @@ export async function POST(request: NextRequest) {
     // Navigate to the page with optimized settings
     await page.goto(url, { 
       waitUntil: 'domcontentloaded',
-      timeout: 20000 
+      timeout: 30000 
     });
 
     console.log('Page loaded, waiting for products to load...');
 
     // Wait for products to load - look for product elements with reduced timeout
     try {
-      await page.waitForSelector('a[href*="product-detail"]', { 
-        timeout: 8000 
+      await page.waitForSelector('a[href*="product-detail"], .search-result-item, [class*="search-result"]', { 
+        timeout: 6000 
       });
       console.log('Found product links, waiting for content to load...');
     } catch (error) {
@@ -227,7 +228,7 @@ export async function POST(request: NextRequest) {
       await page.waitForFunction(() => {
         const loadingElements = document.querySelectorAll('[class*="loading"], [class*="spinner"], .loading, .spinner');
         return loadingElements.length === 0;
-      }, { timeout: 5000 });
+      }, { timeout: 3000 });
     } catch (error) {
       console.log('Loading indicators still present, continuing...');
     }
