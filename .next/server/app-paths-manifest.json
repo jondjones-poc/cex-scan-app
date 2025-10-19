@@ -1,3 +1,4 @@
 {
+  "/api/scrape-dvd-horror/route": "app/api/scrape-dvd-horror/route.js",
   "/dvds/page": "app/dvds/page.js"
 }
