@@ -342,7 +342,11 @@ export default function DVDsPage() {
       {/* Store Selection - 50% width buttons */}
       <div style={{ marginBottom: "16px" }}>
         <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }} className="store-buttons-container">
-          {settings?.stores?.map((storeGroup) => {
+          {!settings ? (
+            <div style={{ color: "#a0a0a0", fontSize: "14px", padding: "20px", textAlign: "center", width: "100%" }}>
+              Loading store options...
+            </div>
+          ) : settings.stores && settings.stores.length > 0 ? settings.stores.map((storeGroup) => {
             const isSelected = selectedStoreGroup === storeGroup.name;
             return (
               <button
@@ -383,7 +387,11 @@ export default function DVDsPage() {
                 {storeGroup.name === 'Home' ? '🎮' : storeGroup.name === 'London' ? '🎧' : storeGroup.name === 'Near home' ? '🕹️' : '🧑‍💻'} {storeGroup.name}
               </button>
             );
-          })}
+          }) : (
+            <div style={{ color: "#a0a0a0", fontSize: "14px", padding: "20px", textAlign: "center", width: "100%" }}>
+              No store options available
+            </div>
+          )}
         </div>
       </div>
 
@@ -422,7 +430,9 @@ export default function DVDsPage() {
           >
             <option value="" style={{ backgroundColor: "#1a1a2e", color: "#ffffff" }}>All</option>
             <option value="horror" style={{ backgroundColor: "#1a1a2e", color: "#ffffff" }}>Horror</option>
-            {settings?.dvdCategoryIds?.map((categoryId) => {
+            {!settings ? (
+              <option value="" style={{ backgroundColor: "#1a1a2e", color: "#ffffff" }} disabled>Loading categories...</option>
+            ) : settings?.dvdCategoryIds?.map((categoryId) => {
               const categoryName = getCategoryName(categoryId);
               return (
                 <option key={categoryId} value={categoryId} style={{ backgroundColor: "#1a1a2e", color: "#ffffff" }}>

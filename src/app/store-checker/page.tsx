@@ -480,7 +480,6 @@ export default function StoreCheckerPage() {
       {/* Results */}
       {results.length > 0 && (
         <div>
-          <h2>Store Results</h2>
           {results.map((result, index) => (
             <div key={index} style={{ marginBottom: "24px" }}>
               <h3>
@@ -494,60 +493,116 @@ export default function StoreCheckerPage() {
                 <div>
                   {/* In Stock Products */}
                   <div style={{ marginBottom: "24px" }}>
-                    <h4 style={{ margin: "0 0 12px 0", color: "#28a745" }}>
-                      ✅ In Stock ({result.products.length})
-                    </h4>
-                    <table className="table" key={`in-stock-table-${settings?.categoryMap ? 'loaded' : 'loading'}`}>
-                      <thead>
-                        <tr>
-                          <th>Image</th>
-                          <th>Name</th>
-                          <th>Price</th>
-                          <th>Category</th>
-                          <th>Product</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {result.products.map((product) => (
-                          <tr key={product.productId}>
-                            <td>
-                              {product.imageUrl ? (
-                                <img 
-                                  src={`/api/image-proxy?url=${encodeURIComponent(product.imageUrl)}`}
-                                  alt={product.name || 'Product'} 
-                                  style={{
-                                    width: '40px',
-                                    height: '40px',
-                                    objectFit: 'cover',
-                                    borderRadius: '4px'
-                                  }}
-                                />
-                              ) : (
-                                <div style={{
-                                  width: '40px',
-                                  height: '40px',
-                                  backgroundColor: '#f0f0f0',
-                                  borderRadius: '4px',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  fontSize: '12px',
-                                  color: '#666'
-                                }}>
-                                  No Image
-                                </div>
-                              )}
-                            </td>
-                            <td>{product.name}</td>
-                            <td>{product.price}</td>
-                            <td>{getCategoryName(product.categoryId)}</td>
-                            <td>
-                              <a href={product.url} target="_blank" rel="noreferrer">Open</a>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                    <div style={{ 
+                      display: "grid", 
+                      gap: "16px", 
+                      gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))" 
+                    }}>
+                      {result.products.map((product) => (
+                        <div 
+                          key={product.productId}
+                          style={{
+                            padding: "16px",
+                            border: "1px solid #7b2cbf",
+                            borderRadius: "8px",
+                            backgroundColor: "#1a1a2e",
+                            transition: "all 0.2s ease"
+                          }}
+                          onMouseOver={(e) => {
+                            e.currentTarget.style.boxShadow = "0 4px 12px rgba(123, 44, 191, 0.3)";
+                            e.currentTarget.style.transform = "translateY(-2px)";
+                            e.currentTarget.style.borderColor = "#c084fc";
+                          }}
+                          onMouseOut={(e) => {
+                            e.currentTarget.style.boxShadow = "none";
+                            e.currentTarget.style.transform = "translateY(0)";
+                            e.currentTarget.style.borderColor = "#7b2cbf";
+                          }}
+                        >
+                          <div style={{ display: "flex", gap: "12px" }}>
+                            {product.imageUrl ? (
+                              <img 
+                                src={`/api/image-proxy?url=${encodeURIComponent(product.imageUrl)}`}
+                                alt={product.name || 'Product'} 
+                                style={{
+                                  width: "60px",
+                                  height: "60px",
+                                  objectFit: "cover",
+                                  borderRadius: "4px",
+                                  flexShrink: 0
+                                }}
+                                onError={(e) => {
+                                  e.currentTarget.style.display = "none";
+                                }}
+                              />
+                            ) : (
+                              <div style={{
+                                width: "60px",
+                                height: "60px",
+                                backgroundColor: "#2a2a3e",
+                                borderRadius: "4px",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                fontSize: "12px",
+                                color: "#a0a0a0",
+                                flexShrink: 0
+                              }}>
+                                No Image
+                              </div>
+                            )}
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <h3 style={{ 
+                                fontSize: "16px", 
+                                fontWeight: "600", 
+                                marginBottom: "8px", 
+                                color: "#ffffff",
+                                lineHeight: "1.3"
+                              }}>
+                                {product.name}
+                              </h3>
+                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                                <span style={{ fontSize: "18px", fontWeight: "700", color: "#ff66a3" }}>
+                                  {product.price || "N/A"}
+                                </span>
+                                <span style={{ fontSize: "12px", color: "#28a745", backgroundColor: "rgba(40, 167, 69, 0.2)", padding: "2px 6px", borderRadius: "4px" }}>
+                                  In Stock
+                                </span>
+                              </div>
+                              <div style={{ fontSize: "12px", color: "#a0a0a0", marginBottom: "8px" }}>
+                                {getCategoryName(product.categoryId)}
+                              </div>
+                              <a 
+                                href={product.url} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                style={{
+                                  display: "inline-block",
+                                  padding: "6px 12px",
+                                  backgroundColor: "#7b2cbf",
+                                  color: "white",
+                                  textDecoration: "none",
+                                  borderRadius: "4px",
+                                  fontSize: "12px",
+                                  fontWeight: "500",
+                                  transition: "all 0.2s ease"
+                                }}
+                                onMouseOver={(e) => {
+                                  e.currentTarget.style.backgroundColor = "#6b21a8";
+                                  e.currentTarget.style.transform = "translateY(-1px)";
+                                }}
+                                onMouseOut={(e) => {
+                                  e.currentTarget.style.backgroundColor = "#7b2cbf";
+                                  e.currentTarget.style.transform = "translateY(0)";
+                                }}
+                              >
+                                View on CEX →
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
                   {/* Out of Stock Products - Currently empty but structure ready */}

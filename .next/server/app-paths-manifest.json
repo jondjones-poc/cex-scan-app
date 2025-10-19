@@ -1,9 +1,7 @@
 {
+  "/api/scrape-dvd-horror/route": "app/api/scrape-dvd-horror/route.js",
+  "/api/image-proxy/route": "app/api/image-proxy/route.js",
   "/api/settings/route": "app/api/settings/route.js",
   "/dvds/page": "app/dvds/page.js",
-  "/modern-game-search/page": "app/modern-game-search/page.js",
-  "/retro-game-checker/page": "app/retro-game-checker/page.js",
-  "/store-checker/page": "app/store-checker/page.js",
-  "/cex-link/page": "app/cex-link/page.js",
-  "/store-links/page": "app/store-links/page.js"
+  "/api/scrape-search-puppeteer/route": "app/api/scrape-search-puppeteer/route.js"
 }
