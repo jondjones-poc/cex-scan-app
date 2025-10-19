@@ -1,10 +1,11 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 export default function Navigation() {
   const pathname = usePathname();
+  const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const navRef = useRef<HTMLElement>(null);
@@ -214,11 +215,14 @@ export default function Navigation() {
             flexDirection: "column"
           }}>
             {navItems.map((item) => (
-              <Link 
+              <button
                 key={item.href}
-                href={item.href} 
-                onClick={() => setIsMobileMenuOpen(false)}
-                onTouchEnd={() => setIsMobileMenuOpen(false)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setIsMobileMenuOpen(false);
+                  // Use router.push for proper Next.js navigation
+                  router.push(item.href);
+                }}
                 style={{
                   ...linkStyle(item.href),
                   marginBottom: "8px",
@@ -227,11 +231,14 @@ export default function Navigation() {
                   alignItems: "center",
                   touchAction: "manipulation",
                   width: "100%",
-                  textAlign: "left"
+                  textAlign: "left",
+                  border: "none",
+                  background: "transparent",
+                  cursor: "pointer"
                 }}
               >
                 {item.label}
-              </Link>
+              </button>
             ))}
           </div>
         </>
