@@ -91,17 +91,6 @@ export default function CEXLinkPage() {
         <>
           {/* Store Dropdown */}
           <div style={{ marginBottom: "32px" }}>
-            <label style={{ 
-              display: "block", 
-              marginBottom: "12px", 
-              fontSize: "16px",
-              fontWeight: "600",
-              color: "#00ffff",
-              textTransform: "uppercase",
-              letterSpacing: "1px"
-            }}>
-              Select Store
-            </label>
             <select 
               value={selectedStore} 
               onChange={(e) => setSelectedStore(e.target.value)}
@@ -400,17 +389,6 @@ export default function CEXLinkPage() {
             </div>
           )}
 
-          {!selectedStore && (
-            <div style={{
-              padding: "60px 40px",
-              textAlign: "center",
-              color: "#666",
-              fontSize: "18px",
-              fontWeight: "500"
-            }}>
-              Please select a store to view CEX links
-            </div>
-          )}
         </>
       )}
     </div>

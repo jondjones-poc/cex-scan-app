@@ -104,77 +104,119 @@ export default function StatusTable({ results, loading, onCheckProducts, canChec
       
       {results.length > 0 && (
         <>
-          {/* Sort Info */}
-          <div style={{ marginBottom: "16px" }}>
-            <span className="muted" style={{ fontSize: "14px" }}>
-              In Stock: Sorted by quantity (highest first) | Out of Stock: Sorted by name (A-Z)
-            </span>
-          </div>
 
           {/* In Stock Results - Always show this section */}
           <div style={{ marginBottom: "24px" }}>
-            <h3 style={{ margin: "0 0 8px 0", color: "#28a745" }}>✅ In Stock ({inStockResults.length})</h3>
+            <h3 style={{ margin: "0 0 16px 0", color: "#28a745", fontSize: "20px", fontWeight: "600" }}>✅ In Stock ({inStockResults.length})</h3>
             {inStockResults.length > 0 ? (
-              <table className="table" style={{ textAlign: 'center' }}>
-                <thead>
-                  <tr>
-                    <th style={{ textAlign: 'center', width: '80px' }}>Image</th>
-                    <th style={{ textAlign: 'center', width: '200px' }}>Name</th>
-                    <th style={{ textAlign: 'center', width: '80px' }}>Price</th>
-                    <th style={{ textAlign: 'center', width: '80px' }}>Quantity</th>
-                    <th style={{ textAlign: 'center', width: '120px' }}>Product ID</th>
-                    <th style={{ textAlign: 'center', width: '80px' }}>Product</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {inStockResults.map(r => (
-                    <tr key={r.productId}>
-                      <td style={{ textAlign: 'center' }}>
-                        {r.imageUrl ? (
-                          <img 
-                            src={`/api/image-proxy?url=${encodeURIComponent(r.imageUrl)}`}
-                            alt={r.name || 'Product'} 
-                            style={{
-                              width: '40px',
-                              height: '40px',
-                              objectFit: 'cover',
-                              borderRadius: '4px',
-                              border: '1px solid #ddd'
-                            }}
-                            onError={(e) => {
-                              // Hide image if it fails to load
-                              (e.target as HTMLImageElement).style.display = 'none';
-                            }}
-                          />
-                        ) : (
-                          <div style={{
-                            width: '40px',
-                            height: '40px',
-                            backgroundColor: '#f0f0f0',
-                            borderRadius: '4px',
-                            border: '1px solid #ddd',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: '12px',
-                            color: '#666',
-                            margin: '0 auto'
-                          }}>
-                            No img
-                          </div>
-                        )}
-                      </td>
-                      <td style={{ textAlign: 'center' }}>{r.name}</td>
-                      <td style={{ textAlign: 'center' }}>{r.price || "N/A"}</td>
-                      <td style={{ textAlign: 'center' }}>{r.quantity ?? 0}</td>
-                      <td style={{ textAlign: 'center' }}>{r.productId}</td>
-                      <td style={{ textAlign: 'center' }}>
-                        <a href={r.url} target="_blank" rel="noreferrer">Open</a>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <div style={{ 
+                display: "grid", 
+                gap: "16px", 
+                gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))" 
+              }}>
+                {inStockResults.map(r => (
+                  <div 
+                    key={r.productId}
+                    style={{
+                      padding: "16px",
+                      border: "1px solid #7b2cbf",
+                      borderRadius: "8px",
+                      backgroundColor: "#1a1a2e",
+                      transition: "all 0.2s ease"
+                    }}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.boxShadow = "0 4px 12px rgba(123, 44, 191, 0.3)";
+                      e.currentTarget.style.transform = "translateY(-2px)";
+                      e.currentTarget.style.borderColor = "#c084fc";
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.boxShadow = "none";
+                      e.currentTarget.style.transform = "translateY(0)";
+                      e.currentTarget.style.borderColor = "#7b2cbf";
+                    }}
+                  >
+                    <div style={{ display: "flex", gap: "12px" }}>
+                      {r.imageUrl ? (
+                        <img 
+                          src={`/api/image-proxy?url=${encodeURIComponent(r.imageUrl)}`}
+                          alt={r.name || 'Product'} 
+                          style={{
+                            width: "60px",
+                            height: "60px",
+                            objectFit: "cover",
+                            borderRadius: "4px",
+                            flexShrink: 0
+                          }}
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none";
+                          }}
+                        />
+                      ) : (
+                        <div style={{
+                          width: "60px",
+                          height: "60px",
+                          backgroundColor: "#2a2a3e",
+                          borderRadius: "4px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: "12px",
+                          color: "#a0a0a0",
+                          flexShrink: 0
+                        }}>
+                          No Image
+                        </div>
+                      )}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <h3 style={{ 
+                          fontSize: "16px", 
+                          fontWeight: "600", 
+                          marginBottom: "8px", 
+                          color: "#ffffff",
+                          lineHeight: "1.3"
+                        }}>
+                          {r.name}
+                        </h3>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                          <span style={{ fontSize: "18px", fontWeight: "700", color: "#ff66a3" }}>
+                            {r.price || "N/A"}
+                          </span>
+                          <span style={{ fontSize: "12px", color: "#28a745", backgroundColor: "rgba(40, 167, 69, 0.2)", padding: "2px 6px", borderRadius: "4px" }}>
+                            Qty: {r.quantity ?? 0}
+                          </span>
+                        </div>
+                        <div style={{ fontSize: "12px", color: "#a0a0a0", marginBottom: "8px" }}>
+                          ID: {r.productId}
+                        </div>
+                        <a 
+                          href={r.url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          style={{
+                            display: "inline-block",
+                            padding: "6px 12px",
+                            backgroundColor: "#7b2cbf",
+                            color: "white",
+                            textDecoration: "none",
+                            borderRadius: "4px",
+                            fontSize: "12px",
+                            fontWeight: "500",
+                            transition: "all 0.2s ease"
+                          }}
+                          onMouseOver={(e) => {
+                            e.currentTarget.style.backgroundColor = "#6b21a8";
+                          }}
+                          onMouseOut={(e) => {
+                            e.currentTarget.style.backgroundColor = "#7b2cbf";
+                          }}
+                        >
+                          View on CEX →
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             ) : (
               <p className="muted" style={{ margin: "8px 0", fontStyle: "italic" }}>
                 No products in stock
@@ -184,68 +226,116 @@ export default function StatusTable({ results, loading, onCheckProducts, canChec
 
           {/* Out of Stock Results - Always show this section */}
           <div style={{ marginBottom: "24px" }}>
-            <h3 style={{ margin: "0 0 8px 0", color: "#dc3545" }}>❌ Out of Stock ({outOfStockResults.length})</h3>
+            <h3 style={{ margin: "0 0 16px 0", color: "#dc3545", fontSize: "20px", fontWeight: "600" }}>❌ Out of Stock ({outOfStockResults.length})</h3>
             {outOfStockResults.length > 0 ? (
-              <table className="table" style={{ textAlign: 'center' }}>
-                <thead>
-                  <tr>
-                    <th style={{ textAlign: 'center', width: '80px' }}>Image</th>
-                    <th style={{ textAlign: 'center', width: '200px' }}>Name</th>
-                    <th style={{ textAlign: 'center', width: '80px' }}>Price</th>
-                    <th style={{ textAlign: 'center', width: '80px' }}>Quantity</th>
-                    <th style={{ textAlign: 'center', width: '120px' }}>Product ID</th>
-                    <th style={{ textAlign: 'center', width: '80px' }}>Product</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {outOfStockResults.map(r => (
-                    <tr key={r.productId}>
-                      <td style={{ textAlign: 'center' }}>
-                        {r.imageUrl ? (
-                          <img 
-                            src={`/api/image-proxy?url=${encodeURIComponent(r.imageUrl)}`}
-                            alt={r.name || 'Product'} 
-                            style={{
-                              width: '40px',
-                              height: '40px',
-                              objectFit: 'cover',
-                              borderRadius: '4px',
-                              border: '1px solid #ddd'
-                            }}
-                            onError={(e) => {
-                              // Hide image if it fails to load
-                              (e.target as HTMLImageElement).style.display = 'none';
-                            }}
-                          />
-                        ) : (
-                          <div style={{
-                            width: '40px',
-                            height: '40px',
-                            backgroundColor: '#f0f0f0',
-                            borderRadius: '4px',
-                            border: '1px solid #ddd',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: '12px',
-                            color: '#666',
-                            margin: '0 auto'
-                          }}>
-                            No img
-                          </div>
-                        )}
-                      </td>
-                      <td style={{ textAlign: 'center' }}>{r.name}</td>
-                      <td style={{ textAlign: 'center' }}>{r.price || "N/A"}</td>
-                      <td style={{ textAlign: 'center' }}>{r.quantity ?? 0}</td>
-                      <td style={{ textAlign: 'center' }}>{r.productId}</td>
-                      <td style={{ textAlign: 'center' }}>
-                        <a href={r.url} target="_blank" rel="noreferrer">Open</a>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <div style={{ 
+                display: "grid", 
+                gap: "16px", 
+                gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))" 
+              }}>
+                {outOfStockResults.map(r => (
+                  <div 
+                    key={r.productId}
+                    style={{
+                      padding: "16px",
+                      border: "1px solid #7b2cbf",
+                      borderRadius: "8px",
+                      backgroundColor: "#1a1a2e",
+                      transition: "all 0.2s ease"
+                    }}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.boxShadow = "0 4px 12px rgba(123, 44, 191, 0.3)";
+                      e.currentTarget.style.transform = "translateY(-2px)";
+                      e.currentTarget.style.borderColor = "#c084fc";
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.boxShadow = "none";
+                      e.currentTarget.style.transform = "translateY(0)";
+                      e.currentTarget.style.borderColor = "#7b2cbf";
+                    }}
+                  >
+                    <div style={{ display: "flex", gap: "12px" }}>
+                      {r.imageUrl ? (
+                        <img 
+                          src={`/api/image-proxy?url=${encodeURIComponent(r.imageUrl)}`}
+                          alt={r.name || 'Product'} 
+                          style={{
+                            width: "60px",
+                            height: "60px",
+                            objectFit: "cover",
+                            borderRadius: "4px",
+                            flexShrink: 0
+                          }}
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none";
+                          }}
+                        />
+                      ) : (
+                        <div style={{
+                          width: "60px",
+                          height: "60px",
+                          backgroundColor: "#2a2a3e",
+                          borderRadius: "4px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: "12px",
+                          color: "#a0a0a0",
+                          flexShrink: 0
+                        }}>
+                          No Image
+                        </div>
+                      )}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <h3 style={{ 
+                          fontSize: "16px", 
+                          fontWeight: "600", 
+                          marginBottom: "8px", 
+                          color: "#ffffff",
+                          lineHeight: "1.3"
+                        }}>
+                          {r.name}
+                        </h3>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                          <span style={{ fontSize: "18px", fontWeight: "700", color: "#ff66a3" }}>
+                            {r.price || "N/A"}
+                          </span>
+                          <span style={{ fontSize: "12px", color: "#dc3545", backgroundColor: "rgba(220, 53, 69, 0.2)", padding: "2px 6px", borderRadius: "4px" }}>
+                            Out of Stock
+                          </span>
+                        </div>
+                        <div style={{ fontSize: "12px", color: "#a0a0a0", marginBottom: "8px" }}>
+                          ID: {r.productId}
+                        </div>
+                        <a 
+                          href={r.url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          style={{
+                            display: "inline-block",
+                            padding: "6px 12px",
+                            backgroundColor: "#7b2cbf",
+                            color: "white",
+                            textDecoration: "none",
+                            borderRadius: "4px",
+                            fontSize: "12px",
+                            fontWeight: "500",
+                            transition: "all 0.2s ease"
+                          }}
+                          onMouseOver={(e) => {
+                            e.currentTarget.style.backgroundColor = "#6b21a8";
+                          }}
+                          onMouseOut={(e) => {
+                            e.currentTarget.style.backgroundColor = "#7b2cbf";
+                          }}
+                        >
+                          View on CEX →
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             ) : (
               <p className="muted" style={{ margin: "8px 0", fontStyle: "italic" }}>
                 No products out of stock
@@ -255,74 +345,121 @@ export default function StatusTable({ results, loading, onCheckProducts, canChec
 
           {/* Failed Results - Only show if there are failed products */}
           {failedResults.length > 0 && (
-            <div>
-              <h3 style={{ margin: "0 0 8px 0", color: "#ffc107" }}>⚠️ Failed ({failedResults.length})</h3>
-              <table className="table" style={{ textAlign: 'center' }}>
-                <thead>
-                  <tr>
-                    <th style={{ textAlign: 'center', width: '80px' }}>Image</th>
-                    <th style={{ textAlign: 'center', width: '150px' }}>Name</th>
-                    <th style={{ textAlign: 'center', width: '80px' }}>Price</th>
-                    <th style={{ textAlign: 'center', width: '80px' }}>Quantity</th>
-                    <th style={{ textAlign: 'center', width: '120px' }}>Product ID</th>
-                    <th style={{ textAlign: 'center', width: '80px' }}>Status</th>
-                    <th style={{ textAlign: 'center', width: '150px' }}>Error Details</th>
-                    <th style={{ textAlign: 'center', width: '80px' }}>Product</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {failedResults.map(r => (
-                    <tr key={r.productId}>
-                      <td style={{ textAlign: 'center' }}>
-                        {r.imageUrl ? (
-                          <img 
-                            src={`/api/image-proxy?url=${encodeURIComponent(r.imageUrl)}`}
-                            alt={r.name || 'Product'} 
-                            style={{
-                              width: '40px',
-                              height: '40px',
-                              objectFit: 'cover',
-                              borderRadius: '4px',
-                              border: '1px solid #ddd'
-                            }}
-                            onError={(e) => {
-                              // Hide image if it fails to load
-                              (e.target as HTMLImageElement).style.display = 'none';
-                            }}
-                          />
-                        ) : (
-                          <div style={{
-                            width: '40px',
-                            height: '40px',
-                            backgroundColor: '#f0f0f0',
-                            borderRadius: '4px',
-                            border: '1px solid #ddd',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: '12px',
-                            color: '#666',
-                            margin: '0 auto'
-                          }}>
-                            No img
+            <div style={{ marginBottom: "24px" }}>
+              <h3 style={{ margin: "0 0 16px 0", color: "#ffc107", fontSize: "20px", fontWeight: "600" }}>⚠️ Failed ({failedResults.length})</h3>
+              <div style={{ 
+                display: "grid", 
+                gap: "16px", 
+                gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))" 
+              }}>
+                {failedResults.map(r => (
+                  <div 
+                    key={r.productId}
+                    style={{
+                      padding: "16px",
+                      border: "1px solid #7b2cbf",
+                      borderRadius: "8px",
+                      backgroundColor: "#1a1a2e",
+                      transition: "all 0.2s ease"
+                    }}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.boxShadow = "0 4px 12px rgba(123, 44, 191, 0.3)";
+                      e.currentTarget.style.transform = "translateY(-2px)";
+                      e.currentTarget.style.borderColor = "#c084fc";
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.boxShadow = "none";
+                      e.currentTarget.style.transform = "translateY(0)";
+                      e.currentTarget.style.borderColor = "#7b2cbf";
+                    }}
+                  >
+                    <div style={{ display: "flex", gap: "12px" }}>
+                      {r.imageUrl ? (
+                        <img 
+                          src={`/api/image-proxy?url=${encodeURIComponent(r.imageUrl)}`}
+                          alt={r.name || 'Product'} 
+                          style={{
+                            width: "60px",
+                            height: "60px",
+                            objectFit: "cover",
+                            borderRadius: "4px",
+                            flexShrink: 0
+                          }}
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none";
+                          }}
+                        />
+                      ) : (
+                        <div style={{
+                          width: "60px",
+                          height: "60px",
+                          backgroundColor: "#2a2a3e",
+                          borderRadius: "4px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: "12px",
+                          color: "#a0a0a0",
+                          flexShrink: 0
+                        }}>
+                          No Image
+                        </div>
+                      )}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <h3 style={{ 
+                          fontSize: "16px", 
+                          fontWeight: "600", 
+                          marginBottom: "8px", 
+                          color: "#ffffff",
+                          lineHeight: "1.3"
+                        }}>
+                          {r.name || "N/A"}
+                        </h3>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                          <span style={{ fontSize: "18px", fontWeight: "700", color: "#ff66a3" }}>
+                            {r.price || "N/A"}
+                          </span>
+                          <span style={{ fontSize: "12px", color: "#ffc107", backgroundColor: "rgba(255, 193, 7, 0.2)", padding: "2px 6px", borderRadius: "4px" }}>
+                            {r.stockNote?.includes("Error") ? "Error" : "Failed"}
+                          </span>
+                        </div>
+                        <div style={{ fontSize: "12px", color: "#a0a0a0", marginBottom: "8px" }}>
+                          ID: {r.productId}
+                        </div>
+                        {r.stockNote && (
+                          <div style={{ fontSize: "11px", color: "#ffc107", marginBottom: "8px", fontStyle: "italic" }}>
+                            {r.stockNote}
                           </div>
                         )}
-                      </td>
-                      <td style={{ textAlign: 'center' }}>{r.name || "N/A"}</td>
-                      <td style={{ textAlign: 'center' }}>{r.price || "N/A"}</td>
-                      <td style={{ textAlign: 'center' }}>{r.quantity ?? 0}</td>
-                      <td style={{ textAlign: 'center' }}>{r.productId}</td>
-                      <td style={{ textAlign: 'center' }} className="bad">
-                        {r.stockNote?.includes("Error") ? "Error" : "Failed"}
-                      </td>
-                      <td style={{ textAlign: 'center' }} className="muted">{r.stockNote || ""}</td>
-                      <td style={{ textAlign: 'center' }}>
-                        <a href={r.url} target="_blank" rel="noreferrer">Open</a>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                        <a 
+                          href={r.url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          style={{
+                            display: "inline-block",
+                            padding: "6px 12px",
+                            backgroundColor: "#7b2cbf",
+                            color: "white",
+                            textDecoration: "none",
+                            borderRadius: "4px",
+                            fontSize: "12px",
+                            fontWeight: "500",
+                            transition: "all 0.2s ease"
+                          }}
+                          onMouseOver={(e) => {
+                            e.currentTarget.style.backgroundColor = "#6b21a8";
+                          }}
+                          onMouseOut={(e) => {
+                            e.currentTarget.style.backgroundColor = "#7b2cbf";
+                          }}
+                        >
+                          View on CEX →
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </>
@@ -334,85 +471,85 @@ export default function StatusTable({ results, loading, onCheckProducts, canChec
             onClick={() => onCheckProducts('essential')}
             disabled={loading || !canCheck}
             style={{
-              padding: "14px 24px",
-              fontSize: "15px",
+              flex: "1",
+              padding: "16px",
+              fontSize: "16px",
               fontWeight: "600",
-              backgroundColor: loading || !canCheck ? "#ccc" : "#ff0066",
-              color: "white",
-              border: (checkType === 'essential' && !loading && canCheck) ? "3px solid #ff66a3" : "none",
+              backgroundColor: loading || !canCheck ? "#333" : "#1a1a2e",
+              color: "#ffffff",
+              border: (checkType === 'essential' && !loading && canCheck) ? "2px solid rgba(0, 255, 255, 0.8)" : "2px solid rgba(0, 255, 255, 0.3)",
               borderRadius: "8px",
               cursor: loading || !canCheck ? "not-allowed" : "pointer",
-              minWidth: "140px",
               boxShadow: (checkType === 'essential' && !loading && canCheck)
-                ? "0 0 0 3px rgba(255, 102, 163, 0.3), 0 6px 20px rgba(255, 0, 102, 0.5)"
-                : (loading || !canCheck) ? "none" : "0 4px 15px rgba(255, 0, 102, 0.3)",
+                ? "0 0 0 3px rgba(0, 255, 255, 0.3), 0 4px 20px rgba(0, 255, 255, 0.4)"
+                : (loading || !canCheck) ? "none" : "0 4px 20px rgba(0, 255, 255, 0.2)",
               transition: "all 0.3s ease",
-              transform: (checkType === 'essential' && !loading && canCheck) ? "scale(1.05)" : "scale(1)"
+              transform: (checkType === 'essential' && !loading && canCheck) ? "scale(1.02)" : "scale(1)"
             }}
             onMouseOver={(e) => {
               if (!loading && canCheck) {
-                e.currentTarget.style.backgroundColor = "#cc0052";
+                e.currentTarget.style.backgroundColor = "#2a2a4e";
                 const isSelected = checkType === 'essential';
                 e.currentTarget.style.boxShadow = isSelected
-                  ? "0 0 0 3px rgba(255, 102, 163, 0.3), 0 6px 20px rgba(255, 0, 102, 0.5)"
-                  : "0 6px 20px rgba(255, 0, 102, 0.5)";
+                  ? "0 0 0 3px rgba(0, 255, 255, 0.3), 0 4px 20px rgba(0, 255, 255, 0.4)"
+                  : "0 6px 20px rgba(0, 255, 255, 0.3)";
                 e.currentTarget.style.transform = "scale(1.02)";
               }
             }}
             onMouseOut={(e) => {
               if (!loading && canCheck) {
                 const isSelected = checkType === 'essential';
-                e.currentTarget.style.backgroundColor = "#ff0066";
+                e.currentTarget.style.backgroundColor = "#1a1a2e";
                 e.currentTarget.style.boxShadow = isSelected
-                  ? "0 0 0 3px rgba(255, 102, 163, 0.3), 0 6px 20px rgba(255, 0, 102, 0.5)"
-                  : "0 4px 15px rgba(255, 0, 102, 0.3)";
-                e.currentTarget.style.transform = isSelected ? "scale(1.05)" : "scale(1)";
+                  ? "0 0 0 3px rgba(0, 255, 255, 0.3), 0 4px 20px rgba(0, 255, 255, 0.4)"
+                  : "0 4px 20px rgba(0, 255, 255, 0.2)";
+                e.currentTarget.style.transform = isSelected ? "scale(1.02)" : "scale(1)";
               }
             }}
           >
-            {loading && checkType === 'essential' ? "Checking..." : "Essentials"}
+            {loading && checkType === 'essential' ? "Checking..." : "⚡ Essentials"}
           </button>
           <button 
             onClick={() => onCheckProducts('oneDay')}
             disabled={loading || !canCheck}
             style={{
-              padding: "14px 24px",
-              fontSize: "15px",
+              flex: "1",
+              padding: "16px",
+              fontSize: "16px",
               fontWeight: "600",
-              backgroundColor: loading || !canCheck ? "#ccc" : "#ff0066",
-              color: "white",
-              border: (checkType === 'oneDay' && !loading && canCheck) ? "3px solid #ff66a3" : "none",
+              backgroundColor: loading || !canCheck ? "#333" : "#1a1a2e",
+              color: "#ffffff",
+              border: (checkType === 'oneDay' && !loading && canCheck) ? "2px solid rgba(0, 255, 255, 0.8)" : "2px solid rgba(0, 255, 255, 0.3)",
               borderRadius: "8px",
               cursor: loading || !canCheck ? "not-allowed" : "pointer",
-              minWidth: "140px",
               boxShadow: (checkType === 'oneDay' && !loading && canCheck)
-                ? "0 0 0 3px rgba(255, 102, 163, 0.3), 0 6px 20px rgba(255, 0, 102, 0.5)"
-                : (loading || !canCheck) ? "none" : "0 4px 15px rgba(255, 0, 102, 0.3)",
+                ? "0 0 0 3px rgba(0, 255, 255, 0.3), 0 4px 20px rgba(0, 255, 255, 0.4)"
+                : (loading || !canCheck) ? "none" : "0 4px 20px rgba(0, 255, 255, 0.2)",
               transition: "all 0.3s ease",
-              transform: (checkType === 'oneDay' && !loading && canCheck) ? "scale(1.05)" : "scale(1)"
+              transform: (checkType === 'oneDay' && !loading && canCheck) ? "scale(1.02)" : "scale(1)"
             }}
             onMouseOver={(e) => {
               if (!loading && canCheck) {
-                e.currentTarget.style.backgroundColor = "#cc0052";
+                e.currentTarget.style.backgroundColor = "#2a2a4e";
                 const isSelected = checkType === 'oneDay';
                 e.currentTarget.style.boxShadow = isSelected
-                  ? "0 0 0 3px rgba(255, 102, 163, 0.3), 0 6px 20px rgba(255, 0, 102, 0.5)"
-                  : "0 6px 20px rgba(255, 0, 102, 0.5)";
+                  ? "0 0 0 3px rgba(0, 255, 255, 0.3), 0 4px 20px rgba(0, 255, 255, 0.4)"
+                  : "0 6px 20px rgba(0, 255, 255, 0.3)";
                 e.currentTarget.style.transform = "scale(1.02)";
               }
             }}
             onMouseOut={(e) => {
               if (!loading && canCheck) {
                 const isSelected = checkType === 'oneDay';
-                e.currentTarget.style.backgroundColor = "#ff0066";
+                e.currentTarget.style.backgroundColor = "#1a1a2e";
                 e.currentTarget.style.boxShadow = isSelected
-                  ? "0 0 0 3px rgba(255, 102, 163, 0.3), 0 6px 20px rgba(255, 0, 102, 0.5)"
-                  : "0 4px 15px rgba(255, 0, 102, 0.3)";
-                e.currentTarget.style.transform = isSelected ? "scale(1.05)" : "scale(1)";
+                  ? "0 0 0 3px rgba(0, 255, 255, 0.3), 0 4px 20px rgba(0, 255, 255, 0.4)"
+                  : "0 4px 20px rgba(0, 255, 255, 0.2)";
+                e.currentTarget.style.transform = isSelected ? "scale(1.02)" : "scale(1)";
               }
             }}
           >
-            {loading && checkType === 'oneDay' ? "Checking..." : "Nice to Have"}
+            {loading && checkType === 'oneDay' ? "Checking..." : "⭐ Nice to Have"}
           </button>
         </div>
         {!canCheck && (

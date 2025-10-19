@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -7,11 +7,12 @@ export default function Navigation() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const navRef = useRef<HTMLElement>(null);
 
   const navItems = [
     { href: "/", label: "Stock Checker" },
-    { href: "/whats-in-stock", label: "Retro Games" },
-    { href: "/disc-based-games", label: "Modern Games" },
+    { href: "/retro-game-checker", label: "Retro Games" },
+    { href: "/modern-game-search", label: "Modern Games" },
     { href: "/store-checker", label: "Store Checker" },
     { href: "/cex-link", label: "Store Links" },
     { href: "/store-links", label: "Location Links" },
@@ -25,25 +26,45 @@ export default function Navigation() {
       setIsMobile(isMobileDevice);
     };
     
+    // Check immediately
     checkMobile();
+    
+    // Also check after a short delay to handle any timing issues
+    const timeoutId = setTimeout(checkMobile, 100);
+    
+    // Check on resize
     window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    
+    // Check on orientation change
+    window.addEventListener('orientationchange', () => {
+      setTimeout(checkMobile, 100);
+    });
+    
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener('resize', checkMobile);
+      window.removeEventListener('orientationchange', checkMobile);
+    };
   }, []);
 
   // Close mobile menu when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (isMobileMenuOpen && isMobile) {
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+      if (isMobileMenuOpen && isMobile && navRef.current) {
         const target = event.target as HTMLElement;
-        if (!target.closest('nav')) {
+        if (!navRef.current.contains(target)) {
           setIsMobileMenuOpen(false);
         }
       }
     };
 
     if (isMobileMenuOpen) {
-      document.addEventListener('click', handleClickOutside);
-      return () => document.removeEventListener('click', handleClickOutside);
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+        document.removeEventListener('touchstart', handleClickOutside);
+      };
     }
   }, [isMobileMenuOpen, isMobile]);
 
@@ -73,24 +94,36 @@ export default function Navigation() {
   });
 
   return (
-    <nav style={{
+    <nav ref={navRef} style={{
       backgroundColor: "#e20a03",
       padding: "12px 24px",
       marginBottom: "24px",
-      borderRadius: "8px"
+      borderRadius: "8px",
+      position: "relative",
+      zIndex: 1000
     }}>
+      <style jsx global>{`
+        @media (max-width: 768px) {
+          .desktop-nav { display: none !important; }
+          .mobile-nav { display: flex !important; }
+        }
+        @media (min-width: 769px) {
+          .desktop-nav { display: flex !important; }
+          .mobile-nav { display: none !important; }
+        }
+      `}</style>
+
       <div style={{
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center"
       }}>
         {/* Desktop Navigation */}
-        {!isMobile && (
-          <div style={{
-            display: "flex",
-            gap: "24px",
-            alignItems: "center"
-          }}>
+        <div className="desktop-nav" style={{
+          display: isMobile ? "none" : "flex",
+          gap: "24px",
+          alignItems: "center"
+        }}>
             {navItems.map((item) => (
               <Link 
                 key={item.href}
@@ -100,49 +133,108 @@ export default function Navigation() {
                 {item.label}
               </Link>
             ))}
-          </div>
-        )}
+        </div>
 
-        {/* Mobile Menu Button */}
-        {isMobile && (
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            style={{
-              background: "none",
-              border: "none",
+        {/* Mobile Menu Button and Current Page */}
+        <div className="mobile-nav" style={{
+          display: isMobile ? "flex" : "none",
+          alignItems: "center",
+          gap: "12px"
+        }}>
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsMobileMenuOpen(!isMobileMenuOpen);
+              }}
+              onTouchEnd={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsMobileMenuOpen(!isMobileMenuOpen);
+              }}
+              style={{
+                background: "none",
+                border: "none",
+                color: "white",
+                fontSize: "24px",
+                cursor: "pointer",
+                padding: "12px",
+                minWidth: "44px",
+                minHeight: "44px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                touchAction: "manipulation"
+              }}
+              aria-label="Toggle mobile menu"
+            >
+              ☰
+            </button>
+            <div style={{
               color: "white",
-              fontSize: "24px",
-              cursor: "pointer",
-              padding: "8px"
-            }}
-            aria-label="Toggle mobile menu"
-          >
-            ☰
-          </button>
-        )}
+              fontSize: "16px",
+              fontWeight: "600",
+              textAlign: "right"
+            }}>
+              {navItems.find(item => item.href === pathname)?.label || "Stock Checker"}
+            </div>
+        </div>
       </div>
 
       {/* Mobile Dropdown Menu */}
-      {isMobile && isMobileMenuOpen && (
-        <div style={{
-          marginTop: "16px",
-          paddingTop: "16px",
-          borderTop: "1px solid rgba(255,255,255,0.2)"
-        }}>
-          {navItems.map((item) => (
-            <Link 
-              key={item.href}
-              href={item.href} 
-              onClick={() => setIsMobileMenuOpen(false)}
-              style={{
-                ...linkStyle(item.href),
-                marginBottom: "8px"
-              }}
-            >
-              {item.label}
-            </Link>
-          ))}
-        </div>
+      {isMobileMenuOpen && isMobile && (
+        <>
+          {/* Backdrop */}
+          <div 
+            style={{
+              position: "fixed",
+              top: "0",
+              left: "0",
+              right: "0",
+              bottom: "0",
+              backgroundColor: "rgba(0,0,0,0.5)",
+              zIndex: 1000
+            }}
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+          
+          {/* Menu */}
+          <div className="mobile-nav" style={{
+            position: "absolute",
+            top: "100%",
+            left: "0",
+            right: "0",
+            backgroundColor: "#e20a03",
+            borderRadius: "0 0 8px 8px",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
+            zIndex: 1001,
+            padding: "16px 0",
+            borderTop: "1px solid rgba(255,255,255,0.2)",
+            display: "flex",
+            flexDirection: "column"
+          }}>
+            {navItems.map((item) => (
+              <Link 
+                key={item.href}
+                href={item.href} 
+                onClick={() => setIsMobileMenuOpen(false)}
+                onTouchEnd={() => setIsMobileMenuOpen(false)}
+                style={{
+                  ...linkStyle(item.href),
+                  marginBottom: "8px",
+                  minHeight: "44px",
+                  display: "block",
+                  alignItems: "center",
+                  touchAction: "manipulation",
+                  width: "100%",
+                  textAlign: "left"
+                }}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        </>
       )}
     </nav>
   );

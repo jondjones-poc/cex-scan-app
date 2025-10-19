@@ -91,42 +91,51 @@ export default function StoreLinksPage() {
 
       {settings && (
         <>
-          {/* Store Group Dropdown */}
+          {/* Store Group Buttons */}
           <div style={{ marginBottom: "32px" }}>
-            <label style={{ 
-              display: "block", 
-              marginBottom: "12px", 
-              fontSize: "16px",
-              fontWeight: "600",
-              color: "#00ffff",
-              textTransform: "uppercase",
-              letterSpacing: "1px"
-            }}>
-              Select Area
-            </label>
-            <select 
-              value={selectedStoreGroup} 
-              onChange={(e) => setSelectedStoreGroup(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "16px",
-                fontSize: "16px",
-                border: "2px solid rgba(0, 255, 255, 0.3)",
-                borderRadius: "8px",
-                backgroundColor: "#1a1a2e",
-                color: "#ffffff",
-                cursor: "pointer",
-                fontWeight: "500",
-                boxShadow: "0 4px 20px rgba(0, 255, 255, 0.2)",
-                transition: "all 0.3s ease"
-              }}
-            >
+            <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
               {settings?.stores?.map((storeGroup) => (
-                <option key={storeGroup.name} value={storeGroup.name} style={{ backgroundColor: "#1a1a2e", color: "#ffffff" }}>
-                  {storeGroup.name}
-                </option>
+                <button
+                  key={storeGroup.name}
+                  onClick={() => setSelectedStoreGroup(storeGroup.name)}
+                  style={{
+                    flex: "1",
+                    minWidth: "200px",
+                    padding: "16px",
+                    fontSize: "16px",
+                    fontWeight: "600",
+                    backgroundColor: selectedStoreGroup === storeGroup.name ? "#1a1a2e" : "#1a1a2e",
+                    color: "#ffffff",
+                    border: selectedStoreGroup === storeGroup.name ? "2px solid rgba(0, 255, 255, 0.8)" : "2px solid rgba(0, 255, 255, 0.3)",
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                    boxShadow: selectedStoreGroup === storeGroup.name
+                      ? "0 0 0 3px rgba(0, 255, 255, 0.3), 0 4px 20px rgba(0, 255, 255, 0.4)"
+                      : "0 4px 20px rgba(0, 255, 255, 0.2)",
+                    transition: "all 0.3s ease",
+                    transform: selectedStoreGroup === storeGroup.name ? "scale(1.02)" : "scale(1)"
+                  }}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.backgroundColor = "#2a2a4e";
+                    const isSelected = selectedStoreGroup === storeGroup.name;
+                    e.currentTarget.style.boxShadow = isSelected
+                      ? "0 0 0 3px rgba(0, 255, 255, 0.3), 0 4px 20px rgba(0, 255, 255, 0.4)"
+                      : "0 6px 20px rgba(0, 255, 255, 0.3)";
+                    e.currentTarget.style.transform = "scale(1.02)";
+                  }}
+                  onMouseOut={(e) => {
+                    const isSelected = selectedStoreGroup === storeGroup.name;
+                    e.currentTarget.style.backgroundColor = "#1a1a2e";
+                    e.currentTarget.style.boxShadow = isSelected
+                      ? "0 0 0 3px rgba(0, 255, 255, 0.3), 0 4px 20px rgba(0, 255, 255, 0.4)"
+                      : "0 4px 20px rgba(0, 255, 255, 0.2)";
+                    e.currentTarget.style.transform = isSelected ? "scale(1.02)" : "scale(1)";
+                  }}
+                >
+                  🏠 {storeGroup.name}
+                </button>
               ))}
-            </select>
+            </div>
           </div>
 
           {/* Game Category Links */}
@@ -398,17 +407,6 @@ export default function StoreLinksPage() {
             </div>
           )}
 
-          {!selectedStoreGroup && (
-            <div style={{
-              padding: "60px 40px",
-              textAlign: "center",
-              color: "#666",
-              fontSize: "18px",
-              fontWeight: "500"
-            }}>
-              Please select a store group to view CEX links
-            </div>
-          )}
         </>
       )}
     </div>

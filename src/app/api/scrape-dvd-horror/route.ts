@@ -306,8 +306,9 @@ export async function POST(request: NextRequest) {
           
           // Get product ID from URL
           let productId = '';
-          if (link.href) {
-            const urlMatch = link.href.match(/\/product\/([^\/\?]+)/);
+          const linkElement = link as HTMLAnchorElement;
+          if (linkElement.href) {
+            const urlMatch = linkElement.href.match(/\/product\/([^\/\?]+)/);
             if (urlMatch) {
               productId = urlMatch[1];
             }
@@ -331,7 +332,7 @@ export async function POST(request: NextRequest) {
           
           productElements.push({
             name: link.textContent.trim(),
-            url: link.href,
+            url: linkElement.href,
             containerText,
             priceText: finalPrice,
             imageUrl,

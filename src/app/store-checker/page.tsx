@@ -255,140 +255,138 @@ export default function StoreCheckerPage() {
 
   return (
     <div>
-      {/* Category and Scan Mode Controls */}
-      <div style={{ marginBottom: "12px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "16px", justifyContent: "space-between" }}>
-          {/* Category Mode Buttons (Left - Red) */}
-          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", flex: 1 }}>
-            <button
-              onClick={() => setCategoryMode('retro')}
-              disabled={loading}
-              style={{
-                padding: "14px 20px",
-                border: categoryMode === 'retro' ? "3px solid #ff66a3" : "none",
-                borderRadius: "8px",
-                backgroundColor: "#ff0066",
-                color: "#fff",
-                cursor: loading ? "not-allowed" : "pointer",
-                fontSize: "15px",
-                fontWeight: "600",
-                opacity: loading ? 0.6 : 1,
-                boxShadow: categoryMode === 'retro'
-                  ? "0 0 0 3px rgba(255, 102, 163, 0.3), 0 6px 20px rgba(255, 0, 102, 0.5)" 
-                  : "0 4px 15px rgba(255, 0, 102, 0.3)",
-                transition: "all 0.3s ease",
-                transform: categoryMode === 'retro' ? "scale(1.05)" : "scale(1)"
-              }}
-              onMouseOver={(e) => {
-                if (!loading) {
-                  e.currentTarget.style.backgroundColor = "#cc0052";
-                  const isSelected = categoryMode === 'retro';
-                  e.currentTarget.style.boxShadow = isSelected 
-                    ? "0 0 0 3px rgba(255, 102, 163, 0.3), 0 6px 20px rgba(255, 0, 102, 0.5)"
-                    : "0 6px 20px rgba(255, 0, 102, 0.5)";
-                  e.currentTarget.style.transform = "scale(1.02)";
-                }
-              }}
-              onMouseOut={(e) => {
-                if (!loading) {
-                  const isSelected = categoryMode === 'retro';
-                  e.currentTarget.style.backgroundColor = "#ff0066";
-                  e.currentTarget.style.boxShadow = isSelected 
-                    ? "0 0 0 3px rgba(255, 102, 163, 0.3), 0 6px 20px rgba(255, 0, 102, 0.5)" 
-                    : "0 4px 15px rgba(255, 0, 102, 0.3)";
-                  e.currentTarget.style.transform = isSelected ? "scale(1.05)" : "scale(1)";
-                }
-              }}
-            >
-              🎮 Retro Games
-            </button>
-            <button
-              onClick={() => setCategoryMode('all')}
-              disabled={loading}
-              style={{
-                padding: "14px 20px",
-                border: categoryMode === 'all' ? "3px solid #ff66a3" : "none",
-                borderRadius: "8px",
-                backgroundColor: "#ff0066",
-                color: "#fff",
-                cursor: loading ? "not-allowed" : "pointer",
-                fontSize: "15px",
-                fontWeight: "600",
-                opacity: loading ? 0.6 : 1,
-                boxShadow: categoryMode === 'all'
-                  ? "0 0 0 3px rgba(255, 102, 163, 0.3), 0 6px 20px rgba(255, 0, 102, 0.5)" 
-                  : "0 4px 15px rgba(255, 0, 102, 0.3)",
-                transition: "all 0.3s ease",
-                transform: categoryMode === 'all' ? "scale(1.05)" : "scale(1)"
-              }}
-              onMouseOver={(e) => {
-                if (!loading) {
-                  e.currentTarget.style.backgroundColor = "#cc0052";
-                  const isSelected = categoryMode === 'all';
-                  e.currentTarget.style.boxShadow = isSelected 
-                    ? "0 0 0 3px rgba(255, 102, 163, 0.3), 0 6px 20px rgba(255, 0, 102, 0.5)"
-                    : "0 6px 20px rgba(255, 0, 102, 0.5)";
-                  e.currentTarget.style.transform = "scale(1.02)";
-                }
-              }}
-              onMouseOut={(e) => {
-                if (!loading) {
-                  const isSelected = categoryMode === 'all';
-                  e.currentTarget.style.backgroundColor = "#ff0066";
-                  e.currentTarget.style.boxShadow = isSelected 
-                    ? "0 0 0 3px rgba(255, 102, 163, 0.3), 0 6px 20px rgba(255, 0, 102, 0.5)" 
-                    : "0 4px 15px rgba(255, 0, 102, 0.3)";
-                  e.currentTarget.style.transform = isSelected ? "scale(1.05)" : "scale(1)";
-                }
-              }}
-            >
-              📦 All Categories
-            </button>
+      {/* Quick/Full Mode Toggle (Centered Above) */}
+      <div style={{ marginBottom: "24px", display: "flex", justifyContent: "center" }}>
+        <div 
+          onClick={() => !loading && setScanMode(scanMode === 'quick' ? 'full' : 'quick')}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "6px",
+            padding: "4px",
+            backgroundColor: "rgba(0, 255, 255, 0.08)",
+            border: "2px solid rgba(0, 255, 255, 0.25)",
+            borderRadius: "20px",
+            cursor: loading ? "not-allowed" : "pointer",
+            transition: "all 0.3s ease",
+            opacity: loading ? 0.6 : 1,
+            boxShadow: "0 2px 8px rgba(0, 255, 255, 0.15)"
+          }}
+        >
+          <div style={{
+            padding: "6px 14px",
+            borderRadius: "16px",
+            fontSize: "13px",
+            fontWeight: "600",
+            transition: "all 0.3s ease",
+            backgroundColor: scanMode === 'quick' ? "rgba(0, 255, 255, 0.9)" : "transparent",
+            color: scanMode === 'quick' ? "#ffffff" : "rgba(0, 255, 255, 0.9)",
+            boxShadow: scanMode === 'quick' ? "0 2px 6px rgba(0, 255, 255, 0.3)" : "none"
+          }}>
+            ⚡ Quick
           </div>
+          <div style={{
+            padding: "6px 14px",
+            borderRadius: "16px",
+            fontSize: "13px",
+            fontWeight: "600",
+            transition: "all 0.3s ease",
+            backgroundColor: scanMode === 'full' ? "rgba(0, 255, 255, 0.9)" : "transparent",
+            color: scanMode === 'full' ? "#ffffff" : "rgba(0, 255, 255, 0.9)",
+            boxShadow: scanMode === 'full' ? "0 2px 6px rgba(0, 255, 255, 0.3)" : "none"
+          }}>
+            🔍 Full
+          </div>
+        </div>
+      </div>
 
-          {/* Quick/Full Mode Toggle (Right) */}
-          <div 
-            onClick={() => !loading && setScanMode(scanMode === 'quick' ? 'full' : 'quick')}
+      {/* Category Mode Buttons (50% width each) */}
+      <div style={{ marginBottom: "24px" }}>
+        <div style={{ display: "flex", gap: "12px" }}>
+          <button
+            onClick={() => setCategoryMode('retro')}
+            disabled={loading}
             style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "6px",
-              padding: "4px",
-              backgroundColor: "rgba(100, 150, 200, 0.08)",
-              border: "2px solid rgba(100, 150, 200, 0.25)",
-              borderRadius: "20px",
+              flex: "1",
+              padding: "16px",
+              fontSize: "16px",
+              fontWeight: "600",
+              backgroundColor: loading ? "#333" : "#1a1a2e",
+              color: "#ffffff",
+              border: (categoryMode === 'retro' && !loading) ? "2px solid rgba(0, 255, 255, 0.8)" : "2px solid rgba(0, 255, 255, 0.3)",
+              borderRadius: "8px",
               cursor: loading ? "not-allowed" : "pointer",
+              boxShadow: (categoryMode === 'retro' && !loading)
+                ? "0 0 0 3px rgba(0, 255, 255, 0.3), 0 4px 20px rgba(0, 255, 255, 0.4)"
+                : (loading) ? "none" : "0 4px 20px rgba(0, 255, 255, 0.2)",
               transition: "all 0.3s ease",
-              opacity: loading ? 0.6 : 1,
-              boxShadow: "0 2px 8px rgba(100, 150, 200, 0.15)",
-              flexShrink: 0
+              transform: (categoryMode === 'retro' && !loading) ? "scale(1.02)" : "scale(1)"
+            }}
+            onMouseOver={(e) => {
+              if (!loading) {
+                e.currentTarget.style.backgroundColor = "#2a2a4e";
+                const isSelected = categoryMode === 'retro';
+                e.currentTarget.style.boxShadow = isSelected
+                  ? "0 0 0 3px rgba(0, 255, 255, 0.3), 0 4px 20px rgba(0, 255, 255, 0.4)"
+                  : "0 6px 20px rgba(0, 255, 255, 0.3)";
+                e.currentTarget.style.transform = "scale(1.02)";
+              }
+            }}
+            onMouseOut={(e) => {
+              if (!loading) {
+                const isSelected = categoryMode === 'retro';
+                e.currentTarget.style.backgroundColor = "#1a1a2e";
+                e.currentTarget.style.boxShadow = isSelected
+                  ? "0 0 0 3px rgba(0, 255, 255, 0.3), 0 4px 20px rgba(0, 255, 255, 0.4)"
+                  : "0 4px 20px rgba(0, 255, 255, 0.2)";
+                e.currentTarget.style.transform = isSelected ? "scale(1.02)" : "scale(1)";
+              }
             }}
           >
-            <div style={{
-              padding: "6px 14px",
-              borderRadius: "16px",
-              fontSize: "13px",
+            🎮 Retro Games
+          </button>
+          <button
+            onClick={() => setCategoryMode('all')}
+            disabled={loading}
+            style={{
+              flex: "1",
+              padding: "16px",
+              fontSize: "16px",
               fontWeight: "600",
+              backgroundColor: loading ? "#333" : "#1a1a2e",
+              color: "#ffffff",
+              border: (categoryMode === 'all' && !loading) ? "2px solid rgba(0, 255, 255, 0.8)" : "2px solid rgba(0, 255, 255, 0.3)",
+              borderRadius: "8px",
+              cursor: loading ? "not-allowed" : "pointer",
+              boxShadow: (categoryMode === 'all' && !loading)
+                ? "0 0 0 3px rgba(0, 255, 255, 0.3), 0 4px 20px rgba(0, 255, 255, 0.4)"
+                : (loading) ? "none" : "0 4px 20px rgba(0, 255, 255, 0.2)",
               transition: "all 0.3s ease",
-              backgroundColor: scanMode === 'quick' ? "rgba(100, 150, 200, 0.9)" : "transparent",
-              color: scanMode === 'quick' ? "#ffffff" : "rgba(100, 150, 200, 0.9)",
-              boxShadow: scanMode === 'quick' ? "0 2px 6px rgba(100, 150, 200, 0.3)" : "none"
-            }}>
-              ⚡ Quick
-            </div>
-            <div style={{
-              padding: "6px 14px",
-              borderRadius: "16px",
-              fontSize: "13px",
-              fontWeight: "600",
-              transition: "all 0.3s ease",
-              backgroundColor: scanMode === 'full' ? "rgba(100, 150, 200, 0.9)" : "transparent",
-              color: scanMode === 'full' ? "#ffffff" : "rgba(100, 150, 200, 0.9)",
-              boxShadow: scanMode === 'full' ? "0 2px 6px rgba(100, 150, 200, 0.3)" : "none"
-            }}>
-              🔍 Full
-            </div>
-          </div>
+              transform: (categoryMode === 'all' && !loading) ? "scale(1.02)" : "scale(1)"
+            }}
+            onMouseOver={(e) => {
+              if (!loading) {
+                e.currentTarget.style.backgroundColor = "#2a2a4e";
+                const isSelected = categoryMode === 'all';
+                e.currentTarget.style.boxShadow = isSelected
+                  ? "0 0 0 3px rgba(0, 255, 255, 0.3), 0 4px 20px rgba(0, 255, 255, 0.4)"
+                  : "0 6px 20px rgba(0, 255, 255, 0.3)";
+                e.currentTarget.style.transform = "scale(1.02)";
+              }
+            }}
+            onMouseOut={(e) => {
+              if (!loading) {
+                const isSelected = categoryMode === 'all';
+                e.currentTarget.style.backgroundColor = "#1a1a2e";
+                e.currentTarget.style.boxShadow = isSelected
+                  ? "0 0 0 3px rgba(0, 255, 255, 0.3), 0 4px 20px rgba(0, 255, 255, 0.4)"
+                  : "0 4px 20px rgba(0, 255, 255, 0.2)";
+                e.currentTarget.style.transform = isSelected ? "scale(1.02)" : "scale(1)";
+              }
+            }}
+          >
+            📦 All Categories
+          </button>
         </div>
       </div>
 
@@ -397,17 +395,6 @@ export default function StoreCheckerPage() {
         <div style={{ marginTop: "16px", marginBottom: "32px" }}>
           {/* Store Selection */}
           <div>
-            <label style={{ 
-              display: "block", 
-              marginBottom: "12px", 
-              fontSize: "16px",
-              fontWeight: "600",
-              color: "#00ffff",
-              textTransform: "uppercase",
-              letterSpacing: "1px"
-            }}>
-              Select Store
-            </label>
             <select
               value={selectedStore}
               onChange={(e) => setSelectedStore(e.target.value)}

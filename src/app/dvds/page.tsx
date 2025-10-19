@@ -34,6 +34,7 @@ export default function DVDsPage() {
   const [selectedStoreGroup, setSelectedStoreGroup] = useState<string>("Home");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [scanMode, setScanMode] = useState<'quick' | 'full'>('quick');
+  const [showSearchButton, setShowSearchButton] = useState<boolean>(true);
 
   useEffect(() => {
     // Load settings on component mount
@@ -170,6 +171,7 @@ export default function DVDsPage() {
       setError("Scan failed: " + (error as Error).message);
     } finally {
       setLoading(false);
+      setShowSearchButton(true); // Show search button again when search completes
     }
   };
 
@@ -235,6 +237,7 @@ export default function DVDsPage() {
       setError("Horror scan failed: " + (error as Error).message);
     } finally {
       setLoading(false);
+      setShowSearchButton(true); // Show search button again when search completes
     }
   };
 
@@ -270,6 +273,7 @@ export default function DVDsPage() {
       setError("Scan failed: " + (error as Error).message);
     } finally {
       setLoading(false);
+      setShowSearchButton(true); // Show search button again when search completes
     }
   };
 
@@ -289,250 +293,188 @@ export default function DVDsPage() {
         </div>
       )}
 
-      {/* Store Group Selection */}
-      <div style={{ marginBottom: "24px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "16px", justifyContent: "space-between", flexWrap: "wrap" }}>
-          {/* Store Group Buttons (Left - Purple) */}
-          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", flex: 1 }}>
-            {settings?.stores?.map((storeGroup) => (
-              <button
-                key={storeGroup.name}
-                onClick={() => setSelectedStoreGroup(storeGroup.name)}
-                disabled={loading}
-                style={{
-                  padding: "14px 20px",
-                  border: selectedStoreGroup === storeGroup.name ? "3px solid #c084fc" : "none",
-                  borderRadius: "8px",
-                  backgroundColor: "#7b2cbf",
-                  color: "#fff",
-                  cursor: loading ? "not-allowed" : "pointer",
-                  fontSize: "15px",
-                  fontWeight: "600",
-                  opacity: loading ? 0.6 : 1,
-                  boxShadow: selectedStoreGroup === storeGroup.name
-                    ? "0 0 0 3px rgba(192, 132, 252, 0.3), 0 6px 20px rgba(123, 44, 191, 0.5)" 
-                    : "0 4px 15px rgba(123, 44, 191, 0.3)",
-                  transition: "all 0.3s ease",
-                  transform: selectedStoreGroup === storeGroup.name ? "scale(1.05)" : "scale(1)"
-                }}
-                onMouseOver={(e) => {
-                  if (!loading) {
-                    e.currentTarget.style.backgroundColor = "#6b21a8";
-                    const isSelected = selectedStoreGroup === storeGroup.name;
-                    e.currentTarget.style.boxShadow = isSelected 
-                      ? "0 0 0 3px rgba(192, 132, 252, 0.3), 0 6px 20px rgba(123, 44, 191, 0.5)"
-                      : "0 6px 20px rgba(123, 44, 191, 0.5)";
-                    e.currentTarget.style.transform = "scale(1.02)";
-                  }
-                }}
-                onMouseOut={(e) => {
-                  if (!loading) {
-                    const isSelected = selectedStoreGroup === storeGroup.name;
-                    e.currentTarget.style.backgroundColor = "#7b2cbf";
-                    e.currentTarget.style.boxShadow = isSelected 
-                      ? "0 0 0 3px rgba(192, 132, 252, 0.3), 0 6px 20px rgba(123, 44, 191, 0.5)" 
-                      : "0 4px 15px rgba(123, 44, 191, 0.3)";
-                    e.currentTarget.style.transform = isSelected ? "scale(1.05)" : "scale(1)";
-                  }
-                }}
-              >
-                {storeGroup.name}
-              </button>
-            ))}
+      {/* Quick/Full Mode Toggle - Top Center */}
+      <div style={{ marginBottom: "16px", display: "flex", justifyContent: "center" }}>
+        <div 
+          onClick={() => !loading && setScanMode(scanMode === 'quick' ? 'full' : 'quick')}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "6px",
+            padding: "4px",
+            backgroundColor: "rgba(0, 255, 255, 0.08)",
+            border: "2px solid rgba(0, 255, 255, 0.25)",
+            borderRadius: "20px",
+            cursor: loading ? "not-allowed" : "pointer",
+            transition: "all 0.3s ease",
+            opacity: loading ? 0.6 : 1,
+            boxShadow: "0 2px 8px rgba(0, 255, 255, 0.15)",
+            flexShrink: 0
+          }}
+        >
+          <div style={{
+            padding: "6px 14px",
+            borderRadius: "16px",
+            fontSize: "13px",
+            fontWeight: "600",
+            transition: "all 0.3s ease",
+            backgroundColor: scanMode === 'quick' ? "rgba(0, 255, 255, 0.9)" : "transparent",
+            color: scanMode === 'quick' ? "#ffffff" : "rgba(0, 255, 255, 0.9)",
+            boxShadow: scanMode === 'quick' ? "0 2px 6px rgba(0, 255, 255, 0.3)" : "none"
+          }}>
+            🎧 Quick
           </div>
-
-          {/* Quick/Full Mode Toggle (Right) */}
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <span style={{ fontSize: "14px", color: "#666", fontWeight: "500" }}>Mode:</span>
-            <div style={{ display: "flex", backgroundColor: "#f3f4f6", borderRadius: "20px", padding: "2px" }}>
-              <button
-                onClick={() => setScanMode('quick')}
-                disabled={loading}
-                style={{
-                  padding: "8px 16px",
-                  borderRadius: "18px",
-                  border: "none",
-                  backgroundColor: scanMode === 'quick' ? "#6b7280" : "transparent",
-                  color: scanMode === 'quick' ? "#fff" : "#6b7280",
-                  cursor: loading ? "not-allowed" : "pointer",
-                  fontSize: "13px",
-                  fontWeight: "500",
-                  transition: "all 0.2s ease",
-                  opacity: loading ? 0.6 : 1
-                }}
-              >
-                Quick
-              </button>
-              <button
-                onClick={() => setScanMode('full')}
-                disabled={loading}
-                style={{
-                  padding: "8px 16px",
-                  borderRadius: "18px",
-                  border: "none",
-                  backgroundColor: scanMode === 'full' ? "#6b7280" : "transparent",
-                  color: scanMode === 'full' ? "#fff" : "#6b7280",
-                  cursor: loading ? "not-allowed" : "pointer",
-                  fontSize: "13px",
-                  fontWeight: "500",
-                  transition: "all 0.2s ease",
-                  opacity: loading ? 0.6 : 1
-                }}
-              >
-                Full
-              </button>
-            </div>
+          <div style={{
+            padding: "6px 14px",
+            borderRadius: "16px",
+            fontSize: "13px",
+            fontWeight: "600",
+            transition: "all 0.3s ease",
+            backgroundColor: scanMode === 'full' ? "rgba(0, 255, 255, 0.9)" : "transparent",
+            color: scanMode === 'full' ? "#ffffff" : "rgba(0, 255, 255, 0.9)",
+            boxShadow: scanMode === 'full' ? "0 2px 6px rgba(0, 255, 255, 0.3)" : "none"
+          }}>
+            👾 Full
           </div>
-        </div>
-
-        {/* Stores Info */}
-        <div style={{ marginTop: "16px", fontSize: "14px", color: "#e0e0e0" }}>
-          <strong>Stores:</strong> {settings?.stores?.find((group) => group.name === selectedStoreGroup)?.values?.join(", ") || "None configured"}
         </div>
       </div>
 
-      {/* Category Buttons */}
-      <div style={{ marginBottom: "24px" }}>
-        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-          {/* Horror Category Button */}
-          <button
-            onClick={() => handleScanHorrorCategory()}
-            disabled={loading}
-            style={{
-              padding: "14px 20px",
-              border: selectedCategory === "horror" ? "3px solid #ff66a3" : "none",
-              borderRadius: "8px",
-              backgroundColor: "#ff0066",
-              color: "#fff",
-              cursor: loading ? "not-allowed" : "pointer",
-              fontSize: "15px",
-              fontWeight: "600",
-              opacity: loading ? 0.6 : 1,
-              boxShadow: selectedCategory === "horror" 
-                ? "0 0 0 3px rgba(255, 102, 163, 0.3), 0 6px 20px rgba(255, 0, 102, 0.5)" 
-                : "0 4px 15px rgba(255, 0, 102, 0.3)",
-              transition: "all 0.3s ease",
-              transform: selectedCategory === "horror" ? "scale(1.05)" : "scale(1)"
-            }}
-            onMouseOver={(e) => {
-              if (!loading) {
-                e.currentTarget.style.backgroundColor = "#cc0052";
-                const isSelected = selectedCategory === "horror";
-                e.currentTarget.style.boxShadow = isSelected 
-                  ? "0 0 0 3px rgba(255, 102, 163, 0.3), 0 6px 20px rgba(255, 0, 102, 0.5)"
-                  : "0 6px 20px rgba(255, 0, 102, 0.5)";
-                e.currentTarget.style.transform = "scale(1.02)";
-              }
-            }}
-            onMouseOut={(e) => {
-              if (!loading) {
-                const isSelected = selectedCategory === "horror";
-                e.currentTarget.style.backgroundColor = "#ff0066";
-                e.currentTarget.style.boxShadow = isSelected 
-                  ? "0 0 0 3px rgba(255, 102, 163, 0.3), 0 6px 20px rgba(255, 0, 102, 0.5)" 
-                  : "0 4px 15px rgba(255, 0, 102, 0.3)";
-                e.currentTarget.style.transform = isSelected ? "scale(1.05)" : "scale(1)";
-              }
-            }}
-          >
-            Horror
-          </button>
-          
-          {settings?.dvdCategoryIds?.map((categoryId) => {
-            const categoryName = getCategoryName(categoryId);
-            const isSelected = selectedCategory === categoryId;
-            
+      {/* Store Selection - 50% width buttons */}
+      <div style={{ marginBottom: "16px" }}>
+        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }} className="store-buttons-container">
+          {settings?.stores?.map((storeGroup) => {
+            const isSelected = selectedStoreGroup === storeGroup.name;
             return (
               <button
-                key={categoryId}
-                onClick={() => handleCategoryClick(categoryId)}
-                disabled={loading}
+                key={storeGroup.name}
+                onClick={() => setSelectedStoreGroup(storeGroup.name)}
                 style={{
+                  flex: "1",
+                  minWidth: "calc(50% - 4px)",
                   padding: "14px 20px",
-                  border: isSelected ? "3px solid #ff66a3" : "none",
+                  border: isSelected ? "3px solid rgba(0, 255, 255, 0.8)" : "none",
                   borderRadius: "8px",
-                  backgroundColor: "#ff0066",
+                  backgroundColor: "#1a1a2e",
                   color: "#fff",
-                  cursor: loading ? "not-allowed" : "pointer",
+                  cursor: "pointer",
                   fontSize: "15px",
                   fontWeight: "600",
-                  opacity: loading ? 0.6 : 1,
-                  boxShadow: isSelected
-                    ? "0 0 0 3px rgba(255, 102, 163, 0.3), 0 6px 20px rgba(255, 0, 102, 0.5)" 
-                    : "0 4px 15px rgba(255, 0, 102, 0.3)",
+                  boxShadow: isSelected 
+                    ? "0 0 0 3px rgba(0, 255, 255, 0.3), 0 6px 20px rgba(0, 255, 255, 0.5)" 
+                    : "0 4px 15px rgba(0, 255, 255, 0.3)",
                   transition: "all 0.3s ease",
                   transform: isSelected ? "scale(1.05)" : "scale(1)"
                 }}
                 onMouseOver={(e) => {
-                  if (!loading) {
-                    e.currentTarget.style.backgroundColor = "#cc0052";
-                    const isSelected = selectedCategory === categoryId;
-                    e.currentTarget.style.boxShadow = isSelected 
-                      ? "0 0 0 3px rgba(255, 102, 163, 0.3), 0 6px 20px rgba(255, 0, 102, 0.5)"
-                      : "0 6px 20px rgba(255, 0, 102, 0.5)";
-                    e.currentTarget.style.transform = "scale(1.02)";
-                  }
+                  e.currentTarget.style.backgroundColor = "#2a2a3e";
+                  e.currentTarget.style.boxShadow = isSelected 
+                    ? "0 0 0 3px rgba(0, 255, 255, 0.3), 0 6px 20px rgba(0, 255, 255, 0.5)"
+                    : "0 6px 20px rgba(0, 255, 255, 0.5)";
+                  e.currentTarget.style.transform = "scale(1.02)";
                 }}
                 onMouseOut={(e) => {
-                  if (!loading) {
-                    const isSelected = selectedCategory === categoryId;
-                    e.currentTarget.style.backgroundColor = "#ff0066";
-                    e.currentTarget.style.boxShadow = isSelected 
-                      ? "0 0 0 3px rgba(255, 102, 163, 0.3), 0 6px 20px rgba(255, 0, 102, 0.5)" 
-                      : "0 4px 15px rgba(255, 0, 102, 0.3)";
-                    e.currentTarget.style.transform = isSelected ? "scale(1.05)" : "scale(1)";
-                  }
+                  e.currentTarget.style.backgroundColor = "#1a1a2e";
+                  e.currentTarget.style.boxShadow = isSelected 
+                    ? "0 0 0 3px rgba(0, 255, 255, 0.3), 0 6px 20px rgba(0, 255, 255, 0.5)" 
+                    : "0 4px 15px rgba(0, 255, 255, 0.3)";
+                  e.currentTarget.style.transform = isSelected ? "scale(1.05)" : "scale(1)";
                 }}
               >
-                {categoryName}
+                {storeGroup.name === 'Home' ? '🎮' : storeGroup.name === 'London' ? '🎧' : storeGroup.name === 'Near home' ? '🕹️' : '🧑‍💻'} {storeGroup.name}
               </button>
             );
           })}
-          
-          {/* All Categories Button */}
-          <button
-            onClick={handleScanAllCategories}
+        </div>
+      </div>
+
+      {/* Category Selection */}
+      <div style={{ marginBottom: "16px" }}>
+        <div style={{ marginBottom: "12px" }}>
+          <select
+            value={selectedCategory}
+            onChange={(e) => {
+              const newCategory = e.target.value;
+              setSelectedCategory(newCategory);
+              setShowSearchButton(false); // Hide search button when dropdown changes
+              if (newCategory === "") {
+                handleScanAllCategories();
+              } else if (newCategory === "horror") {
+                handleScanHorrorCategory();
+              } else {
+                handleCategoryClick(newCategory);
+              }
+            }}
             disabled={loading}
             style={{
-              padding: "14px 20px",
-              border: selectedCategory === "all" ? "3px solid #ff66a3" : "none",
+              width: "100%",
+              padding: "16px",
+              fontSize: "16px",
+              border: "2px solid rgba(0, 255, 255, 0.3)",
               borderRadius: "8px",
-              backgroundColor: "#ff0066",
-              color: "#fff",
+              backgroundColor: "#1a1a2e",
+              color: "#ffffff",
               cursor: loading ? "not-allowed" : "pointer",
-              fontSize: "15px",
-              fontWeight: "600",
-              opacity: loading ? 0.6 : 1,
-              boxShadow: selectedCategory === "all"
-                ? "0 0 0 3px rgba(255, 102, 163, 0.3), 0 6px 20px rgba(255, 0, 102, 0.5)" 
-                : "0 4px 15px rgba(255, 0, 102, 0.3)",
+              fontWeight: "500",
+              boxShadow: "0 4px 20px rgba(0, 255, 255, 0.2)",
               transition: "all 0.3s ease",
-              transform: selectedCategory === "all" ? "scale(1.05)" : "scale(1)"
-            }}
-            onMouseOver={(e) => {
-              if (!loading) {
-                e.currentTarget.style.backgroundColor = "#cc0052";
-                const isSelected = selectedCategory === "all";
-                e.currentTarget.style.boxShadow = isSelected 
-                  ? "0 0 0 3px rgba(255, 102, 163, 0.3), 0 6px 20px rgba(255, 0, 102, 0.5)"
-                  : "0 6px 20px rgba(255, 0, 102, 0.5)";
-                e.currentTarget.style.transform = "scale(1.02)";
-              }
-            }}
-            onMouseOut={(e) => {
-              if (!loading) {
-                const isSelected = selectedCategory === "all";
-                e.currentTarget.style.backgroundColor = "#ff0066";
-                e.currentTarget.style.boxShadow = isSelected 
-                  ? "0 0 0 3px rgba(255, 102, 163, 0.3), 0 6px 20px rgba(255, 0, 102, 0.5)" 
-                  : "0 4px 15px rgba(255, 0, 102, 0.3)";
-                e.currentTarget.style.transform = isSelected ? "scale(1.05)" : "scale(1)";
-              }
+              opacity: loading ? 0.6 : 1
             }}
           >
-            📦 All Categories
-          </button>
+            <option value="" style={{ backgroundColor: "#1a1a2e", color: "#ffffff" }}>All</option>
+            <option value="horror" style={{ backgroundColor: "#1a1a2e", color: "#ffffff" }}>Horror</option>
+            {settings?.dvdCategoryIds?.map((categoryId) => {
+              const categoryName = getCategoryName(categoryId);
+              return (
+                <option key={categoryId} value={categoryId} style={{ backgroundColor: "#1a1a2e", color: "#ffffff" }}>
+                  {categoryName}
+                </option>
+              );
+            })}
+          </select>
         </div>
+        
+        {/* Search Button */}
+        {!loading && showSearchButton && (
+          <div style={{ display: "flex", justifyContent: "center", marginTop: "16px" }}>
+            <button
+              onClick={() => {
+                setShowSearchButton(false); // Hide search button when clicked
+                if (selectedCategory === "") {
+                  handleScanAllCategories();
+                } else if (selectedCategory === "horror") {
+                  handleScanHorrorCategory();
+                } else {
+                  handleCategoryClick(selectedCategory);
+                }
+              }}
+              style={{
+                width: "33%",
+                padding: "16px",
+                fontSize: "16px",
+                fontWeight: "600",
+                backgroundColor: "#ff0066",
+                color: "#fff",
+                border: "none",
+                borderRadius: "8px",
+                cursor: "pointer",
+                boxShadow: "0 4px 15px rgba(255, 0, 102, 0.3)",
+                transition: "all 0.3s ease"
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = "#cc0052";
+                e.currentTarget.style.boxShadow = "0 6px 20px rgba(255, 0, 102, 0.5)";
+                e.currentTarget.style.transform = "scale(1.02)";
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = "#ff0066";
+                e.currentTarget.style.boxShadow = "0 4px 15px rgba(255, 0, 102, 0.3)";
+                e.currentTarget.style.transform = "scale(1)";
+              }}
+            >
+              Search
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Progress */}
@@ -669,6 +611,14 @@ export default function DVDsPage() {
           No DVDs found. Try selecting a different category or store group.
         </div>
       )}
+      
+      <style jsx>{`
+        @media (min-width: 768px) {
+          .store-buttons-container button {
+            min-width: calc(25% - 6px) !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }
