@@ -96,7 +96,10 @@ export default function Navigation() {
 
   return (
     <nav ref={navRef} style={{
-      backgroundColor: "#e20a03",
+      backgroundColor: "#2f2323",
+      borderColor: "#e20a03",
+      borderStyle: "solid",
+      borderWidth: "2px",
       padding: "12px 24px",
       marginBottom: "24px",
       borderRadius: "8px",
@@ -205,12 +208,15 @@ export default function Navigation() {
             top: "100%",
             left: "0",
             right: "0",
-            backgroundColor: "#e20a03",
+            backgroundColor: "#2f2323",
+            borderColor: "#e20a03",
+            borderStyle: "solid",
+            borderWidth: "2px",
+            borderTop: "none",
             borderRadius: "0 0 8px 8px",
             boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
             zIndex: 1001,
             padding: "16px 0",
-            borderTop: "1px solid rgba(255,255,255,0.2)",
             display: "flex",
             flexDirection: "column"
           }}>
