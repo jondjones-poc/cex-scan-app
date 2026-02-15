@@ -187,6 +187,32 @@ export default function StatusTable({ results, loading, onCheckProducts, canChec
                         </div>
                         <div style={{ fontSize: "12px", color: "#a0a0a0", marginBottom: "8px" }}>
                           ID: {r.productId}
+                          {(() => {
+                            // Client-side logging for debugging
+                            console.log(`[StatusTable InStock] Product ${r.productId}:`, {
+                              inStock: r.inStock,
+                              quantity: r.quantity,
+                              stores: r.stores,
+                              storesType: typeof r.stores,
+                              storesLength: r.stores?.length,
+                              hasStores: !!r.stores && r.stores.length > 0,
+                              fullResult: r
+                            });
+                            
+                            if (r.stores && r.stores.length > 0) {
+                              const sortedStores = [...r.stores].sort((a, b) => a.localeCompare(b));
+                              console.log(`[StatusTable InStock] Displaying ${sortedStores.length} stores for ${r.productId}:`, sortedStores);
+                              return (
+                                <div style={{ fontSize: "11px", color: "#28a745", marginTop: "4px" }}>
+                                  Stores: {sortedStores.join(", ")}
+                                </div>
+                              );
+                            } else if (r.inStock && r.quantity && r.quantity > 0) {
+                              console.warn(`[StatusTable InStock] ⚠️ Product ${r.productId} is in stock (qty: ${r.quantity}) but has no stores!`, r);
+                              return null;
+                            }
+                            return null;
+                          })()}
                         </div>
                         <a 
                           href={r.url} 
@@ -306,6 +332,11 @@ export default function StatusTable({ results, loading, onCheckProducts, canChec
                         </div>
                         <div style={{ fontSize: "12px", color: "#a0a0a0", marginBottom: "8px" }}>
                           ID: {r.productId}
+                          {r.stores && r.stores.length > 0 && (
+                            <div style={{ fontSize: "11px", color: "#28a745", marginTop: "4px" }}>
+                              Stores: {[...r.stores].sort((a, b) => a.localeCompare(b)).join(", ")}
+                            </div>
+                          )}
                         </div>
                         <a 
                           href={r.url} 
@@ -425,6 +456,11 @@ export default function StatusTable({ results, loading, onCheckProducts, canChec
                         </div>
                         <div style={{ fontSize: "12px", color: "#a0a0a0", marginBottom: "8px" }}>
                           ID: {r.productId}
+                          {r.stores && r.stores.length > 0 && (
+                            <div style={{ fontSize: "11px", color: "#28a745", marginTop: "4px" }}>
+                              Stores: {[...r.stores].sort((a, b) => a.localeCompare(b)).join(", ")}
+                            </div>
+                          )}
                         </div>
                         {r.stockNote && (
                           <div style={{ fontSize: "11px", color: "#ffc107", marginBottom: "8px", fontStyle: "italic" }}>

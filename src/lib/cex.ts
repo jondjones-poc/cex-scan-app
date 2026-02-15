@@ -11,6 +11,7 @@ export type ProductCheckResult = {
   quantity?: number;
   imageUrl?: string;
   price?: string;
+  stores?: string[]; // Comma-separated list of stores where item is available
 };
 
 function buildProductUrl(baseUrl: string, productId: string): string {
@@ -176,7 +177,7 @@ export async function checkProducts(
         const result = await response.json();
         
         if (result.success) {
-          return {
+          const productResult = {
             productId: result.productId,
             url: result.url,
             name: result.name,
@@ -186,8 +187,49 @@ export async function checkProducts(
             httpStatus: result.httpStatus,
             quantity: result.quantity,
             imageUrl: result.imageUrl,
-            price: result.price
+            price: result.price,
+            stores: result.stores
           };
+          
+          // Client-side logging for debugging
+          if (typeof window !== 'undefined') {
+            console.log(`[Client] Product ${productId}:`, {
+              inStock: productResult.inStock,
+              quantity: productResult.quantity,
+              stores: productResult.stores,
+              storesCount: productResult.stores?.length || 0,
+              hasStores: !!productResult.stores && productResult.stores.length > 0,
+              fullApiResponse: result // Log the full API response
+            });
+            
+            if (productResult.inStock && (!productResult.stores || productResult.stores.length === 0)) {
+              console.warn(`[Client] ⚠️ Product ${productId} is in stock (qty: ${productResult.quantity}) but has no stores!`);
+              console.warn(`[Client] Full API response for ${productId}:`, result);
+              console.warn(`[Client] All response keys:`, Object.keys(result));
+              
+              // Show debug info if available
+              if (result._debug) {
+                console.warn(`[Client] 🔍 Debug Info:`, {
+                  apiBoxKeys: result._debug.apiBoxKeys,
+                  apiBoxSample: result._debug.apiBoxSample ? JSON.parse(result._debug.apiBoxSample) : null,
+                  checkedHtml: result._debug.checkedHtml,
+                  htmlLength: result._debug.htmlLength,
+                  htmlSample: result._debug.htmlSample ? result._debug.htmlSample.substring(0, 5000) : null
+                });
+                
+                // Search HTML sample for store-related content
+                if (result._debug.htmlSample) {
+                  const html = result._debug.htmlSample;
+                  const storeMatches = html.match(/.{0,300}(?:store|location|branch).{0,300}/gi);
+                  if (storeMatches && storeMatches.length > 0) {
+                    console.warn(`[Client] 📍 Found ${storeMatches.length} HTML snippets with store keywords:`, storeMatches.slice(0, 10));
+                  }
+                }
+              }
+            }
+          }
+          
+          return productResult;
         } else {
           return {
             productId,
