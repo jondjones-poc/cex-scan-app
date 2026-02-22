@@ -8,7 +8,7 @@ export default function HomePage() {
   const [results, setResults] = useState<ProductCheckResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [settings, setSettings] = useState<any>(null);
-  const [checkType, setCheckType] = useState<'essential' | 'oneDay' | null>(null);
+  const [checkType, setCheckType] = useState<'essential' | null>(null);
 
   useEffect(() => {
     // Load settings on component mount
@@ -28,7 +28,7 @@ export default function HomePage() {
     loadSettings();
   }, []);
 
-  const handleCheckProducts = async (type: 'essential' | 'oneDay') => {
+  const handleCheckProducts = async (type: 'essential') => {
     if (!settings) return;
     
     setLoading(true);
@@ -36,9 +36,7 @@ export default function HomePage() {
     setCheckType(type);
     
     // Get the appropriate product list based on type
-    const productIds = type === 'essential' 
-      ? (settings.essentialProducts || [])
-      : (settings.oneDayProducts || []);
+    const productIds = settings.essentialProducts || [];
     
     if (productIds.length === 0) {
       setLoading(false);
@@ -91,10 +89,7 @@ export default function HomePage() {
         loading={loading}
         onCheckProducts={handleCheckProducts}
         canCheck={!!settings}
-        totalProducts={checkType === 'essential' 
-          ? (settings?.essentialProducts?.length || 0)
-          : (settings?.oneDayProducts?.length || 0)
-        }
+        totalProducts={settings?.essentialProducts?.length || 0}
         checkType={checkType}
       />
     </main>

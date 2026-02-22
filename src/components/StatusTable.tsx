@@ -5,10 +5,10 @@ import type { ProductCheckResult } from "@/lib/cex";
 interface StatusTableProps {
   results: ProductCheckResult[];
   loading: boolean;
-  onCheckProducts: (type: 'essential' | 'oneDay') => void;
+  onCheckProducts: (type: 'essential') => void;
   canCheck: boolean;
   totalProducts?: number;
-  checkType?: 'essential' | 'oneDay' | null;
+  checkType?: 'essential' | null;
 }
 
 export default function StatusTable({ results, loading, onCheckProducts, canCheck, totalProducts, checkType }: StatusTableProps) {
@@ -545,48 +545,6 @@ export default function StatusTable({ results, loading, onCheckProducts, canChec
           >
             {loading && checkType === 'essential' ? "Checking..." : "⚡ Essentials"}
           </button>
-          <button 
-            onClick={() => onCheckProducts('oneDay')}
-            disabled={loading || !canCheck}
-            style={{
-              flex: "1",
-              padding: "16px",
-              fontSize: "16px",
-              fontWeight: "600",
-              backgroundColor: loading || !canCheck ? "#333" : "#1a1a2e",
-              color: "#ffffff",
-              border: (checkType === 'oneDay' && !loading && canCheck) ? "2px solid rgba(0, 255, 255, 0.8)" : "2px solid rgba(0, 255, 255, 0.3)",
-              borderRadius: "8px",
-              cursor: loading || !canCheck ? "not-allowed" : "pointer",
-              boxShadow: (checkType === 'oneDay' && !loading && canCheck)
-                ? "0 0 0 3px rgba(0, 255, 255, 0.3), 0 4px 20px rgba(0, 255, 255, 0.4)"
-                : (loading || !canCheck) ? "none" : "0 4px 20px rgba(0, 255, 255, 0.2)",
-              transition: "all 0.3s ease",
-              transform: (checkType === 'oneDay' && !loading && canCheck) ? "scale(1.02)" : "scale(1)"
-            }}
-            onMouseOver={(e) => {
-              if (!loading && canCheck) {
-                e.currentTarget.style.backgroundColor = "#2a2a4e";
-                const isSelected = checkType === 'oneDay';
-                e.currentTarget.style.boxShadow = isSelected
-                  ? "0 0 0 3px rgba(0, 255, 255, 0.3), 0 4px 20px rgba(0, 255, 255, 0.4)"
-                  : "0 6px 20px rgba(0, 255, 255, 0.3)";
-                e.currentTarget.style.transform = "scale(1.02)";
-              }
-            }}
-            onMouseOut={(e) => {
-              if (!loading && canCheck) {
-                const isSelected = checkType === 'oneDay';
-                e.currentTarget.style.backgroundColor = "#1a1a2e";
-                e.currentTarget.style.boxShadow = isSelected
-                  ? "0 0 0 3px rgba(0, 255, 255, 0.3), 0 4px 20px rgba(0, 255, 255, 0.4)"
-                  : "0 4px 20px rgba(0, 255, 255, 0.2)";
-                e.currentTarget.style.transform = isSelected ? "scale(1.02)" : "scale(1)";
-              }
-            }}
-          >
-            {loading && checkType === 'oneDay' ? "Checking..." : "⭐ Nice to Have"}
-          </button>
         </div>
         {!canCheck && (
           <p className="muted" style={{ marginTop: "8px", fontSize: "14px" }}>
@@ -595,7 +553,7 @@ export default function StatusTable({ results, loading, onCheckProducts, canChec
         )}
         {checkType && (
           <p className="muted" style={{ marginTop: "8px", fontSize: "14px" }}>
-            Checking {checkType === 'essential' ? 'Essential' : 'Nice to Have'} products
+            Checking Essential products
           </p>
         )}
       </div>
